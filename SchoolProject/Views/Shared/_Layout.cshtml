@@ -1,0 +1,258 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="Awaiken">
+    <!-- Page Title -->
+    <title>Gyan Sagar Public School</title>
+    
+    <!-- Favicon Icon -->
+    <link rel="shortcut icon" type="image/x-icon" href="images/School-images/logofaviconschoool.ico">
+    <!-- Google Fonts Css-->
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+    @* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-u5wXbR2cCj8dXU0YzUKGwEuKXXSb9VjA36TObgGJE0E7E5Wdl66iRS0LlwM1c01qmPvvrLpzjAU6RzGmmK8Vg==" crossorigin="anonymous" referrerpolicy="no-referrer" /> *@
+    @* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"> *@
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+
+
+    <link href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@200..700&display=swap" rel="stylesheet">
+
+    <!-- Owl Carousel CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" />
+
+
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="~/css/bootstrap.min.css" asp-append-version="true" />
+
+    <!-- SlickNav -->
+    <link rel="stylesheet" href="~/css/slicknav.min.css" asp-append-version="true" />
+
+    <!-- Swiper -->
+    <link rel="stylesheet" href="~/css/swiper-bundle.min.css" asp-append-version="true" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="~/css/all.min.css" asp-append-version="true" />
+
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="~/css/animate.css" asp-append-version="true" />
+
+    <!-- Magnific Popup -->
+    <link rel="stylesheet" href="~/css/magnific-popup.css" asp-append-version="true" />
+
+    <!-- Mouse Cursor -->
+    <link rel="stylesheet" href="~/css/mousecursor.css" asp-append-version="true" />
+
+    <!-- Main Custom CSS -->
+    <link rel="stylesheet" href="~/css/custom.css" asp-append-version="true" />
+
+    <!-- Your main style (final override) -->
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+
+    
+
+    @RenderSection("Styles", false)
+
+   
+
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="header-sticky bg-section">
+            <nav class="navbar navbar-expand-lg">
+                <div class="container">
+
+                    <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                        <img src="~/images/School-images/COLOURLOGO.png" class="schlogo" alt="Logo" />
+                    </a>
+
+                    <div class="collapse navbar-collapse main-menu">
+                        <div class="nav-menu-wrapper">
+                            <ul class="navbar-nav mr-auto" id="menu">
+                                <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
+                                <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="About">About Us</a></li>
+                                <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Gallery">Gallery</a></li>
+                                <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Contact">Contact Us</a></li>
+                                <li class="nav-item highlighted-menu">
+                                    <a class="nav-link" asp-controller="Home" asp-action="Enquiry">Book Free Trial</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="header-btn">
+                            <a asp-controller="Account" asp-action="Login" class="btn-default btn-highlighted">Log In</a>
+                        </div>
+                    </div>
+
+                    <div class="navbar-toggle"></div>
+                </div>
+            </nav>
+            <div class="responsive-menu"></div>
+        </div>
+    </header>
+
+    <!-- Preloader -->
+    <div class="preloader">
+        <div class="loading-container">
+            <div class="loading"></div>
+            <div id="loading-icon"><img src="~/images/School-images/Adobe Express - file.png" alt="" /></div>
+        </div>
+    </div>
+
+    <!-- Main Body -->
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <div class="main-footer bg-section dark-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="about-footer">
+                        <div class="footer-logo">
+                            <img src="~/images/School-images/COLOURLOGO.png" class="schologo" alt="Logo" />
+                        </div>
+
+                        <p>We are dedicated to building confidence, discipline, and respect through quality education.</p>
+
+                        <div class="social-wrapper">
+                           
+                            <a href="https://www.facebook.com/p/GYAN-SAGAR-Public-School-61556260633077/" class="social-icon"><i class="bi bi-facebook"></i></a>
+                            <a href="https://www.youtube.com/c/gyansagarpublicschool" class="social-icon">
+                                <i class="bi bi-youtube"></i>
+                            </a>
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+                <div class="col-lg-8 footer-links-box">
+                    <div class="footer-links">
+                        <h3>Quick Links</h3>
+                        <ul>
+                            <li><a asp-controller="Home" asp-action="Index">Home</a></li>
+                            <li><a asp-controller="Home" asp-action="About">About Us</a></li>
+                            <li><a asp-controller="Home" asp-action="Programs">Programs</a></li>
+                            <li><a asp-controller="Home" asp-action="Gallery">Gallery</a></li>
+                            <li><a asp-controller="Home" asp-action="Contact">Contact Us</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-links footer-schedule-box">
+                        <h3>School Hours</h3>
+
+                        <div class="footer-schedule-item">
+                            <p>Mon – Sat:</p>
+                            <p>8:00 AM – 2:00 PM</p>
+                        </div>
+
+                        <div class="footer-schedule-item">
+                            <p>Sunday:</p>
+                            <p>Closed</p>
+                        </div>
+                    </div>
+
+                    <div class="footer-links footer-contact-box">
+                        <h3>Contact Information</h3>
+
+                        <div class="footer-contact-item">
+                            <p>Phone:</p>
+                            <p><a href="tel:+919470235587">+91 9470235587</a></p>
+                            <p><a href="tel:+919430008812">+91 9430008812</a></p>
+                        </div>
+
+                        <div class="footer-contact-item">
+                            <p>Email:</p>
+                            <p><a href="mailto:gpsagarwa1997@gmail.com">gpsagarwa1997@gmail.com</a></p>
+                        </div>
+
+                        <div class="footer-contact-item">
+                            <p>Address:</p>
+                            <p>Gyan Sagar Public School, Agarwa, Motihari, Bihar 845401</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-copyright">
+            <div class="container">
+                <p>Copyright © 2026 All Rights Reserved.</p>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@4.1.4/dist/locomotive-scroll.min.js"></script>
+    <!-- JS Files -->
+    <script src="~/js/jquery-3.7.1.min.js" asp-append-version="true"></script>
+    <script src="~/js/bootstrap.min.js" asp-append-version="true"></script>
+    <script src="~/js/validator.min.js" asp-append-version="true"></script>
+    <script src="~/js/jquery.slicknav.js" asp-append-version="true"></script>
+    <script src="~/js/swiper-bundle.min.js" asp-append-version="true"></script>
+    <script src="~/js/jquery.waypoints.min.js" asp-append-version="true"></script>
+    <script src="~/js/jquery.counterup.min.js" asp-append-version="true"></script>
+    <script src="~/js/jquery.magnific-popup.min.js" asp-append-version="true"></script>
+
+    <script src="~/js/SmoothScroll.js"></script>
+    <script src="~/js/parallaxie.js" asp-append-version="true"></script>
+    @* <script src="~/js/gsap.min.js" asp-append-version="true"></script> *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/gsap.min.js"></script>
+
+    <script src="~/js/magiccursor.js" asp-append-version="true"></script>
+    <script src="~/js/SplitText.min.js" asp-append-version="true"></script>
+    <script src="~/js/ScrollTrigger.min.js" asp-append-version="true"></script>
+    @* <script src="~/js/ScrollToPlugin.min.js" asp-append-version="true"></script> *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/ScrollToPlugin.min.js"></script>
+
+    <script src="~/js/jquery.mb.YTPlayer.min.js" asp-append-version="true"></script>
+    <script src="~/js/wow.min.js" asp-append-version="true"></script>
+    <script src="~/js/function.js" asp-append-version="true"></script>
+    
+    <script>
+                document.documentElement.style.touchAction = "auto";
+        document.body.style.touchAction = "auto";
+
+    </script>
+    @* @RenderSection("Scripts", false) *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            if ($('.owl-carousel').length) {
+                $('.owl-carousel').owlCarousel({
+                    loop: true,
+                    margin: 10,
+                    nav: true,
+                    dots: true,
+                    autoplay: true,
+                    autoplayTimeout: 2000,
+                    smartSpeed: 800,
+                    responsive: {
+                        0: { items: 1 },
+                        576: { items: 2 },
+                        768: { items: 3 },
+                        992: { items: 4 }
+                    }
+                });
+            } else {
+                console.log("❌ Owl carousel container not found");
+            }
+        });
+    </script>
+
+</body>
+</html>
