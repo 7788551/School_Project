@@ -1,0 +1,68 @@
+﻿@{
+    ViewData["Title"] = "Optional Subject Student List";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h2>Students Opted for Optional Subjects</h2>
+<hr />
+
+@{
+    var dt = ViewBag.OptionalSubjectStudentList as System.Data.DataTable;
+}
+
+@if (dt != null && dt.Rows.Count > 0)
+{
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Student Name</th>
+                <th>Admission No</th>
+                <th>Class</th>
+                <th>Section</th>
+                <th>Optional Subject</th>
+                <th>Assigned On</th>
+                <th>Action</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (System.Data.DataRow row in dt.Rows)
+            {
+                <tr>
+                    <td>@row["StudentName"]</td>
+                    <td>@row["AdmissionNumber"]</td>
+                    <td>@row["ClassName"]</td>
+                    <td>@row["SectionName"]</td>
+                    <td>@row["OptionalSubjectName"]</td>
+                    <td>
+                        @Convert.ToDateTime(row["CreatedDate"]).ToString("dd-MMM-yyyy")
+                    </td>
+                    <td>
+                        <a asp-controller="Admin"
+                           asp-action="EditStudentOptionalSubject"
+                           asp-route-id="@row["StudentOptionalSubjectId"]"
+                           class="btn btn-sm btn-warning">
+                            Edit
+                        </a>
+
+                        <a asp-controller="Admin"
+                           asp-action="DeleteStudentOptionalSubject"
+                           asp-route-id="@row["StudentOptionalSubjectId"]"
+                           onclick="return confirm('Are you sure you want to delete this optional subject?');"
+                           class="btn btn-sm btn-danger">
+                            Delete
+                        </a>
+                    </td>
+
+
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">
+        No optional subject assignments found for current session.
+    </div>
+}

@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Edit Transport Slab";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <h4 class="mb-3">Edit Transport Slab</h4>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form asp-action="EditTransportSlab" method="post">
+
+                <input type="hidden" name="slabId" value="@ViewBag.SlabId" />
+
+                <div class="mb-3">
+                    <label class="form-label">From KM</label>
+                    <input type="number" step="0.1" name="fromKM"
+                           class="form-control" value="@ViewBag.FromKM" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">To KM</label>
+                    <input type="number" step="0.1" name="toKM"
+                           class="form-control" value="@ViewBag.ToKM" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Amount (₹)</label>
+                    <input type="number" step="0.01" name="amount"
+                           class="form-control" value="@ViewBag.Amount" required />
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <a asp-action="TransportSlabs" class="btn btn-outline-secondary me-2">Cancel</a>
+                    <button type="submit" class="btn btn-success">Update</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</div>

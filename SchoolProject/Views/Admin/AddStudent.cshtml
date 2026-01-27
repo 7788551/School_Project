@@ -1,0 +1,153 @@
+﻿@model SchoolProject.Models.AddStudent
+@{
+    ViewData["Title"] = "Student Admission";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="page-header bg-section dark-section parallaxie">
+    <div class="container">
+        <h1>Student Admission Form</h1>
+    </div>
+</div>
+
+<form asp-controller="Admin"
+      asp-action="AddStudent"
+      method="post"
+      enctype="multipart/form-data"
+      id="studentForm">
+
+    <h3>Basic Details</h3>
+
+    <input asp-for="Name" class="form-control" placeholder="Student Name" required />
+    <br />
+
+    <input asp-for="PhoneNumber" class="form-control" placeholder="Phone Number" required />
+    <br />
+
+    <input asp-for="DateOfBirth" type="date" class="form-control" required />
+    <br />
+
+    <select asp-for="Gender" class="form-control" required>
+        <option value="">Select Gender</option>
+        <option>Male</option>
+        <option>Female</option>
+    </select>
+
+    <hr />
+
+    <!-- ✅ STUDENT IMAGE -->
+    <h3>Student Photo</h3>
+
+    <input asp-for="StudentImage"
+           type="file"
+           class="form-control"
+           accept="image/*" />
+    <small class="text-muted">
+        Upload student photo (jpg / png)
+    </small>
+
+    <hr />
+
+    <h3>Academic Details</h3>
+
+    <!-- SESSION -->
+    <label>Academic Session</label>
+    <input type="text" id="sessionName" class="form-control" readonly />
+    <input type="hidden" asp-for="SessionId" id="sessionId" />
+    <br />
+
+    <!-- CLASS -->
+    <label>Class</label>
+    <select asp-for="ClassId" class="form-control" id="classId">
+        <option value="">Select Class</option>
+    </select>
+    <br />
+
+    <!-- SECTION -->
+    <label>Section</label>
+    <select asp-for="SectionId" class="form-control" id="sectionId">
+        <option value="">Select Section</option>
+    </select>
+
+    <hr />
+
+    <input asp-for="AdmissionNumber" class="form-control" placeholder="Admission Number" required />
+    <br />
+
+    <input asp-for="RollNumber" class="form-control" placeholder="Roll Number (optional)" />
+    <br />
+
+    <h3>Parent & Address</h3>
+
+    <input asp-for="FatherName" class="form-control" placeholder="Father Name" required />
+    <br />
+
+    <input asp-for="MotherName" class="form-control" placeholder="Mother Name" />
+    <br />
+
+    <input asp-for="AddressLine1" class="form-control" placeholder="Address Line 1" required />
+    <br />
+
+    <input asp-for="AddressLine2" class="form-control" placeholder="Address Line 2" />
+    <br />
+
+    <input asp-for="City" class="form-control" placeholder="City" />
+    <br />
+
+    <input asp-for="State" class="form-control" placeholder="State" />
+    <br />
+
+    <input asp-for="Pincode" class="form-control" placeholder="Pincode" />
+    <br />
+
+    <button type="submit" class="btn btn-primary">Add Student</button>
+
+</form>
+
+@section Scripts {
+    <script>
+        // ============================
+        // LOAD CURRENT SESSION
+        // ============================
+        function loadCurrentSession() {
+            fetch('/Admin/GetCurrentSession')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('sessionId').value = data.sessionId;
+                    document.getElementById('sessionName').value = data.sessionName;
+                    loadClasses(data.sessionId);
+                });
+        }
+
+        function loadClasses(sessionId) {
+            fetch(`/Admin/GetClassesBySession?sessionId=${sessionId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const ddl = document.getElementById('classId');
+                    ddl.innerHTML = '<option value="">Select Class</option>';
+                    data.forEach(c => {
+                        ddl.innerHTML += `<option value="${c.classId}">${c.className}</option>`;
+                    });
+                });
+        }
+
+        document.getElementById('classId').addEventListener('change', function () {
+            const classId = this.value;
+            const sessionId = document.getElementById('sessionId').value;
+            const sectionSelect = document.getElementById('sectionId');
+
+            sectionSelect.innerHTML = '<option value="">Select Section</option>';
+
+            fetch(`/Admin/GetSectionsByClass?sessionId=${sessionId}&classId=${classId}`)
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(s => {
+                        sectionSelect.innerHTML +=
+                            `<option value="${s.sectionId}">${s.sectionName}</option>`;
+                    });
+                });
+        });
+
+        document.addEventListener('DOMContentLoaded', loadCurrentSession);
+    </script>
+}

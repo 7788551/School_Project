@@ -1,0 +1,46 @@
+﻿@{
+    ViewData["Title"] = "Edit Optional Subject";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h3>Edit Optional Subject</h3>
+<hr />
+
+<form asp-action="EditStudentOptionalSubject" method="post">
+    <input type="hidden" name="studentOptionalSubjectId" value="@ViewBag.StudentOptionalSubjectId" />
+    <input type="hidden" name="studentId" value="@ViewBag.StudentId" />
+
+    <div class="mb-2">
+        <label>Student</label>
+        <input class="form-control" value="@ViewBag.StudentName (@ViewBag.AdmissionNumber)" readonly />
+    </div>
+
+    <div class="mb-2">
+        <label>Optional Subject</label>
+        <select name="optionalSubjectId" class="form-control" required>
+            @foreach (System.Data.DataRow row in (ViewBag.OptionalSubjects as System.Data.DataTable).Rows)
+            {
+                int optId = Convert.ToInt32(row["OptionalSubjectId"]);
+                int selectedId = Convert.ToInt32(ViewBag.SelectedOptionalSubjectId);
+
+                if (optId == selectedId)
+                {
+                    <option value="@optId" selected="selected">
+                        @row["OptionalSubjectName"]
+                    </option>
+                }
+                else
+                {
+                    <option value="@optId">
+                        @row["OptionalSubjectName"]
+                    </option>
+                }
+            }
+        </select>
+
+    </div>
+
+    <br />
+    <button class="btn btn-success">Update</button>
+    <a asp-action="OptionalSubjectStudentList" class="btn btn-secondary">Cancel</a>
+</form>

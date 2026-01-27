@@ -1,0 +1,352 @@
+﻿@{
+    ViewData["Title"] = "Fee Receipt";
+    Layout = null;
+}
+
+@functions {
+    public string AmountInWords(decimal amount)
+    {
+        if (amount == 0) return "Zero Only";
+
+        string[] units = {
+            "", "One", "Two", "Three", "Four", "Five", "Six", "Seven",
+            "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen",
+            "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"
+        };
+
+        string[] tens = {
+            "", "", "Twenty", "Thirty", "Forty", "Fifty",
+            "Sixty", "Seventy", "Eighty", "Ninety"
+        };
+
+        string Convert(long n)
+        {
+            if (n < 20) return units[n];
+            if (n < 100) return tens[n / 10] + (n % 10 != 0 ? " " + units[n % 10] : "");
+            if (n < 1000) return units[n / 100] + " Hundred" + (n % 100 != 0 ? " " + Convert(n % 100) : "");
+            if (n < 100000) return Convert(n / 1000) + " Thousand" + (n % 1000 != 0 ? " " + Convert(n % 1000) : "");
+            if (n < 10000000) return Convert(n / 100000) + " Lakh" + (n % 100000 != 0 ? " " + Convert(n % 100000) : "");
+            return Convert(n / 10000000) + " Crore" + (n % 10000000 != 0 ? " " + Convert(n % 10000000) : "");
+        }
+
+        return Convert((long)amount) + " Only";
+    }
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Fee Receipt</title>
+
+<style>
+    body {
+        font-family: "Times New Roman", serif;
+        font-size: 14px;
+        margin: 20px;
+    }
+
+    .container {
+        border: 2px solid #000;
+        padding: 12px;
+    }
+
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .logo img { height: 70px; }
+
+    .school-header {
+        text-align: center;
+        flex: 1;
+    }
+
+    .school-header h2 { margin: 0; }
+
+    .parent-copy { font-size: 13px; }
+
+    hr { border: 1px solid #000; margin: 8px 0; }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 6px;
+    }
+
+    th, td {
+        border: 1px solid #000;
+        padding: 5px;
+        text-align: center;
+    }
+
+    .no-border td {
+        border: none;
+        padding: 3px;
+    }
+
+    .text-left { text-align: left; }
+
+    .section-title {
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    .footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    .signature {
+        border-top: 1px solid #000;
+        width: 200px;
+        text-align: center;
+        padding-top: 5px;
+    }
+
+    .notes {
+        font-size: 13px;
+        margin-top: 8px;
+    }
+
+    /* ACTION BUTTONS */
+    .action-bar {
+        margin-top: 25px;
+        text-align: center;
+    }
+
+        .action-btn {
+            padding: 10px 20px;
+            margin: 6px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        /* Print button */
+        .print-btn {
+            background-color: #1e88e5; /* Blue */
+            color: #fff;
+        }
+
+        /* Back button */
+        .back-btn {
+            background-color: #2e7d32; /* Green */
+            color: #fff;
+        }
+
+        .print-btn:hover {
+            background-color: #1565c0;
+        }
+
+        .back-btn:hover {
+            background-color: #1b5e20;
+        }
+
+
+    .action-btn:hover { background-color: #e0e0e0; }
+
+    /* ================= PRINT SETTINGS (35% A4) ================= */
+        @@page {
+            size: A4;
+            margin: 3mm;
+        }
+
+
+        @@media print {
+
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            /* Controls 35% A4 space */
+            .print-slot {
+                height: 104mm; /* 35% of A4 */
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                page-break-after: always;
+            }
+            /* Receipt box grows naturally */
+            .container {
+                height: auto; /* ✅ important */
+                overflow: visible; /* ✅ no cutting */
+                transform: scale(0.92);
+                transform-origin: top center;
+            }
+
+
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+
+            .no-print {
+                display: none !important;
+            }
+        }
+        .container {
+            width: 100%;
+            max-width: 98%;
+            box-sizing: border-box;
+        }
+
+</style>
+</head>
+
+<body>
+
+    <div class="print-slot">
+        <div class="container">
+
+            <!-- HEADER -->
+            <div class="top-bar">
+                <div class="logo">
+                    <img src="~/images/school-images/colourlogo.png" alt="School Logo" />
+                </div>
+
+                <div class="school-header">
+                    <h2>Gyan Sagar Public School</h2>
+                    JWV6+395, Agarwa Main Rd, Sri Krishna Nagar, Motihari, Bihar – 845401<br />
+                    Contact No.: 9470235587, 9430008812, 7765987920<br />
+                    Email: gpsagarwa1997@gmail.com
+                    <h4>FEE RECEIPT</h4>
+                </div>
+
+                <div class="parent-copy">Parent Copy</div>
+            </div>
+
+            <hr />
+
+            <!-- RECEIPT INFO -->
+            <table class="no-border">
+                <tr>
+                    <td class="text-left"><b>Receipt No.:</b> @ViewBag.ReceiptNumber</td>
+                    <td class="text-left"><b>Date:</b> @Convert.ToDateTime(ViewBag.ReceiptDate).ToString("dd-MM-yyyy")</td>
+                </tr>
+                <tr>
+                    <td class="text-left"><b>Name of the Student:</b> @ViewBag.StudentName</td>
+                    <td class="text-left"><b>Father’s Name:</b> @ViewBag.FatherName</td>
+                </tr>
+                <tr>
+                    <td class="text-left"><b>Class & Section:</b> @ViewBag.ClassName - @ViewBag.SectionName</td>
+                    <td class="text-left"><b>Admission No.:</b> @ViewBag.AdmissionNumber</td>
+                </tr>
+            </table>
+
+            <!-- FEE DETAILS -->
+            <table>
+                <thead>
+                    <tr>
+                        <th>S.No.</th>
+                        <th>Description</th>
+                        <th>Due</th>
+                        <th>Concession</th>
+                        <th>Paid Amount</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int i = 1;
+                        decimal due = 0, con = 0, paid = 0, bal = 0;
+
+                        foreach (var f in ViewBag.FeeDetails)
+                        {
+                            due += f.DueAmount;
+                            con += f.ConcessionAmount;
+                            paid += f.PaidAmount;
+                            bal += f.BalanceAmount;
+                            <tr>
+                                <td>@i</td>
+                                <td class="text-left">@f.FeeHeadName</td>
+                                <td>@f.DueAmount.ToString("0.00")</td>
+                                <td>@f.ConcessionAmount.ToString("0.00")</td>
+                                <td>@f.PaidAmount.ToString("0.00")</td>
+                                <td>@f.BalanceAmount.ToString("0.00")</td>
+                            </tr>
+                            i++;
+                        }
+                    }
+                    <tr>
+                        <th colspan="2">Total</th>
+                        <th>@due.ToString("0.00")</th>
+                        <th>@con.ToString("0.00")</th>
+                        <th>@paid.ToString("0.00")</th>
+                        <th>@bal.ToString("0.00")</th>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="section-title">Pay Mode Information</div>
+            <table>
+                <tr>
+                    <th>Sr. No.</th>
+                    <th>Pay Mode</th>
+                    <th>Bank</th>
+                    <th>Number</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>@ViewBag.PaymentMode</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>@Convert.ToDateTime(ViewBag.ReceiptDate).ToString("dd-MM-yyyy")</td>
+                    <td>@paid.ToString("0.00")</td>
+                </tr>
+            </table>
+
+            <div class="notes">
+                <b>Remarks:</b><br />
+                Total in words: <b>@AmountInWords(paid)</b>
+            </div>
+
+            <div class="notes">
+                <b>NOTE:</b>
+                <ol>
+                    <li>Fees once paid is not refundable.</li>
+                    <li>Cheque/DD subject to realization.</li>
+                    <li>Late fee applicable after due date.</li>
+                    <li>Fee structure may be revised.</li>
+                    <li>Computer-generated receipt.</li>
+                </ol>
+            </div>
+
+            <div class="footer">
+                <div><b>Total Paid:</b> ₹ @paid.ToString("0.00")</div>
+                <div><b>Date:</b> @DateTime.Now.ToString("dd-MM-yyyy HH:mm")</div>
+                <div class="signature">Signature</div>
+            </div>
+
+        </div>
+    </div>
+
+
+
+
+    <div class="no-print action-bar">
+        <button onclick="window.print()" class="action-btn print-btn">
+            🖨️ Print Receipt
+        </button>
+
+        <a asp-controller="Accountant"
+           asp-action="CollectFee"
+           class="action-btn back-btn">
+            ⬅ Back to Collect Fee
+        </a>
+    </div>
+
+
+</body>
+</html>

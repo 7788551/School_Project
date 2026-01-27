@@ -1,0 +1,30 @@
+﻿@model List<SchoolProject.Models.Exam>
+@{
+    Layout = "~/Views/Shared/TeacherLayout.cshtml";
+}
+
+<h3>Select Exam</h3>
+
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Exam</th>
+            <th style="width:150px;">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var exam in Model)
+        {
+            <tr>
+                <td>@exam.ExamName</td>
+                <td>
+                    <a asp-action="StudentList"
+                       asp-route-examId="@exam.ExamId"
+                       class="btn btn-sm btn-primary">
+                        Enter Marks
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

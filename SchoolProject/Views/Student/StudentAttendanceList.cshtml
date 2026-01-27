@@ -1,0 +1,44 @@
+﻿@model SchoolProject.Models.StudentAttendanceSummary
+<!-- Page Header Start -->
+<div class="page-header bg-section dark-section parallaxie">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <!-- Page Header Box Start -->
+                <div class="page-header-box">
+                    <h1 class="text-anime-style-3" data-cursor="-opaque">Edit Attendance</h1>
+                    <nav class="wow fadeInUp">
+                        <ol class="breadcrumb">
+                            <!-- <li class="breadcrumb-item"><a href="index-2.html">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Contact us</li> -->
+                        </ol>
+                    </nav>
+                </div>
+                <!-- Page Header Box End -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+<h2>StudentAttendanceSummary</h2>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card border-primary">
+            <div class="card-header bg-primary text-white">
+                Attendance Summary
+            </div>
+            <div class="card-body">
+                <p><strong>Total Days:</strong> @Model.TotalDays</p>
+                <p><strong>Present:</strong> @Model.PresentDays</p>
+                <p><strong>Absent:</strong> @Model.AbsentDays</p>
+                <p>
+                    <strong>Attendance %:</strong>
+                    <span class="@(Model.AttendancePercentage < 75 ? "text-danger" : "text-success")">
+                        @Model.AttendancePercentage %
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

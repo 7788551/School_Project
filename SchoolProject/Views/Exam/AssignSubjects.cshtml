@@ -1,0 +1,167 @@
+﻿@{
+    ViewData["Title"] = "Assign Subjects (Marks / Grade)";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h2 class="mb-4">Assign Subjects (Marks / Grade)</h2>
+
+<!-- 🔽 CLASS DROPDOWN -->
+<div class="mb-3">
+    <label class="form-label fw-bold">Select Class</label>
+    <select id="classFilter"
+            class="form-select"
+            onchange="filterByClass()">
+        <option value="">-- Select Class --</option>
+
+        @foreach (var cls in ViewBag.Classes)
+        {
+            <option value="@cls.Key">@cls.Value</option>
+        }
+    </select>
+</div>
+
+<form asp-action="AssignSubjects"
+      asp-controller="Exam"
+      method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Class</th>
+                    <th>Subject</th>
+                    <th>Evaluation Type</th>
+                    <th>Max Marks</th>
+                    <th>Pass Marks</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int i = 0;
+                }
+
+                @foreach (var subject in ViewBag.Subjects)
+                {
+                    <tr class="subject-row"
+                        data-class-id="@subject.ClassId"
+                        style="display:none;">
+
+                        <!-- 🔑 REQUIRED FOR LIST BINDING -->
+                        <input type="hidden" name="subjects.Index" value="@i" />
+
+                        <input type="hidden"
+                               name="subjects[@i].ExamId"
+                               value="@ViewBag.ExamId" />
+
+                        <td>
+                            <input type="hidden"
+                                   name="subjects[@i].ClassId"
+                                   value="@subject.ClassId" />
+                            @subject.ClassName
+                        </td>
+
+                        <td>
+                            <input type="hidden"
+                                   name="subjects[@i].SubjectId"
+                                   value="@subject.SubjectId" />
+                            @subject.SubjectName
+                        </td>
+
+                        <td>
+                            <select name="subjects[@i].EvaluationType"
+                                    class="form-select"
+                                    required
+                                    onchange="toggleMarks(this)">
+                                <option value="">-- Select --</option>
+                                <option value="Marks">Marks</option>
+                                <option value="Grade">Grade</option>
+                            </select>
+                        </td>
+
+                        <td>
+                            <input type="number"
+                                   step="0.01"
+                                   name="subjects[@i].MaxMarks"
+                                   class="form-control max-marks"
+                                   value="100" />
+                        </td>
+
+                        <td>
+                            <input type="number"
+                                   step="0.01"
+                                   name="subjects[@i].PassMarks"
+                                   class="form-control pass-marks"
+                                   value="33" />
+                        </td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-end mt-3">
+        <button type="submit"
+                id="btnSubmit"
+                class="btn btn-primary"
+                disabled>
+            Save Subject Configuration
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        function filterByClass() {
+            const selectedClass = document.getElementById('classFilter').value;
+            const rows = document.querySelectorAll('.subject-row');
+            const btn = document.getElementById('btnSubmit');
+
+            let anyVisible = false;
+
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input, select');
+
+                if (row.dataset.classId === selectedClass) {
+                    row.style.display = '';
+                    inputs.forEach(i => i.disabled = false);
+                    anyVisible = true;
+                } else {
+                    row.style.display = 'none';
+                    inputs.forEach(i => i.disabled = true);
+                }
+            });
+
+            btn.disabled = !anyVisible;
+        }
+
+        function toggleMarks(select) {
+            const row = select.closest('tr');
+            const maxMarks = row.querySelector('.max-marks');
+            const passMarks = row.querySelector('.pass-marks');
+
+            if (select.value === 'Grade') {
+                maxMarks.value = '';
+                passMarks.value = '';
+                maxMarks.disabled = true;
+                passMarks.disabled = true;
+            } else {
+                maxMarks.disabled = false;
+                passMarks.disabled = false;
+
+                if (!maxMarks.value) maxMarks.value = 100;
+                if (!passMarks.value) passMarks.value = 33;
+            }
+        }
+
+        // ⭐ Auto-select first class
+        document.addEventListener("DOMContentLoaded", function () {
+            const ddl = document.getElementById('classFilter');
+            if (ddl.options.length > 1) {
+                ddl.selectedIndex = 1;
+                filterByClass();
+            }
+        });
+    </script>
+}

@@ -1,0 +1,241 @@
+﻿@model EditStudent
+
+@{
+    ViewData["Title"] = "Edit Student";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<form asp-controller="Admin"
+      asp-action="EditStudent"
+      method="post"
+      enctype="multipart/form-data">
+
+    @Html.AntiForgeryToken()
+
+    <!-- ===============================
+         REQUIRED HIDDEN FIELDS (CRITICAL)
+    =============================== -->
+    <input type="hidden" asp-for="UserId" />
+    <input type="hidden" asp-for="StudentId" />
+    <input type="hidden" asp-for="SessionId" />
+    <input type="hidden" asp-for="SessionName" />
+    <input type="hidden" asp-for="AdmissionNumber" />
+    <input type="hidden" asp-for="ExistingStudentImage" />
+
+    <!-- FOR JS PRELOAD -->
+    <input type="hidden" id="ExistingClassId" value="@Model.ClassId" />
+    <input type="hidden" id="ExistingSectionId" value="@Model.SectionId" />
+
+    <!-- ===============================
+         VALIDATION SUMMARY
+    =============================== -->
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <!-- ===============================
+         ACADEMIC SESSION (READ ONLY)
+    =============================== -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label>Academic Session</label>
+            <input type="text"
+                   class="form-control"
+                   value="@Model.SessionName"
+                   readonly />
+        </div>
+    </div>
+
+    <!-- ===============================
+         BASIC DETAILS
+    =============================== -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label>Name</label>
+            <input asp-for="Name" class="form-control" />
+        </div>
+
+        <div class="col-md-4">
+            <label>Phone Number</label>
+            <input asp-for="PhoneNumber" class="form-control" />
+        </div>
+
+        <div class="col-md-4">
+            <label>Date of Birth</label>
+            <input asp-for="DateOfBirth" type="date" class="form-control" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label>Gender</label>
+            <select asp-for="Gender" class="form-control">
+                <option value="">Select</option>
+                <option>Male</option>
+                <option>Female</option>
+            </select>
+        </div>
+
+        <div class="col-md-4">
+            <label>Admission Number</label>
+            <input asp-for="AdmissionNumber" class="form-control" readonly />
+        </div>
+
+        <div class="col-md-4">
+            <label>Roll Number</label>
+            <input asp-for="RollNumber" class="form-control" />
+        </div>
+    </div>
+
+    <!-- ===============================
+         ACADEMIC DETAILS
+    =============================== -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label>Class</label>
+            <select id="ClassId" name="ClassId" class="form-control">
+                <option value="">Select Class</option>
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label>Section</label>
+            <select id="SectionId" name="SectionId" class="form-control">
+                <option value="">Select Section</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- ===============================
+         PARENT DETAILS
+    =============================== -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label>Father Name</label>
+            <input asp-for="FatherName" class="form-control" />
+        </div>
+
+        <div class="col-md-6">
+            <label>Mother Name</label>
+            <input asp-for="MotherName" class="form-control" />
+        </div>
+    </div>
+
+    <!-- ===============================
+         ADDRESS
+    =============================== -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label>Address Line 1</label>
+            <input asp-for="AddressLine1" class="form-control" />
+        </div>
+
+        <div class="col-md-4">
+            <label>Address Line 2</label>
+            <input asp-for="AddressLine2" class="form-control" />
+        </div>
+
+        <div class="col-md-4">
+            <label>Pincode</label>
+            <input asp-for="Pincode" class="form-control" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label>City</label>
+            <input asp-for="City" class="form-control" />
+        </div>
+
+        <div class="col-md-6">
+            <label>State</label>
+            <input asp-for="State" class="form-control" />
+        </div>
+    </div>
+
+    <!-- ===============================
+         STUDENT IMAGE (TEACHER STYLE)
+    =============================== -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label>Student Image</label>
+
+            @if (!string.IsNullOrEmpty(Model.ExistingStudentImage))
+            {
+                <div class="mb-2">
+                    <img src="~/images/StudentImage/@Model.ExistingStudentImage"
+                         style="width:80px;height:80px;border-radius:50%;object-fit:cover;" />
+                </div>
+            }
+
+            <input asp-for="StudentImageFile"
+                   type="file"
+                   class="form-control"
+                   accept="image/*" />
+
+            <small class="text-muted">
+                Upload new image only if you want to replace the existing one
+            </small>
+        </div>
+    </div>
+
+    <!-- ===============================
+         BUTTONS
+    =============================== -->
+    <div class="mt-4">
+        <button type="submit" class="btn btn-success">Update</button>
+        <a asp-controller="Admin" asp-action="Student" class="btn btn-secondary">Cancel</a>
+    </div>
+
+</form>
+
+@section Scripts {
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const sessionId = document.getElementById('SessionId').value;
+        const existingClassId = document.getElementById('ExistingClassId').value;
+        const existingSectionId = document.getElementById('ExistingSectionId').value;
+
+        loadClasses(sessionId, existingClassId, existingSectionId);
+
+        document.getElementById('ClassId')
+            .addEventListener('change', function () {
+                loadSections(sessionId, this.value, null);
+            });
+    });
+
+    function loadClasses(sessionId, selectedClassId, selectedSectionId) {
+        fetch(`/Admin/GetClassesBySession?sessionId=${sessionId}`)
+            .then(r => r.json())
+            .then(data => {
+                const ddl = document.getElementById('ClassId');
+                ddl.innerHTML = '<option value="">Select Class</option>';
+
+                data.forEach(c => {
+                    ddl.innerHTML += `<option value="${c.classId}">${c.className}</option>`;
+                });
+
+                if (selectedClassId) {
+                    ddl.value = selectedClassId;
+                    loadSections(sessionId, selectedClassId, selectedSectionId);
+                }
+            });
+    }
+
+    function loadSections(sessionId, classId, selectedSectionId) {
+        if (!classId) return;
+
+        fetch(`/Admin/GetSectionsByClass?sessionId=${sessionId}&classId=${classId}`)
+            .then(r => r.json())
+            .then(data => {
+                const ddl = document.getElementById('SectionId');
+                ddl.innerHTML = '<option value="">Select Section</option>';
+
+                data.forEach(s => {
+                    ddl.innerHTML += `<option value="${s.sectionId}">${s.sectionName}</option>`;
+                });
+
+                if (selectedSectionId) ddl.value = selectedSectionId;
+            });
+    }
+</script>
+}

@@ -1,0 +1,66 @@
+﻿@{
+    ViewData["Title"] = "Class Subjects";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+
+    var dt = ViewBag.ClassSubjects as System.Data.DataTable;
+    var classDt = ViewBag.Classes as System.Data.DataTable;
+    int? selectedClassId = ViewBag.SelectedClassId as int?;
+}
+
+<h2>Class-wise Subjects</h2>
+<hr />
+
+<!-- 🔽 Class Dropdown Filter -->
+<form method="get" class="mb-4">
+    <div class="row">
+        <div class="col-md-4">
+            <label class="form-label fw-bold">Select Class</label>
+            <select name="classId"
+                    class="form-select"
+                    onchange="this.form.submit()">
+                <option value="">-- All Classes --</option>
+
+                @if (classDt != null)
+                {
+                    foreach (System.Data.DataRow row in classDt.Rows)
+                    {
+                        <option value="@row["ClassId"]"
+                                selected="@(selectedClassId?.ToString() == row["ClassId"].ToString())">
+                            @row["ClassName"]
+                        </option>
+                    }
+                }
+            </select>
+        </div>
+    </div>
+</form>
+
+<!-- 📘 Class-wise Subject Table -->
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th style="width:30%">Class</th>
+            <th>Subject</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (dt != null && dt.Rows.Count > 0)
+        {
+            foreach (System.Data.DataRow row in dt.Rows)
+            {
+                <tr>
+                    <td>@row["ClassName"]</td>
+                    <td>@row["SubjectName"]</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="2" class="text-center text-muted">
+                    No subjects found
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

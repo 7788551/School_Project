@@ -1,0 +1,125 @@
+﻿@model List<SchoolProject.Models.FeeSchedules>
+
+@{
+    ViewData["Title"] = "Fee Heads";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Fee Heads</h4>
+
+        <!-- Add New Fee Button -->
+        <a class="btn btn-primary"
+           asp-controller="Admin"
+           asp-action="AddFeeHead">
+            <i class="bi bi-plus-circle me-2"></i> Add New Fee
+        </a>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead style="background-color:#0d6efd; color:white;">
+            <tr>
+                <th>Serial Number</th>
+                <th>Fee Head Name</th>
+                <th>Schedule</th>
+                <th>Status</th>
+                <th style="width:220px;">Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (Model != null && Model.Count > 0)
+            {
+                int i = 1;
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@i</td>
+
+                        <td>@item.FeeHeadName</td>
+
+                        <!-- 🗓 SCHEDULE COLUMN -->
+                        <td>
+                            @if (item.Schedules != null && item.Schedules.Count > 0)
+                            {
+                                <span class="text-primary">
+                                    @string.Join(", ", item.Schedules.Distinct())
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not Assigned</span>
+                            }
+                        </td>
+
+                        <!-- STATUS -->
+                        <td>
+                            @if (item.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Inactive</span>
+                            }
+                        </td>
+
+                        <!-- ACTION BUTTONS -->
+                        <td>
+                            <!-- ✏️ EDIT -->
+                            <a asp-controller="Admin"
+                               asp-action="EditFeeHead"
+                               asp-route-id="@item.FeeHeadId"
+                               class="btn btn-sm btn-warning me-1">
+                                Edit
+                            </a>
+
+                            <!-- 🔁 TOGGLE -->
+                            <a asp-controller="Admin"
+                               asp-action="ToggleFeeHead"
+                               asp-route-id="@item.FeeHeadId"
+                               class="btn btn-sm @(item.IsActive ? "btn-danger" : "btn-success") me-1"
+                               onclick="return confirm('Are you sure you want to change the status?');">
+                                @(item.IsActive ? "Deactivate" : "Activate")
+                            </a>
+
+                            <!-- 🗑 DELETE -->
+                            <a asp-controller="Admin"
+                               asp-action="DeleteFeeHead"
+                               asp-route-id="@item.FeeHeadId"
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('Are you sure you want to DELETE this Fee Head? This will also remove all its schedules.');">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                    i++;
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No fee heads found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

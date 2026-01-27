@@ -1,0 +1,57 @@
+﻿@model List<AssignedClassTeacher>
+
+@{
+    ViewData["Title"] = "AssignedClassTeacher";
+    Layout = "~/Views/Shared/AdminLayout.cshtml"; // use your layout
+}
+
+
+<div class="container mt-4">
+    <h4>Assigned Class Teachers</h4>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Session</th>
+                <th>Class</th>
+                <th>Section</th>
+                <th>Teacher</th>
+                <th>Status</th>
+                <th>Assigned On</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="6" class="text-center">
+                        No class teachers assigned
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.SessionName</td>
+                        <td>@item.ClassName</td>
+                        <td>@item.SectionName</td>
+                        <td>@item.TeacherName</td>
+                        <td>
+                            @if (item.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
+                        </td>
+                        <td>@item.CreatedDate.ToString("dd-MMM-yyyy")</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

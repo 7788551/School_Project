@@ -1,0 +1,534 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Custom CSS -->
+    <link href="~/css/style.css" rel="stylesheet" asp-append-version="true" />
+
+
+    <style>
+        /* .rotate-icon {
+            transition: transform 0.3s ease;
+        }
+
+        /* When menu is closed */
+        /* a.collapsed .rotate-icon {
+            transform: rotate(0deg);
+        } */
+
+
+        /* ===============================
+           Sidebar Base
+        ================================ */
+        #sidebar {
+            width: 260px;
+            height: 100vh;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 1050;
+        }
+
+        /* ===============================
+           Main Content
+        ================================ */
+        #mainContent {
+            margin-left: 260px;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* ===============================
+           Mobile & Tablet
+        ================================ */
+        @@media (max-width: 991px) {
+            #sidebar
+
+        {
+            transform: translateX(-100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #fff;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+
+        #sidebar.show {
+            transform: translateX(0);
+        }
+
+        #mainContent {
+            margin-left: 0;
+        }
+
+        body.sidebar-open {
+            overflow: hidden;
+        }
+
+        }
+
+        /* ===============================
+           Sidebar Links Touch Friendly
+        ================================ */
+        .nav-link {
+            padding: 10px 14px;
+            border-radius: 6px;
+        }
+
+        /* Prevent sidebar hiding behind navbar */
+        .navbar {
+            z-index: 1100;
+        }
+
+
+    </style>
+</head>
+
+<body>
+  
+    <div class="d-flex">
+
+        <!-- SIDEBAR -->
+        <aside id="sidebar"
+               class="text-dark position-fixed bg-white">
+
+            <div class="p-3 border-bottom fw-bold">
+                Gyan Sagar Public School
+            </div>
+
+            <ul class="nav flex-column p-3">
+                @* <div class="d-flex align-items-center mb-4 p-3 bg-light rounded shadow-sm">
+                    <div class="me-3 text-primary fs-4">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-semibold">
+                            @User.Identity?.Name
+                        </h6>
+                        <small class="text-muted">
+                            @User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
+                        </small>
+                    </div>
+                </div> *@
+               
+                <a asp-controller="Admin"
+                   asp-action="AdminProfiledata"
+                   class="text-decoration-none text-dark">
+
+                    <div class="d-flex align-items-center mb-4 p-3 bg-light rounded shadow-sm"
+                         style="cursor:pointer;">
+
+                        @{
+                            var adminImage = Context.Session.GetString("AdminImage");
+                            var imageName = string.IsNullOrEmpty(adminImage) ? "default.png" : adminImage;
+                        }
+
+                        <!-- PROFILE IMAGE -->
+                        <div class="me-3">
+                            <img src="~/images/Admins/@imageName?v=@DateTime.Now.Ticks"
+                                 alt="Profile Image"
+                                 class="rounded-circle"
+                                 style="width:48px;height:48px;object-fit:cover;border:1px solid #ddd;" />
+                        </div>
+
+
+
+                        <!-- NAME + ROLE -->
+                        <div>
+                            <h6 class="mb-0 fw-semibold">
+                                @User.Identity?.Name
+                            </h6>
+                            <small class="text-muted">
+                                @User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
+                            </small>
+                        </div>
+
+                    </div>
+                </a>
+
+                <li class="nav-item">
+                    <a asp-controller="Admin"
+                       asp-action="AdminDashboard"
+                       class="nav-link sidebar-link @(ViewContext.RouteData.Values["action"]?.ToString() == "AdminDashboard" ? "active" : "")">
+                        <i class="bi bi-clipboard-data sidebar-icon text-black"></i>
+                        <span class="sidebar-text text-black">Dashboard</span>
+                    </a>
+                </li>
+
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark d-flex align-items-center collapsed"
+                       data-bs-toggle="collapse"
+                       href="#feeMenu"
+                       role="button"
+                       aria-expanded="false"
+                       aria-controls="feeMenu">
+                        <i class="bi bi-list-check me-2"></i> Fee Menu
+                        <i class="bi bi-chevron-down ms-auto rotate-icon"></i>
+                    </a>
+
+                    <div class="collapse"
+                         id="feeMenu"
+                         data-bs-parent="#sidebarAccordion">
+
+                        <ul class="nav flex-column ms-4">
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="AddFeeHead">
+                                    <i class="bi bi-plus-circle me-2"></i> Add New Fee
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="FeeHeads">
+                                    <i class="bi bi-card-list me-2"></i> Fee List
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="AddFeeSchedule">
+                                    <i class="bi bi-clipboard-check me-2"></i> Add Fee Schedule
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="AssignClassFee">
+                                    <i class="bi bi-clipboard-check me-2"></i> Assign Class Fee
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="ClassFeeStructure">
+                                    <i class="bi bi-clipboard-check me-2"></i> Class Fee Structure
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="StudentFeeDetails">
+                                    <i class="bi bi-clipboard-check me-2"></i> Student Fee Details
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="AddTransportSlab">
+                                    <i class="bi bi-clipboard-check me-2"></i> AddTransportSlab
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="TransportSlabS">
+                                    <i class="bi bi-clipboard-check me-2"></i> TransportSlab
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Admin" asp-action="StudentTransport">
+                                    <i class="bi bi-clipboard-check me-2"></i> StudentTransport
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+                </li>
+
+
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark d-flex align-items-center collapsed"
+                       data-bs-toggle="collapse"
+                       href="#examMenu"
+                       role="button"
+                       aria-expanded="false"
+                       aria-controls="examMenu">
+                        <i class="bi bi-list-check me-2"></i> Exam Menu
+                        <i class="bi bi-chevron-down ms-auto rotate-icon"></i>
+                    </a>
+
+                    <div class="collapse"
+                         id="examMenu"
+                         data-bs-parent="#sidebarAccordion">
+
+                        <ul class="nav flex-column ms-4">
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Exam" asp-action="CreateExam">
+                                    <i class="bi bi-plus-circle me-2"></i>CreateExam
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Exam" asp-action="ExamList">
+                                    <i class="bi bi-plus-circle me-2"></i>ExamList
+                                </a>
+                            </li>
+
+                          
+
+                        </ul>
+                    </div>
+                </li>
+
+
+
+
+                <li class="mt-3 text-uppercase text-muted small">Peoples</li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Student">
+                        <i class="bi bi-mortarboard-fill me-2"></i> Students
+                    </a>
+                </li>
+
+               
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Teacher">
+                        <i class="bi bi-person-badge me-2"></i> Teachers
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Accountant">
+                        <i class="bi bi-person-workspace me-2"></i> Accountant
+                    </a>
+                </li>
+               
+
+                <li class="mt-3 text-uppercase text-muted small">Academic</li>
+
+               
+              
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Subjects">
+                        <i class="bi bi-book me-2"></i> Subjects
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="CreateSubject">
+                        <i class="bi bi-bookmark-plus me-2"></i> CreateSubject
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="OptionalSubjects">
+                        <i class="bi bi-bookmarks me-2"></i> OptionalSubjectList
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="CreateOptionalSubject">
+                        <i class="bi bi-bookmark-plus-fill me-2"></i> AddOptionalSubject
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="AssignOptionalSubject">
+                        <i class="bi bi-link-45deg me-2"></i> AssignOptionalSubject
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="OptionalSubjectStudentList">
+                        <i class="bi bi-people me-2"></i> OptionalSubjectStudentList
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark"
+                       asp-controller="Admin"
+                       asp-action="AssignSubjectsToClass">
+                        <i class="bi bi-ui-checks-grid me-2"></i>
+                        Assign Subjects to Class
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark"
+                       asp-controller="Admin"
+                       asp-action="ViewClassSubjects">
+                        <i class="bi bi-list-ul me-2"></i>
+                        Class Subject List
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark"
+                       asp-controller="Admin"
+                       asp-action="StudentSubjectList">
+                        <i class="bi bi-person-lines-fill me-2"></i>
+                        Student Subject List
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark"
+                       asp-controller="Admin"
+                       asp-action="AssignClassTeacher">
+                        <i class="bi bi-person-check-fill me-2"></i>
+                        Assign Class Teacher
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link text-dark"
+                       asp-controller="Admin"
+                       asp-action="AssignedClassTeacher">
+                        <i class="bi bi-person-lines-fill me-2"></i>
+                        Assigned Class Teachers
+                    </a>
+                </li>
+
+
+
+
+            </ul>
+
+           
+
+            <div class="p-3 border-top">
+                <button class="btn btn-outline-light w-100">
+                    <i class="bi bi-gear me-2"></i> Theme Settings
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <div id="mainContent" class="flex-grow-1">
+
+
+            <!-- HEADER -->
+            @* <nav class="navbar bg-white shadow-sm sticky-top px-4">
+
+                <button class="btn btn-outline-primary d-lg-none me-3" id="sidebarToggle">
+                    <i class="bi bi-list"></i>
+                </button>
+               
+
+                <span class="me-3" id="academicYear">
+                    <i class="bi bi-calendar-event"></i> Academic Year: Loading...
+                </span>
+
+
+
+
+                
+
+                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger d-flex align-items-center logout-btn">
+                        <i class="bi bi-box-arrow-right me-2"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </nav> *@
+
+            <nav class="navbar bg-white shadow-sm sticky-top px-3 px-md-4">
+                <div class="container-fluid d-flex flex-wrap align-items-center">
+
+                    <!-- LEFT: Sidebar Toggle (Mobile Only) -->
+                    <div class="d-flex align-items-center me-2">
+                        <button class="btn btn-outline-primary d-lg-none me-2" id="sidebarToggle">
+                            <i class="bi bi-list"></i>
+                        </button>
+                    </div>
+
+                    <!-- CENTER: Academic Year -->
+                    <div class="flex-grow-1 text-center text-md-start my-2 my-md-0">
+                        <span class="fw-semibold small" id="academicYear">
+                            <i class="bi bi-calendar-event"></i>
+                            <span class="d-none d-sm-inline">Academic Year:</span> Loading...
+                        </span>
+                    </div>
+
+                    <!-- RIGHT: Logout -->
+                    <div class="ms-md-auto">
+                        <form asp-controller="Account"
+                              asp-action="Logout"
+                              method="post"
+                              class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit"
+                                    class="btn btn-outline-danger d-flex align-items-center">
+                                <i class="bi bi-box-arrow-right me-2"></i>
+                                <span class="d-none d-sm-inline">Logout</span>
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </nav>
+
+            <!-- PAGE BODY -->
+            <main class="p-4 bg-light min-vh-100">
+                @RenderBody()
+            </main>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            fetch('/Admin/GetCurrentSession')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.sessionName) {
+                        document.getElementById("academicYear").innerHTML =
+                            `<i class="bi bi-calendar-event"></i> Academic Year: ${data.sessionName}`;
+                    } else {
+                        document.getElementById("academicYear").innerHTML =
+                            `<i class="bi bi-calendar-event"></i> Academic Year: Not Set`;
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching academic year:", error);
+                    document.getElementById("academicYear").innerHTML =
+                        `<i class="bi bi-calendar-event"></i> Academic Year: Error`;
+                });
+
+        });
+
+            
+        document.getElementById("sidebarToggle")?.addEventListener("click", function () {
+            document.getElementById("sidebar").classList.toggle("show");
+            document.body.classList.toggle("sidebar-open");
+        });
+
+        // Close sidebar when clicking outside (mobile)
+        document.addEventListener("click", function (e) {
+            const sidebar = document.getElementById("sidebar");
+            const toggle = document.getElementById("sidebarToggle");
+
+            if (
+                sidebar.classList.contains("show") &&
+                !sidebar.contains(e.target) &&
+                !toggle.contains(e.target)
+            ) {
+                sidebar.classList.remove("show");
+                document.body.classList.remove("sidebar-open");
+            }
+        });
+          document.querySelectorAll("#sidebar a").forEach(link => {
+            link.addEventListener("click", () => {
+                if (window.innerWidth <= 991) {
+                    document.getElementById("sidebar").classList.remove("show");
+                    document.body.classList.remove("sidebar-open");
+                }
+            });
+        });
+
+    </script>
+
+</body>
+</html>

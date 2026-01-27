@@ -1,0 +1,199 @@
+﻿@using System.Data
+@model DataTable
+
+@{
+    ViewData["Title"] = "Student Transport";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="container-fluid mt-3">
+
+    <h4 class="mb-3">Student Transport Management</h4>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+
+    <!-- ===================== -->
+    <!-- SEARCH + ASSIGN FORM -->
+    <!-- ===================== -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">Search Student & Assign Transport</h6>
+        </div>
+        <div class="card-body">
+
+            <!-- 🔍 SEARCH BY ADMISSION NO -->
+            <form method="get" asp-action="StudentTransport" class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">Search by Admission No</label>
+                    <input type="text" name="admissionSearch"
+                           value="@ViewBag.AdmissionSearch"
+                           class="form-control"
+                           placeholder="Enter Admission Number" />
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
+            </form>
+
+            <!-- ASSIGN FORM -->
+            <form asp-action="AssignStudentTransport" method="post" class="row g-3">
+                @Html.AntiForgeryToken()
+
+                <!-- Student -->
+                <div class="col-md-4">
+                    <label class="form-label">Student</label>
+                    <select name="studentId" class="form-select" required>
+                        <option value="">-- Select Student --</option>
+                        @foreach (System.Data.DataRow s in ((System.Data.DataTable)ViewBag.Students).Rows)
+                        {
+                            var isSelected = ViewBag.SelectedStudentId != null &&
+                            ViewBag.SelectedStudentId.ToString() == s["StudentId"].ToString();
+
+                            <option value="@s["StudentId"]" selected="@(isSelected ? "selected" : null)">
+                                @s["StudentName"] (@s["AdmissionNumber"])
+                            </option>
+                        }
+                    </select>
+
+
+                </div>
+
+                <!-- Distance -->
+                <div class="col-md-3">
+                    <label class="form-label">Distance (KM)</label>
+                    <input type="number" step="0.1" name="distanceKM" class="form-control" required />
+                </div>
+
+                <!-- Slab -->
+                <div class="col-md-3">
+                    <label class="form-label">Transport Slab</label>
+                    <select name="slabId" class="form-select" required>
+                        <option value="">-- Select Slab --</option>
+                        @foreach (DataRow slab in ((DataTable)ViewBag.Slabs).Rows)
+                        {
+                            <option value="@slab["SlabId"]">
+                                @slab["FromKM"] - @slab["ToKM"] KM (₹@slab["Amount"])
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100">
+                        @(ViewBag.HasTransport != null && (bool)ViewBag.HasTransport ? "Update" : "Assign")
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- ======================== -->
+    <!-- ASSIGNED TRANSPORT LIST -->
+    <!-- ======================== -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h6 class="mb-0">Assigned Students</h6>
+        </div>
+        <div class="card-body">
+
+            <!-- 🔍 SEARCH ASSIGNED STUDENTS -->
+            <form method="get" asp-action="StudentTransport" class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">Search Assigned by Admission No</label>
+                    <input type="text" name="assignedSearch"
+                           value="@ViewBag.AssignedSearch"
+                           class="form-control"
+                           placeholder="Enter Admission Number" />
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-dark w-100">Search</button>
+                </div>
+            </form>
+
+            <table class="table table-bordered table-striped">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Student</th>
+                        <th>Admission No</th>
+                        <th>Distance (KM)</th>
+                        <th>Slab</th>
+                        <th>Monthly Fee</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Rows.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">
+                                No transport records found.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (DataRow row in Model.Rows)
+                        {
+                            bool isActive = Convert.ToBoolean(row["IsActive"]);
+
+                            <tr>
+                                <td>@row["StudentName"]</td>
+                                <td>@row["AdmissionNumber"]</td>
+                                <td>@row["DistanceKM"]</td>
+                                <td>@row["FromKM"] - @row["ToKM"]</td>
+                                <td>₹@row["MonthlyAmount"]</td>
+                                <td>
+                                    <span class="badge @(isActive ? "bg-success" : "bg-secondary")">
+                                        @(isActive ? "Active" : "Inactive")
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (isActive)
+                                    {
+                                        <!-- 🔴 DISCONTINUE -->
+                                        <form asp-action="DiscontinueStudentTransport"
+                                              method="post"
+                                              class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="studentId" value="@row["StudentId"]" />
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-danger"
+                                                    onclick="return confirm('Discontinue transport for this student?');">
+                                                Discontinue
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <!-- 🟢 CONTINUE -->
+                                        <form asp-action="AssignStudentTransport"
+                                              method="post"
+                                              class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="studentId" value="@row["StudentId"]" />
+                                            <input type="hidden" name="distanceKM" value="@row["DistanceKM"]" />
+                                            <input type="hidden" name="slabId" value="@row["SlabId"]" />
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-success"
+                                                    onclick="return confirm('Activate transport again?');">
+                                                Continue
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</div>

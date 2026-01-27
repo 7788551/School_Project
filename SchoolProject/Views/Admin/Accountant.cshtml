@@ -1,0 +1,119 @@
+﻿@model List<Accountant>
+
+@{
+    ViewData["Title"] = "Accountant";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="container mb-4">
+    <div class="row align-items-center border-bottom pb-3">
+
+        <!-- Title -->
+        <div class="col-lg-6">
+            <h3 class="fw-bold mb-0">
+                <i class="bi bi-person-workspace text-primary me-2"></i> Accountant List
+            </h3>
+            <small class="text-muted">All registered accountants</small>
+        </div>
+
+        <!-- Action Button -->
+        <div class="col-lg-6 d-flex justify-content-end">
+            <a asp-controller="Admin"
+               asp-action="AddAccountant"
+               class="btn btn-primary px-4">
+                <i class="bi bi-plus-circle me-1"></i> Add New Accountant
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Photo</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th style="width:18%">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            int count = 1;
+
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@count</td>
+
+                                    <!-- ACCOUNTANT IMAGE -->
+                                    <td class="text-center">
+                                        @if (!string.IsNullOrEmpty(item.AccountantImage))
+                                        {
+                                            <img src="~/images/Accountantimage/@item.AccountantImage"
+                                                 alt="Accountant"
+                                                 style="width:45px;height:45px;border-radius:50%;object-fit:cover;" />
+                                        }
+                                        else
+                                        {
+                                            <img src="~/images/default-user.png"
+                                                 alt="No Image"
+                                                 style="width:45px;height:45px;border-radius:50%;object-fit:cover;" />
+                                        }
+                                    </td>
+
+                                    <td>@item.Name</td>
+                                    <td>@(item.Email ?? "-")</td>
+                                    <td>@item.PhoneNumber</td>
+
+                                    <td>
+                                        <!-- EDIT -->
+                                        <a asp-controller="Admin"
+                                           asp-action="EditAccountant"
+                                           asp-route-id="@item.UserId"
+                                           class="btn btn-sm btn-warning me-1">
+                                            Edit
+                                        </a>
+
+                                        <!-- DELETE -->
+                                        <form asp-controller="Admin"
+                                              asp-action="DeleteAccountant"
+                                              asp-route-id="@item.UserId"
+                                              method="post"
+                                              style="display:inline"
+                                              onsubmit="return confirm('Are you sure you want to delete this accountant?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-danger">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">
+                                    No accountants found
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

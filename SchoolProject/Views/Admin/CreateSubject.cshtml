@@ -1,0 +1,106 @@
+﻿@model SchoolProject.Models.Subject
+
+@{
+    ViewData["Title"] = "Create Subject";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<style>
+    /* ============================
+       ADMIN FORM STYLING
+       ============================ */
+
+    h2 {
+        margin-bottom: 20px;
+        color: #2c3e50;
+    }
+
+    /* Form container */
+    form {
+        background: #ffffff;
+        padding: 25px;
+        width: 400px;
+        border-radius: 6px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    /* Form group */
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+        /* Labels */
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+    /* Input fields */
+    .form-control {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+        /* Input focus effect */
+        .form-control:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+    /* Buttons */
+    .btn {
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+    }
+
+    /* Save button */
+    .btn-success {
+        background-color: #28a745;
+        color: #fff;
+    }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+    /* Cancel button */
+    .btn-secondary {
+        background-color: #6c757d;
+        color: #fff;
+        margin-left: 10px;
+    }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+</style>
+
+<h2>Create Subject</h2>
+
+<form asp-action="CreateSubject" method="post">
+
+    <div class="form-group">
+        <label>Subject Name</label><br />
+        <input asp-for="SubjectName" class="form-control" required />
+    </div>
+
+    <br />
+
+    <button type="submit" class="btn btn-success">
+        Save
+    </button>
+
+    <a asp-action="Subjects" class="btn btn-secondary">
+        Cancel
+    </a>
+
+</form>

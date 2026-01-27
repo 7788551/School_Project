@@ -1,0 +1,88 @@
+﻿@model SchoolProject.Models.Exam
+
+@{
+    ViewData["Title"] = "Create Exam";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h2 class="mb-4">Create Exam</h2>
+
+<form asp-action="CreateExam" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <!-- ============================= -->
+            <!-- Academic Session (Loaded via JS) -->
+            <!-- ============================= -->
+            <input type="hidden" id="sessionId" name="SessionId" />
+
+            <div class="mb-3">
+                <label class="form-label">Academic Session</label>
+                <input type="text"
+                       id="sessionName"
+                       class="form-control"
+                       readonly />
+                <div id="sessionError" class="text-danger small d-none">
+                    Unable to load academic session. Please refresh the page.
+                </div>
+            </div>
+
+            <!-- ============================= -->
+            <!-- Exam Name (ONLY REQUIRED FIELD) -->
+            <!-- ============================= -->
+            <div class="mb-3">
+                <label asp-for="ExamName" class="form-label"></label>
+                <input asp-for="ExamName" class="form-control" />
+                <span asp-validation-for="ExamName" class="text-danger"></span>
+            </div>
+
+            <!-- ============================= -->
+            <!-- Buttons -->
+            <!-- ============================= -->
+            <div class="d-flex justify-content-end">
+                <a asp-action="ExamList"
+                   asp-controller="Exam"
+                   class="btn btn-secondary me-2">
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        id="btnSubmit"
+                        class="btn btn-primary"
+                        disabled>
+                    Save & Assign Subjects
+                </button>
+            </div>
+
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.addEventListener("DOMContentLoaded", loadCurrentSession);
+
+        function loadCurrentSession() {
+            fetch('/Admin/GetCurrentSession')
+                .then(r => r.ok ? r.json() : null)
+                .then(data => {
+                    if (!data) throw "No session";
+                    sessionId.value = data.sessionId;
+                    sessionName.value = data.sessionName;
+
+                    // Enable submit once session is loaded
+                    btnSubmit.disabled = false;
+                })
+                .catch(() => {
+                    document.getElementById('sessionError')
+                        .classList.remove('d-none');
+                });
+        }
+    </script>
+}

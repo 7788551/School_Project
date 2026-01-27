@@ -1,0 +1,44 @@
+﻿@model List<SchoolProject.Models.OptionalSubject>
+
+@{
+    ViewData["Title"] = "Optional Subjects";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h2>Optional Subjects (Current Session)</h2>
+
+<a asp-action="CreateOptionalSubject" class="btn btn-primary">
+    + Add Optional Subject
+</a>
+
+<br />
+<br />
+
+<table border="1" cellpadding="8" cellspacing="0" width="50%">
+    <thead>
+        <tr>
+            <th>Optional Subject Name</th>
+            <th>Created On</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (var s in Model)
+            {
+                <tr>
+                    <td>@s.OptionalSubjectName</td>
+                    <td>@s.CreatedDate.ToString("dd-MMM-yyyy")</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="2" style="text-align:center">
+                    No optional subjects defined for this session
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

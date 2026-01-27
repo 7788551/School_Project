@@ -1,0 +1,79 @@
+﻿@{
+    ViewData["Title"] = "Exam Subject Configuration";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h3 class="mb-4">Exam Subject Configuration</h3>
+
+<!-- 🔽 CLASS DROPDOWN -->
+<div class="mb-3">
+    <label class="form-label fw-bold">Select Class</label>
+    <select id="classFilter"
+            class="form-select"
+            onchange="filterByClass()">
+        <option value="">-- Select Class --</option>
+
+        @foreach (var cls in ViewBag.Classes)
+        {
+            <option value="@cls.Key">@cls.Value</option>
+        }
+    </select>
+</div>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Class</th>
+            <th>Subject</th>
+            <th>Evaluation Type</th>
+            <th>Max Marks</th>
+            <th>Pass Marks</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var s in ViewBag.Subjects)
+        {
+            <tr class="subject-row"
+                data-class-id="@s.ClassId"
+                style="display:none;">
+                <td>@s.ClassName</td>
+                <td>@s.SubjectName</td>
+                <td>@s.EvaluationType</td>
+                <td>@s.MaxMarks</td>
+                <td>@s.PassMarks</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="ExamList"
+   asp-controller="Exam"
+   class="btn btn-secondary mt-3">
+    ← Back to Exam List
+</a>
+
+@section Scripts {
+    <script>
+        function filterByClass() {
+            const selectedClass = document.getElementById('classFilter').value;
+            const rows = document.querySelectorAll('.subject-row');
+
+            rows.forEach(row => {
+                if (row.dataset.classId === selectedClass) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // ⭐ Auto-select first class
+        document.addEventListener("DOMContentLoaded", function () {
+            const ddl = document.getElementById('classFilter');
+            if (ddl.options.length > 1) {
+                ddl.selectedIndex = 1;
+                filterByClass();
+            }
+        });
+    </script>
+}

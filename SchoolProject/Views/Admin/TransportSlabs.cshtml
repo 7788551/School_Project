@@ -1,0 +1,90 @@
+﻿@{
+    ViewData["Title"] = "Transport Slabs";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Transport Slabs</h4>
+        <a asp-action="AddTransportSlab" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Add New Slab
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th style="width:5%">#</th>
+                            <th>From KM</th>
+                            <th>To KM</th>
+                            <th>Amount (₹)</th>
+                            <th>Status</th>
+                            <th style="width:20%">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int i = 1;
+                            if (ViewBag.TransportSlabs != null && ViewBag.TransportSlabs.Count > 0)
+                            {
+                                foreach (var item in ViewBag.TransportSlabs)
+                                {
+                                    <tr>
+                                        <td>@i</td>
+                                        <td>@item.FromKM</td>
+                                        <td>@item.ToKM</td>
+                                        <td>₹ @item.Amount</td>
+                                        <td>
+                                            @if (Convert.ToBoolean(item.IsActive))
+                                            {
+                                                <span class="badge bg-success">Active</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Inactive</span>
+                                            }
+                                        </td>
+                                        <td class="text-nowrap">
+                                            <a asp-action="EditTransportSlab" asp-route-id="@item.SlabId"
+                                               class="btn btn-warning btn-sm me-1">
+                                                Edit
+                                            </a>
+
+                                            <a asp-action="ToggleTransportSlabStatus" asp-route-id="@item.SlabId"
+                                               class="btn btn-danger btn-sm me-1">
+                                                @(Convert.ToBoolean(item.IsActive) ? "Deactivate" : "Activate")
+                                            </a>
+
+                                            <a asp-action="DeleteTransportSlab" asp-route-id="@item.SlabId"
+                                               class="btn btn-outline-danger btn-sm"
+                                               onclick="return confirm('Are you sure you want to delete this slab?');">
+                                                Delete
+                                            </a>
+                                        </td>
+
+                                    </tr>
+                                    i++;
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">
+                                        No transport slabs found.
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>

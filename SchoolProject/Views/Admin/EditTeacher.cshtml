@@ -1,0 +1,202 @@
+﻿@model SchoolProject.Models.EditTeacher
+
+@{
+    ViewData["Title"] = "Edit Teacher";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<form asp-controller="Admin"
+      asp-action="EditTeacher"
+      method="post"
+      enctype="multipart/form-data"
+      id="teacherForm">
+
+    @Html.AntiForgeryToken()
+
+    <!-- 🔑 REQUIRED -->
+    <input type="hidden" asp-for="UserId" />
+    <input type="hidden" asp-for="SessionId" />
+    <input type="hidden" asp-for="ExistingTeacherImage" />
+
+    <!-- ===============================
+         ACADEMIC SESSION (READONLY)
+    =============================== -->
+    <div class="row">
+        <div class="col">
+            <label>Academic Session</label>
+            <input type="text" id="sessionName" readonly class="form-control" />
+        </div>
+    </div>
+
+    <!-- ===============================
+         BASIC DETAILS
+    =============================== -->
+    <div class="row">
+        <div class="col">
+            <label>Name</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="col">
+            <label>Date of Birth</label>
+            <input asp-for="DateOfBirth" type="date" class="form-control" />
+        </div>
+
+        <div class="col">
+            <label>Gender</label>
+            <select asp-for="Gender" class="form-control">
+                <option value="">Select Gender</option>
+                <option>Male</option>
+                <option>Female</option>
+            </select>
+        </div>
+
+        <div class="col">
+            <label>Joining Date</label>
+            <input asp-for="JoiningDate" type="date" class="form-control" />
+        </div>
+    </div>
+
+    <!-- ===============================
+         PROFESSIONAL DETAILS
+    =============================== -->
+    <div class="row">
+        <div class="col">
+            <label>Qualification</label>
+            <input asp-for="Qualification" class="form-control" />
+        </div>
+
+        <div class="col">
+            <label>Experience (Years)</label>
+            <input asp-for="ExperienceYears" type="number" class="form-control" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <label>Designation</label>
+            <input asp-for="Designation" class="form-control" />
+        </div>
+
+        <div class="col">
+            <label>Teacher Type</label>
+            <select asp-for="TeacherTypeId" id="TeacherTypeId" class="form-control">
+                <option value="">-- Select Teacher Type --</option>
+            </select>
+        </div>
+
+        <div class="col">
+            <label>Subject</label>
+            <input asp-for="Subject" class="form-control" />
+        </div>
+    </div>
+
+    <!-- ===============================
+         CONTACT DETAILS
+    =============================== -->
+    <div class="row">
+        <div class="col">
+            <label>Email</label>
+            <input asp-for="Email" type="email" class="form-control" />
+        </div>
+
+        <div class="col">
+            <label>Phone Number</label>
+            <input asp-for="PhoneNumber" class="form-control" />
+        </div>
+
+        <div class="col">
+            <label>Pincode</label>
+            <input asp-for="Pincode" class="form-control" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <label>Address Line 1</label>
+            <input asp-for="AddressLine1" class="form-control" />
+        </div>
+
+        <div class="col">
+            <label>Address Line 2</label>
+            <input asp-for="AddressLine2" class="form-control" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <label>City</label>
+            <input asp-for="City" class="form-control" />
+        </div>
+
+        <div class="col">
+            <label>State</label>
+            <input asp-for="State" class="form-control" />
+        </div>
+    </div>
+
+    <!-- ===============================
+         TEACHER IMAGE (EDIT LOGIC)
+    =============================== -->
+    <div class="row mt-3">
+        <div class="col">
+            <label>Teacher Image</label>
+
+            @if (!string.IsNullOrEmpty(Model.ExistingTeacherImage))
+            {
+                <div class="mb-2">
+                    <img src="~/images/Teacherprofileimage/@Model.ExistingTeacherImage"
+                         alt="Teacher"
+                         style="width:80px;height:80px;border-radius:50%;object-fit:cover;" />
+                </div>
+            }
+
+            <input asp-for="TeacherImage" type="file" class="form-control" />
+            <small class="text-muted">
+                Upload new image only if you want to replace the existing one
+            </small>
+        </div>
+    </div>
+
+    <!-- ===============================
+         BUTTONS
+    =============================== -->
+    <div class="mt-4">
+        <button type="submit" class="btn btn-success">Update</button>
+        <a asp-controller="Admin" asp-action="Teacher" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            setSessionName();
+            loadTeacherTypes();
+        });
+
+        function setSessionName() {
+            fetch('/Admin/GetCurrentSession')
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.sessionName) {
+                        document.getElementById("sessionName").value = data.sessionName;
+                    }
+                });
+        }
+
+        function loadTeacherTypes() {
+            fetch('/Admin/GetTeacherTypes')
+                .then(res => res.json())
+                .then(data => {
+                    let ddl = document.getElementById("TeacherTypeId");
+                    ddl.innerHTML = '<option value="">-- Select Teacher Type --</option>';
+
+                    data.forEach(x => {
+                        ddl.innerHTML +=
+                            `<option value="${x.teacherTypeId}">${x.typeName}</option>`;
+                    });
+                });
+        }
+    </script>
+}

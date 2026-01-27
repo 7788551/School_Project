@@ -1,0 +1,87 @@
+﻿@model EditAccountant
+
+@{
+    ViewData["Title"] = "Edit Accountant";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<form asp-action="EditAccountant"
+      method="post"
+      enctype="multipart/form-data">
+
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="UserId" />
+    <input type="hidden" asp-for="SessionId" />
+    <input type="hidden" asp-for="ExistingAccountantImage" />
+
+    <div class="mb-3">
+        <label>Academic Session</label>
+        <input class="form-control" value="@Model.SessionName" readonly />
+    </div>
+
+    <div class="mb-3">
+        <label>Name</label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Email</label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Phone</label>
+        <input asp-for="PhoneNumber" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Gender</label>
+        <select asp-for="Gender" class="form-control">
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label>Date of Birth</label>
+        <input asp-for="DateOfBirth" type="date" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Joining Date</label>
+        <input asp-for="JoiningDate" type="date" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Designation</label>
+        <input asp-for="Designation" class="form-control" />
+    </div>
+
+    <!-- =========================
+         IMAGE SECTION
+         ========================= -->
+   
+
+    @if (!string.IsNullOrEmpty(Model.ExistingAccountantImage))
+    {
+        <div class="mb-3">
+            <label>Current Image</label><br />
+            <img src="~/images/Accountantimage/@Model.ExistingAccountantImage"
+                 alt="Accountant Image"
+                 style="max-height:120px;border:1px solid #ccc;padding:5px;" />
+        </div>
+    }
+
+    <div class="mb-3">
+        <label>Profile Image</label>
+        <input asp-for="AccountantImage"
+               type="file"
+               class="form-control"
+               accept="image/*" />
+    </div>
+
+    <button class="btn btn-success">Update</button>
+    <a asp-action="Accountant" class="btn btn-secondary">Cancel</a>
+</form>

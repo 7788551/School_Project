@@ -1,0 +1,286 @@
+﻿@model AddTeacher
+
+@{
+    ViewData["Title"] = "Add Teacher";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<style>
+    h2 {
+        margin-bottom: 20px;
+    }
+
+    .row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 15px;
+    }
+
+    .col {
+        flex: 1;
+    }
+
+    label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    }
+
+    .text-danger {
+        color: red;
+        font-size: 13px;
+    }
+
+    .btn {
+        padding: 10px 18px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        margin-left: 10px;
+    }
+</style>
+<!-- Page Header Start -->
+<div class="page-header bg-section dark-section parallaxie">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <!-- Page Header Box Start -->
+                <div class="page-header-box">
+                    <h1 class="text-anime-style-3" data-cursor="-opaque">Add Teacher</h1>
+                    <nav class="wow fadeInUp">
+                        <ol class="breadcrumb">
+                            <!-- <li class="breadcrumb-item"><a href="index-2.html">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Contact us</li> -->
+                        </ol>
+                    </nav>
+                </div>
+                <!-- Page Header Box End -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page Header End -->
+<div class="container-fluid">
+    <h2>Add Teacher</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <p style="color:green">@TempData["Success"]</p>
+    }
+
+
+    <form asp-controller="Admin"
+          asp-action="AddTeacher"
+          method="post"
+          enctype="multipart/form-data"
+          id="teacherForm">
+
+        @Html.AntiForgeryToken()
+
+        <!-- ===============================
+             ACADEMIC SESSION (AUTO-FETCHED)
+        =============================== -->
+        <div class="row">
+            <div class="col">
+                <label>Academic Session</label>
+                <input type="text" id="sessionName" readonly />
+                <input type="hidden" asp-for="SessionId" id="SessionId" />
+                <span asp-validation-for="SessionId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <!-- ===============================
+             BASIC DETAILS
+        =============================== -->
+
+
+        <div class="row">
+
+            <div class="col">
+                <label>Teacher Image</label>
+                <input asp-for="TeacherImage" type="file" accept="image/*" />
+                <span asp-validation-for="TeacherImage" class="text-danger"></span>
+            </div>
+            <div class="col">
+                <label>Name</label>
+                <input asp-for="Name" placeholder="Teacher Name" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="col">
+                <label>Date of Birth</label>
+                <input asp-for="DateOfBirth" type="date" />
+                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+            </div>
+            <div class="col">
+                <label>Gender</label>
+                <select asp-for="Gender" class="form-control" required>
+                    <option value="">Select Gender</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                </select>
+            </div>
+            <div class="col">
+                <label>Joining Date</label>
+                <input asp-for="JoiningDate" type="date" />
+            </div>
+        </div>
+
+        <!-- ===============================
+             PROFESSIONAL DETAILS
+        =============================== -->
+        <div class="row">
+            <div class="col">
+                <label>Qualification</label>
+                <input asp-for="Qualification" />
+            </div>
+
+            <div class="col">
+                <label>Experience (Years)</label>
+                <input asp-for="ExperienceYears" type="number" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label>Designation</label>
+                <input asp-for="Designation" />
+            </div>
+
+            <div class="col">
+                <label>Teacher Type</label>
+                <select asp-for="TeacherTypeId" id="TeacherTypeId">
+                    <option value="">-- Select Teacher Type --</option>
+                </select>
+                <span asp-validation-for="TeacherTypeId" class="text-danger"></span>
+            </div>
+
+            <div class="col">
+                <label>Subject</label>
+                <input asp-for="Subject" />
+            </div>
+        </div>
+
+        <!-- ===============================
+             CONTACT DETAILS
+        =============================== -->
+        <div class="row">
+
+            <div class="col">
+                <label>Email</label>
+                <input asp-for="Email" type="email" placeholder="teacher@email.com" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+
+            <div class="col">
+                <label>Phone Number</label>
+                <input asp-for="PhoneNumber" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+
+            <div class="col">
+                <label>Pincode</label>
+                <input asp-for="Pincode" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label>Address Line 1</label>
+                <input asp-for="AddressLine1" />
+            </div>
+
+            <div class="col">
+                <label>Address Line 2</label>
+                <input asp-for="AddressLine2" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label>City</label>
+                <input asp-for="City" />
+            </div>
+
+            <div class="col">
+                <label>State</label>
+                <input asp-for="State" />
+            </div>
+        </div>
+
+        <!-- ===============================
+             BUTTONS
+        =============================== -->
+        <div style="margin-top:20px;">
+            <button type="submit" class="btn btn-primary">Submit</button>
+            @* <a asp-action="Teacher" class="btn btn-secondary">Cancel</a> *@
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            loadCurrentSession();
+            loadTeacherTypes();
+        });
+
+        // ============================
+        // LOAD CURRENT SESSION
+        // ============================
+        function loadCurrentSession() {
+            fetch('/Admin/GetCurrentSession')
+                .then(res => res.json())
+                .then(data => {
+                    console.log("Session API:", data);
+
+                    if (!data || !data.sessionId) {
+                        alert("No active academic session found");
+                        return;
+                    }
+
+                    document.getElementById("SessionId").value = data.sessionId;
+                    document.getElementById("sessionName").value = data.sessionName;
+                })
+                .catch(err => console.error("Session Error:", err));
+        }
+
+        // ============================
+        // LOAD TEACHER TYPES
+        // ============================
+        function loadTeacherTypes() {
+            fetch('/Admin/GetTeacherTypes') // ⚠️ VERIFY CONTROLLER NAME
+                .then(res => res.json())
+                .then(data => {
+                    console.log("Teacher Types:", data);
+
+                    let ddl = document.getElementById("TeacherTypeId");
+                    ddl.innerHTML = '<option value="">-- Select Teacher Type --</option>';
+
+                    data.forEach(x => {
+                        ddl.innerHTML +=
+                            `<option value="${x.teacherTypeId}">${x.typeName}</option>`;
+                    });
+                })
+                .catch(err => console.error("TeacherType Error:", err));
+        }
+    </script>
+}

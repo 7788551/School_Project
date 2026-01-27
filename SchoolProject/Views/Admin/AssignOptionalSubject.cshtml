@@ -1,0 +1,123 @@
+﻿@{
+    ViewData["Title"] = "Assign Optional Subject";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h2>Assign Optional Subject to Student</h2>
+
+<hr />
+
+<!-- 🔍 SEARCH FORM -->
+<form asp-action="AssignOptionalSubject" method="post">
+    <div class="form-group">
+        <label>Admission Number</label>
+        <input type="text"
+               name="admissionNumber"
+               class="form-control"
+               value="@ViewBag.AdmissionNumber"
+               placeholder="Enter Admission Number" />
+    </div>
+
+    <br />
+    <button type="submit" class="btn btn-primary">
+        Search Student
+    </button>
+</form>
+
+<br />
+
+<!-- ❌ ERROR MESSAGE -->
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">
+        @ViewBag.Error
+    </div>
+}
+
+<!-- 👤 STUDENT DETAILS + OPTIONAL SUBJECTS -->
+@if (ViewBag.StudentId != null)
+{
+    <hr />
+
+    <h4>Student Details</h4>
+
+    <table class="table table-bordered w-50">
+        <tr>
+            <th>Student Name</th>
+            <td>@ViewBag.StudentName</td>
+        </tr>
+        <tr>
+            <th>Admission Number</th>
+            <td>@ViewBag.AdmissionNumber</td>
+        </tr>
+        <tr>
+            <th>Class</th>
+            <td>@ViewBag.ClassName</td>
+        </tr>
+        <tr>
+            <th>Section</th>
+            <td>@ViewBag.SectionName</td>
+        </tr>
+    </table>
+
+    <h4>Optional Subjects</h4>
+
+    <form asp-action="SaveStudentOptionalSubjects" method="post">
+        <input type="hidden" name="studentId" value="@ViewBag.StudentId" />
+
+        @{
+            var optionalSubjects = ViewBag.OptionalSubjects as System.Data.DataTable;
+            var assignedIds = ViewBag.AssignedSubjectIds as List<int>;
+        }
+
+        @if (optionalSubjects != null && optionalSubjects.Rows.Count > 0)
+        {
+            foreach (System.Data.DataRow row in optionalSubjects.Rows)
+            {
+                int optionalSubjectId = Convert.ToInt32(row["OptionalSubjectId"]);
+                string optionalSubjectName = row["OptionalSubjectName"]?.ToString();
+
+                bool isChecked = assignedIds != null && assignedIds.Contains(optionalSubjectId);
+
+                <div class="form-check mb-1">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           name="selectedOptionalSubjectIds"
+                           value="@optionalSubjectId"
+                           @(isChecked ? "checked" : "") />
+
+                    <label class="form-check-label">
+                        @optionalSubjectName
+                    </label>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-muted">
+                No optional subjects found for current session.
+            </p>
+        }
+
+        <br />
+        <button type="submit" class="btn btn-success">
+            Save Optional Subjects
+        </button>
+    </form>
+}
+
+<!-- ✅ SUCCESS MESSAGE -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success mt-3">
+        @TempData["Success"]
+    </div>
+}
+
+<!-- ❌ ERROR MESSAGE -->
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger mt-3">
+        @TempData["Error"]
+    </div>
+}

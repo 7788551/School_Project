@@ -1,0 +1,188 @@
+﻿@{
+    ViewData["Title"] = "Student Fee Details";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <h4 class="mb-3">Student Fee Details</h4>
+
+    <!-- 🔍 SEARCH SECTION -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-action="SearchStudentByAdmission" method="post" class="row g-3 align-items-end">
+
+                <div class="col-md-4">
+                    <label class="form-label">Admission Number</label>
+                    <input type="text"
+                           name="admissionNumber"
+                           class="form-control"
+                           placeholder="Enter Admission Number"
+                           required />
+                </div>
+
+                <!-- SESSION (AUTO-LOADED) -->
+                <div class="col-md-4">
+                    <label class="form-label">Academic Session</label>
+                    <input type="text" id="SessionName" class="form-control" readonly />
+                    <input type="hidden" id="SessionId" name="sessionId" />
+                </div>
+
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search me-1"></i> Search
+                    </button>
+                </div>
+
+            </form>
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger mt-2 mb-0">
+                    @TempData["Error"]
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- 👤 STUDENT BASIC DETAILS -->
+    @if (!string.IsNullOrEmpty(ViewBag.StudentName))
+    {
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h6 class="text-primary mb-3">Student Information</h6>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Name:</strong><br />
+                        @ViewBag.StudentName
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Admission No:</strong><br />
+                        @ViewBag.AdmissionNumber
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Class:</strong><br />
+                        @ViewBag.ClassName
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Section:</strong><br />
+                        @ViewBag.SectionName
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- 📋 MONTH-WISE LEDGER -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <h6 class="mb-3 text-primary">Month-wise Fee Ledger</h6>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle">
+                    <thead class="table-primary">
+                        <tr>
+                            <th style="width:5%">#</th>
+                            <th style="width:12%">Month</th>
+                            <th>Fee Head</th>
+                            <th style="width:12%" class="text-end">Due (₹)</th>
+                            <th style="width:12%" class="text-end">Paid (₹)</th>
+                            <th style="width:12%" class="text-end">Balance (₹)</th>
+                            <th style="width:10%" class="text-center">Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @{
+                            int i = 1;
+                            decimal totalDue = 0;
+                            decimal totalPaid = 0;
+                            decimal totalBalance = 0;
+                        }
+
+                        @if (ViewBag.MonthlyLedger != null && ViewBag.MonthlyLedger.Count > 0)
+                        {
+                            foreach (var item in ViewBag.MonthlyLedger)
+                            {
+                                bool isCleared = item.Balance == 0;
+
+                                totalDue += item.DueAmount;
+                                totalPaid += item.PaidAmount;
+                                totalBalance += item.Balance;
+
+                                <tr>
+                                    <td>@i</td>
+                                    <td>@item.FeeMonth</td>
+                                    <td>@item.FeeHeadName</td>
+                                    <td class="text-end">₹ @item.DueAmount.ToString("0.00")</td>
+                                    <td class="text-end">₹ @item.PaidAmount.ToString("0.00")</td>
+                                    <td class="text-end fw-semibold @(isCleared ? "text-success" : "text-danger")">
+                                        ₹ @item.Balance.ToString("0.00")
+                                    </td>
+                                    <td class="text-center">
+                                        @if (isCleared)
+                                        {
+                                            <span class="badge bg-success">Cleared</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        }
+                                    </td>
+                                </tr>
+
+                                i++;
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">
+                                    Please search a student using Admission Number.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                    <tfoot>
+                        <tr class="table-success fw-bold">
+                            <td colspan="3" class="text-end">Totals</td>
+                            <td class="text-end">₹ @totalDue.ToString("0.00")</td>
+                            <td class="text-end">₹ @totalPaid.ToString("0.00")</td>
+                            <td class="text-end">₹ @totalBalance.ToString("0.00")</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- ============================ -->
+<!-- LOAD CURRENT SESSION SCRIPT -->
+<!-- ============================ -->
+<script>
+    function loadCurrentSession() {
+        fetch('/Admin/GetCurrentSession')
+            .then(res => res.json())
+            .then(data => {
+                if (!data) {
+                    alert('No academic session found');
+                    return;
+                }
+
+                document.getElementById('SessionId').value = data.sessionId;
+                document.getElementById('SessionName').value = data.sessionName;
+            })
+            .catch(err => console.error(err));
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        loadCurrentSession();
+    });
+</script>

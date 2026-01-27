@@ -1,0 +1,60 @@
+﻿@model SchoolProject.Models.ClassFeeStructure
+
+@{
+    ViewData["Title"] = "Edit Class Fee";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">Edit Class Fee</h5>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="EditClassFee" asp-controller="Admin" method="post">
+
+                <input type="hidden" name="structureId" value="@Model.StructureId" />
+
+                <div class="mb-3">
+                    <label class="form-label">Session</label>
+                    <input type="text" class="form-control" value="@Model.SessionName" readonly />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Class</label>
+                    <input type="text" class="form-control" value="@Model.ClassName" readonly />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Fee Head</label>
+                    <input type="text" class="form-control" value="@Model.FeeHeadName" readonly />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Amount</label>
+                    <input type="number"
+                           name="amount"
+                           class="form-control"
+                           step="0.01"
+                           min="0"
+                           value="@Model.Amount"
+                           required />
+                </div>
+
+               
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save me-1"></i> Update
+                    </button>
+
+                    <a asp-action="ClassFeeStructure" asp-controller="Admin" class="btn btn-secondary ms-2">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

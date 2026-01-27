@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Add FeeHeads";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";   // change layout if needed
+}
+
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Add New Fee Head</h5>
+                </div>
+
+                <div class="card-body">
+                    <form asp-action="AddFeeHead" asp-controller="Admin" method="post">
+
+                        <div class="mb-3">
+                            <label class="form-label">Fee Head Name</label>
+                            <input type="text"
+                                   name="feeHeadName"
+                                   class="form-control"
+                                   placeholder="e.g. Tuition Fee, Exam Fee, Admission Fee"
+                                   required />
+                        </div>
+
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> Add Fee Head
+                        </button>
+
+                        <a asp-action="FeeHeads" asp-controller="Admin" class="btn btn-secondary ms-2">
+                            Cancel
+                        </a>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

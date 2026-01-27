@@ -1,0 +1,160 @@
+﻿@{
+    ViewData["Title"] = "Assign Class Fee";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Assign Fee to Class</h5>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="AssignClassFee" asp-controller="Admin" method="post">
+
+                <!-- ========================= -->
+                <!-- CURRENT SESSION (AUTO) -->
+                <!-- ========================= -->
+                <div class="mb-3">
+                    <label class="form-label">Academic Session</label>
+                    <input type="hidden" id="sessionId" name="sessionId" />
+                    <input type="text" id="sessionName" class="form-control" readonly />
+                </div>
+
+                <!-- ========================= -->
+                <!-- CLASS -->
+                <!-- ========================= -->
+                <div class="mb-3">
+                    <label class="form-label">Class</label>
+                    <select class="form-select" name="classId" id="classId" required>
+                        <option value="">-- Select Class --</option>
+                    </select>
+                </div>
+
+                <!-- ========================= -->
+                <!-- FEE HEAD -->
+                <!-- ========================= -->
+                <div class="mb-3">
+                    <label class="form-label">Fee Head</label>
+                    <select class="form-select" name="feeHeadId" id="feeHeadDropdown" required>
+                        <option value="">-- Select Fee Head --</option>
+                    </select>
+                </div>
+
+                <!-- ========================= -->
+                <!-- AMOUNT -->
+                <!-- ========================= -->
+                <div class="mb-3">
+                    <label class="form-label">Amount</label>
+                    <input type="number"
+                           class="form-control"
+                           name="amount"
+                           step="0.01"
+                           min="0"
+                           placeholder="Enter amount"
+                           required />
+                </div>
+
+                <!-- ========================= -->
+                <!-- BUTTONS -->
+                <!-- ========================= -->
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save me-1"></i> Assign Fee
+                    </button>
+
+                    <a asp-action="ClassFeeStructure" asp-controller="Admin" class="btn btn-secondary ms-2">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ========================= -->
+<!-- SCRIPTS -->
+<!-- ========================= -->
+@section Scripts {
+    <script>
+
+        // ============================
+        // LOAD CURRENT SESSION
+        // ============================
+        function loadCurrentSession() {
+            fetch('/Admin/GetCurrentSession')
+                .then(response => {
+                    if (!response.ok) throw new Error('Session not found');
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data) {
+                        alert('No active academic session found');
+                        return;
+                    }
+
+                    // Set hidden + display values
+                    document.getElementById('sessionId').value = data.sessionId;
+                    document.getElementById('sessionName').value = data.sessionName;
+
+                    // Load classes based on this session
+                    loadClasses(data.sessionId);
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Failed to load academic session');
+                });
+        }
+
+        // ============================
+        // LOAD CLASSES BY SESSION
+        // ============================
+        function loadClasses(sessionId) {
+            fetch(`/Admin/GetClassesBySession?sessionId=${sessionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const classSelect = document.getElementById('classId');
+                    classSelect.innerHTML = '<option value="">-- Select Class --</option>';
+
+                    data.forEach(c => {
+                        const option = document.createElement('option');
+                        option.value = c.classId;
+                        option.textContent = c.className;
+                        classSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Failed to load classes');
+                });
+        }
+
+        // ============================
+        // LOAD FEE HEADS
+        // ============================
+        function loadFeeHeads() {
+            fetch('/Admin/FeeHeads', { headers: { 'Accept': 'application/json' } })
+                .then(response => response.json())
+                .then(data => {
+                    const ddl = document.getElementById("feeHeadDropdown");
+                    ddl.innerHTML = '<option value="">-- Select Fee Head --</option>';
+
+                    data.forEach(item => {
+                        ddl.innerHTML += `<option value="${item.feeHeadId}">${item.feeHeadName}</option>`;
+                    });
+                })
+                .catch(() => alert("Unable to load Fee Heads."));
+        }
+
+        // ============================
+        // PAGE LOAD
+        // ============================
+        document.addEventListener('DOMContentLoaded', function () {
+            loadCurrentSession();   // 🔥 loads session + classes
+            loadFeeHeads();
+        });
+
+    </script>
+}

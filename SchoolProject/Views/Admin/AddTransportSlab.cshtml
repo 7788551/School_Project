@@ -1,0 +1,98 @@
+﻿@{
+    ViewData["Title"] = "Add Transport Slab";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Add Transport Slab</h4>
+        <a asp-action="TransportSlabs" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form asp-action="AddTransportSlab" method="post" onsubmit="return validateSlabForm();">
+
+                <!-- From KM -->
+                <div class="mb-3">
+                    <label class="form-label">From Distance (KM)</label>
+                    <input type="number" step="0.1" min="0" id="FromKM" name="fromKM"
+                           class="form-control" placeholder="e.g. 0" required />
+                </div>
+
+                <!-- To KM -->
+                <div class="mb-3">
+                    <label class="form-label">To Distance (KM)</label>
+                    <input type="number" step="0.1" min="0" id="ToKM" name="toKM"
+                           class="form-control" placeholder="e.g. 5" required />
+                </div>
+
+                <!-- Amount -->
+                <div class="mb-3">
+                    <label class="form-label">Transport Fee Amount (₹)</label>
+                    <input type="number" step="0.01" min="0" id="Amount" name="amount"
+                           class="form-control" placeholder="e.g. 800" required />
+                </div>
+
+                <!-- Validation Message -->
+                <div id="errorMsg" class="text-danger mb-3" style="display:none;"></div>
+
+                <!-- Buttons -->
+                <div class="d-flex justify-content-end">
+                    <a asp-action="TransportSlabs" class="btn btn-outline-secondary me-2">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle me-1"></i> Save Slab
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- ============================ -->
+<!-- FRONTEND VALIDATION SCRIPT -->
+<!-- ============================ -->
+<script>
+    function validateSlabForm() {
+
+        var fromKM = parseFloat(document.getElementById("FromKM").value);
+        var toKM = parseFloat(document.getElementById("ToKM").value);
+        var amount = parseFloat(document.getElementById("Amount").value);
+        var errorMsg = document.getElementById("errorMsg");
+
+        errorMsg.style.display = "none";
+        errorMsg.innerText = "";
+
+        // Check required
+        if (isNaN(fromKM) || isNaN(toKM) || isNaN(amount)) {
+            errorMsg.innerText = "All fields are required.";
+            errorMsg.style.display = "block";
+            return false;
+        }
+
+        // Check valid ranges
+        if (fromKM < 0 || toKM < 0 || amount < 0) {
+            errorMsg.innerText = "Values cannot be negative.";
+            errorMsg.style.display = "block";
+            return false;
+        }
+
+        // From must be less than To
+        if (fromKM >= toKM) {
+            errorMsg.innerText = "From KM must be less than To KM.";
+            errorMsg.style.display = "block";
+            return false;
+        }
+
+        return true; // submit form
+    }
+</script>

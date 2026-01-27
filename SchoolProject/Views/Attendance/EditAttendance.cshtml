@@ -1,0 +1,67 @@
+﻿@model SchoolProject.Models.Attendance
+
+@{
+    ViewData["Title"] = "EditAttendance";
+    Layout = "~/Views/Shared/AdminLayout.cshtml"; // use your layout
+}
+@* <!-- Page Header Start -->
+<div class="page-header bg-section dark-section parallaxie">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <!-- Page Header Box Start -->
+                <div class="page-header-box">
+                    <h1 class="text-anime-style-3" data-cursor="-opaque">Edit Attendance</h1>
+                    <nav class="wow fadeInUp">
+                        <ol class="breadcrumb">
+                            <!-- <li class="breadcrumb-item"><a href="index-2.html">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Contact us</li> -->
+                        </ol>
+                    </nav>
+                </div>
+                <!-- Page Header Box End -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Page Header End --> *@
+<h3>Edit Attendance</h3>
+
+<form asp-action="EditAttendance" method="post">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" name="attendanceId" value="@ViewBag.AttendanceId" />
+    <input type="hidden" asp-for="StudentId" />
+    <input type="hidden" asp-for="AttendanceDate" />
+
+    <div class="mb-3">
+        <label class="form-label">Student Name</label>
+        <input type="text" class="form-control" value="@Model.StudentName" readonly />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Attendance Date</label>
+        <input type="text" class="form-control"
+               value="@Model.AttendanceDate.ToString("dd-MM-yyyy")"
+               readonly />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Status</label>
+        <select class="form-select" name="IsPresent">
+            @if (Model.IsPresent)
+            {
+                <option value="true" selected>Present</option>
+                <option value="false">Absent</option>
+            }
+            else
+            {
+                <option value="true">Present</option>
+                <option value="false" selected>Absent</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-success">Update Attendance</button>
+    <a asp-action="AttendanceList" class="btn btn-secondary">Cancel</a>
+</form>

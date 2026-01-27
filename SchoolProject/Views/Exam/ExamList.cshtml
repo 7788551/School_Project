@@ -1,0 +1,76 @@
+﻿@model List<SchoolProject.Models.Exam>
+
+@{
+    ViewData["Title"] = "Exam List";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h2 class="mb-4">Exam List</h2>
+
+<div class="mb-3 text-end">
+    <a asp-action="CreateExam"
+       asp-controller="Exam"
+       class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> Create New Exam
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Exam Name</th>
+                        <th style="width:300px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var exam in Model)
+                        {
+                            <tr>
+                                <td>@exam.ExamName</td>
+
+                                <td>
+                                    <!-- Assign Subjects (Marks / Grade config) -->
+                                    <a asp-action="AssignSubjects"
+                                       asp-controller="Exam"
+                                       asp-route-examId="@exam.ExamId"
+                                       class="btn btn-sm btn-info me-2">
+                                        Assign Subjects
+                                    </a>
+
+                                    <a asp-action="ViewExamSubjects"
+                                       asp-controller="Exam"
+                                       asp-route-examId="@exam.ExamId"
+                                       class="btn btn-sm btn-secondary me-1">
+                                        View Subjects
+                                    </a>
+
+
+                                    <!-- Enter Marks (Admin) -->
+                                    <a asp-action="Index"
+                                       asp-controller="MarksEntry"
+                                       asp-route-examId="@exam.ExamId"
+                                       class="btn btn-sm btn-success">
+                                        Enter Marks
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="2" class="text-center text-muted">
+                                No exams found.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

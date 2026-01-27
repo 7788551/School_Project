@@ -1,0 +1,213 @@
+﻿
+
+@model StudentFeeCollect
+@{
+    ViewData["Title"] = "Collect Fee";
+    Layout = "~/Views/Shared/AccountantLayout.cshtml";
+}
+
+<div class="mt-4">
+
+    <!-- ================= HEADER ================= -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Collect Fee</h4>
+
+        <div class="d-flex align-items-center">
+            <label class="me-2 fw-semibold text-muted">Session:</label>
+            <input type="text"
+                   class="form-control form-control-sm text-center"
+                   value="@Model?.SessionName"
+                   readonly
+                   style="width:120px;" />
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <!-- ================= SEARCH STUDENT ================= -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <h6>Search Student</h6>
+
+            <form asp-action="SearchStudentByAdmission" method="post" class="row g-2 align-items-end">
+                @Html.AntiForgeryToken()
+
+                <div class="col-md-6">
+                    <label class="form-label">Admission Number</label>
+                    <input type="text"
+                           name="admissionNumber"
+                           class="form-control"
+                           placeholder="Enter Admission No"
+                           required />
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model != null && Model.StudentId > 0)
+    {
+        <form asp-action="CollectFee" method="post">
+            @Html.AntiForgeryToken()
+
+            <!-- 🔒 Required hidden fields -->
+            <input type="hidden" name="studentId" value="@Model.StudentId" />
+            <input type="hidden" name="sessionId" value="@Model.SessionId" />
+            <input type="hidden" name="classId" value="@Model.ClassId" />
+
+            <!-- ================= STUDENT DETAILS ================= -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6>Student Details</h6>
+                    <div class="row">
+                        <div class="col-md-4"><b>Name:</b> @Model.StudentName</div>
+                        <div class="col-md-4"><b>Class:</b> @Model.ClassName - @Model.SectionName</div>
+                        <div class="col-md-4"><b>Admission No:</b> @Model.AdmissionNumber</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= OUTSTANDING SUMMARY ================= -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6>Outstanding Summary</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <b>Total Outstanding:</b> ₹
+                            <span id="outstanding">@Model.Outstanding.ToString("0.00")</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= MONTH-WISE LEDGER ================= -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6>Month-wise Pending Fees</h6>
+
+                    @if (Model.MonthlyLedger != null && Model.MonthlyLedger.Any(x => x.Balance > 0))
+                    {
+                        <table class="table table-bordered table-striped align-middle">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th style="width:140px;">Month</th>
+                                    <th>Fee Head</th>
+                                    <th class="text-end" style="width:120px;">Due</th>
+                                    <th class="text-end" style="width:120px;">Paid</th>
+                                    <th class="text-end" style="width:120px;">Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.MonthlyLedger.Where(x => x.Balance > 0))
+                                {
+                                    <tr>
+                                        <td>@item.FeeMonth</td>
+                                        <td>@item.FeeHeadName</td>
+                                        <td class="text-end">₹ @item.DueAmount.ToString("0.00")</td>
+                                        <td class="text-end">₹ @item.PaidAmount.ToString("0.00")</td>
+                                        <td class="text-end fw-bold text-danger">
+                                            ₹ @item.Balance.ToString("0.00")
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="alert alert-success mb-0">
+                            No outstanding fees for this student.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- ================= PAYMENT ================= -->
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6>Payment</h6>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-3">
+                            <label class="form-label">Concession (Discount)</label>
+                            <input type="number"
+                                   step="0.01"
+                                   id="concessionAmount"
+                                   name="concessionAmount"
+                                   class="form-control"
+                                   value="0"
+                                   min="0" />
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Paid Amount</label>
+                            <input type="number"
+                                   step="0.01"
+                                   name="paidAmount"
+                                   class="form-control"
+                                   required />
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Payment Mode</label>
+                            <select name="paymentMode" class="form-select" required>
+                                <option value="">-- Select --</option>
+                                <option>Cash</option>
+                                <option>Online</option>
+                                <option>UPI</option>
+                                <option>Cheque</option>
+                                <option>Bank Transfer</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Reference / Txn No</label>
+                            <input type="text" name="paymentRef" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-end">
+                <button type="submit" class="btn btn-success px-4">
+                    Collect & Generate Receipt
+                </button>
+            </div>
+        </form>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const outstandingEl = document.getElementById("outstanding");
+            const concessionInput = document.getElementById("concessionAmount");
+
+            if (!outstandingEl || !concessionInput) return;
+
+            const originalOutstanding = parseFloat(outstandingEl.innerText) || 0;
+
+            function recalc() {
+                let c = parseFloat(concessionInput.value) || 0;
+                if (c < 0) c = 0;
+                if (c > originalOutstanding) c = originalOutstanding;
+
+                concessionInput.value = c.toFixed(2);
+                outstandingEl.innerText = (originalOutstanding - c).toFixed(2);
+            }
+
+            concessionInput.addEventListener("input", recalc);
+            recalc();
+        });
+    </script>
+}

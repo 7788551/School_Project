@@ -1,4 +1,5 @@
-﻿@{
+﻿
+@{
     Layout = null;
 }
 
@@ -70,7 +71,7 @@
 </head>
 
 <body>
-    <header class="main-header">
+      <header class="main-header">
         <div class="header-sticky bg-section">
             <nav class="navbar navbar-expand-lg">
                 <div class="container">
@@ -80,17 +81,47 @@
                     </a>
 
                     <div class="collapse navbar-collapse main-menu">
-                        <div class="nav-menu-wrapper">
+                        @* <div class="nav-menu-wrapper">
                             <ul class="navbar-nav mr-auto" id="menu">
                                 <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Home</a></li>
                                 <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="About">About Us</a></li>
                                 <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Gallery">Gallery</a></li>
                                 <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Contact">Contact Us</a></li>
                                 <li class="nav-item highlighted-menu">
-                                    <a class="nav-link" asp-controller="Home" asp-action="Enquiry">Book Free Trial</a>
+                                    <a asp-controller="Account"  asp-action="Login" class="btn-default btn-highlighted">Log In</a>
                                 </li>
                             </ul>
+                        </div> *@
+
+
+                        <div class="nav-menu-wrapper">
+                            <ul class="navbar-nav mr-auto" id="menu">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Home" asp-action="About">About Us</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Home" asp-action="Gallery">Gallery</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Home" asp-action="Contact">Contact Us</a>
+                                </li>
+
+                                <!-- Login -->
+                                <li class="nav-item login-mobile-btn">
+                                    <a asp-controller="Account"
+                                       asp-action="Login"
+                                       class="nav-link login-btn">
+                                        Log In
+                                    </a>
+                                </li>
+
+
+                            </ul>
                         </div>
+
 
                         <div class="header-btn">
                             <a asp-controller="Account" asp-action="Login" class="btn-default btn-highlighted">Log In</a>
@@ -103,6 +134,8 @@
             <div class="responsive-menu"></div>
         </div>
     </header>
+
+
 
     <!-- Preloader -->
     <div class="preloader">
@@ -227,7 +260,9 @@
         document.body.style.touchAction = "auto";
 
     </script>
-    @* @RenderSection("Scripts", false) *@
+    
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
     <script>
@@ -253,6 +288,6 @@
             }
         });
     </script>
-
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

@@ -1,0 +1,182 @@
+﻿@model List<SchoolProject.Models.ClassFeeStructure>
+
+@{
+    ViewData["Title"] = "Class Fee Structure";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Class Fee Structure</h4>
+
+        <a asp-action="AssignClassFee" asp-controller="Admin" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Assign New Fee
+        </a>
+    </div>
+
+    <!-- 🔽 FILTER BY CLASS -->
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+            <form method="get" asp-action="ClassFeeStructure" asp-controller="Admin" class="row g-3">
+
+                <div class="col-md-4">
+                    <label class="form-label">Select Class</label>
+                    <select name="classId" id="classDropdown" class="form-select">
+                        <option value="">-- All Classes --</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-funnel"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 📋 TABLE -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <table class="table table-bordered table-striped">
+                <thead class="table-primary">
+                    <tr>
+                        <th>#</th>
+                        <th>Session</th>
+                        <th>Class</th>
+                        <th>Fee Head</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Created Date</th>
+                        <th style="width:220px;">Action</th>   <!-- ✅ Single Action Column -->
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        int i = 1;
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@i</td>
+                                <td>@item.SessionName</td>
+                                <td>@item.ClassName</td>
+                                <td>@item.FeeHeadName</td>
+                                <td>₹ @item.Amount</td>
+
+                                <td>
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Inactive</span>
+                                    }
+                                </td>
+
+                                <td>@item.CreatedDate.ToString("dd-MMM-yyyy")</td>
+
+                                <!-- 🔥 COMBINED ACTION COLUMN -->
+                                <td>
+                                    <!-- ✏️ EDIT -->
+                                    <a asp-action="EditClassFee"
+                                       asp-controller="Admin"
+                                       asp-route-id="@item.StructureId"
+                                       class="btn btn-sm btn-warning me-1">
+                                        Edit
+                                    </a>
+
+                                    <!-- 🔁 ACTIVATE / DEACTIVATE -->
+                                    <a asp-action="ToggleClassFeeStatus"
+                                       asp-controller="Admin"
+                                       asp-route-id="@item.StructureId"
+                                       class="btn btn-sm @(item.IsActive ? "btn-danger" : "btn-success") me-1"
+                                       onclick="return confirm('Are you sure you want to change the status?');">
+                                        @(item.IsActive ? "Deactivate" : "Activate")
+                                    </a>
+
+                                    <!-- 🗑️ DELETE -->
+                                    <a asp-action="DeleteClassFee"
+                                       asp-controller="Admin"
+                                       asp-route-id="@item.StructureId"
+                                       class="btn btn-sm btn-danger"
+                                       onclick="return confirm('Are you sure you want to delete this fee?');">
+                                        Delete
+                                    </a>
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">
+                                No fee structure found for selected class.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+
+@section Scripts {
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                loadCurrentSessionAndClasses();
+            });
+
+            // ============================
+            // LOAD CURRENT SESSION
+            // ============================
+            function loadCurrentSessionAndClasses() {
+                fetch('/Admin/GetCurrentSession')
+                    .then(response => {
+                        if (!response.ok) throw new Error('Session not found');
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (!data) {
+                            alert('No academic session found');
+                            return;
+                        }
+
+                        // Now load classes using this session
+                        loadClasses(data.sessionId);
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert('Failed to load academic session');
+                    });
+            }
+
+            // ============================
+            // LOAD CLASSES BY SESSION
+            // ============================
+            function loadClasses(sessionId) {
+                fetch(`/Admin/GetClassesBySession?sessionId=${sessionId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const ddl = document.getElementById("classDropdown");
+                        ddl.innerHTML = '<option value="">-- All Classes --</option>';
+
+                        data.forEach(item => {
+                            ddl.innerHTML += `<option value="${item.classId}">${item.className}</option>`;
+                        });
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        alert("Unable to load class list.");
+                    });
+            }
+        </script>
+}
+

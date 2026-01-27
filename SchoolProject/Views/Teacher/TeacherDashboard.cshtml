@@ -1,0 +1,377 @@
+﻿@* 
+
+@{
+    ViewData["Title"] = "Dashboard"; Layout = "~/Views/Shared/TeacherLayout.cshtml";
+}
+
+<main class="main-content">
+    <!-- Main Content -->
+    <div  id="mainContent">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+    
+        </div>
+
+        <!-- Greeting Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card greeting-card">
+                    <div class="card-body">
+                        <h1 class="card-title">
+                            <span id="greetingText">Good Day</span>,
+                            <span class="text-white">
+                                @{
+                                    var fullName = User.Identity?.Name;
+                                    var firstName = fullName?.Split(' ')[0];
+                                }
+                                @firstName
+                            </span>!
+                        </h1>
+
+                        <p class="card-text">Have a great day at work.</p>
+
+                        <div class="d-flex align-items-center">
+                            <!-- Academic Year (from JS) -->
+                            <span class="badge bg-light text-dark me-3" id="academicYearBadge">
+                                Academic Year: Loading...
+                            </span>
+
+
+                            <!-- Current Date -->
+                            <span class="badge bg-light text-dark">
+                                Today: <span id="currentDate"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <i class="bi bi-people text-primary mb-3" style="font-size: 2rem;"></i>
+                        <h5 class="card-title">Students</h5>
+                        <div class="number text-primary">142</div>
+                    </div>
+                </div>
+            </div>
+          
+            <div class="col-md-3 col-sm-6">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <i class="bi bi-check-circle text-warning mb-3" style="font-size: 2rem;"></i>
+                        <h5 class="card-title">Attendance</h5>
+                        <div class="number text-warning">94%</div>
+                    </div>
+                </div>
+            </div>
+           
+        </div>
+
+        <div class="row">
+            <!-- Left Column -->
+            <div class="col-lg-8">
+               
+
+                <!-- Attendance -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Attendance</h5>
+                        <select class="form-select form-select-sm w-auto">
+                            <option>This Week</option>
+                            <option>Last Week</option>
+                            <option>This Month</option>
+                        </select>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-3 text-center">
+                                <div class="p-3">
+                                    <h3 class="text-primary">25</h3>
+                                    <p class="mb-0">Present</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="p-3">
+                                    <h3 class="text-danger">2</h3>
+                                    <p class="mb-0">Absent</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="p-3">
+                                    <h3 class="text-warning">1</h3>
+                                    <p class="mb-0">Late</p>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="p-3">
+                                    <h3 class="text-success">94%</h3>
+                                    <p class="mb-0">Rate</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="attendance-chart">
+                            <div class="attendance-bar" style="height: 80%;">
+                                <span>Mon</span>
+                            </div>
+                            <div class="attendance-bar" style="height: 90%;">
+                                <span>Tue</span>
+                            </div>
+                            <div class="attendance-bar" style="height: 75%;">
+                                <span>Wed</span>
+                            </div>
+                            <div class="attendance-bar" style="height: 95%;">
+                                <span>Thu</span>
+                            </div>
+                            <div class="attendance-bar" style="height: 60%;">
+                                <span>Fri</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // ⏰ Time-based greeting
+        const hour = new Date().getHours();
+        let greeting = "Good Day";
+
+        if (hour >= 5 && hour < 12) {
+            greeting = "Good Morning";
+        }
+        else if (hour >= 12 && hour < 17) {
+            greeting = "Good Afternoon";
+        }
+        else if (hour >= 17 && hour < 21) {
+            greeting = "Good Evening";
+        }
+        else {
+            greeting = "Good Night";
+        }
+
+        document.getElementById("greetingText").textContent = greeting;
+
+        // 📅 Current Date
+        const today = new Date();
+        const options = { day: '2-digit', month: 'short', year: 'numeric' };
+        document.getElementById("currentDate").textContent =
+            today.toLocaleDateString('en-GB', options);
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+           fetch('/Admin/GetCurrentSession')
+               .then(response => response.json())
+               .then(data => {
+                   if (data && data.sessionName) {
+                       document.getElementById("academicYearBadge").textContent =
+                           `Academic Year: ${data.sessionName}`;
+                   } else {
+                       document.getElementById("academicYearBadge").textContent =
+                           "Academic Year: Not Set";
+                   }
+               })
+               .catch(error => {
+                   console.error("Error fetching academic year:", error);
+                   document.getElementById("academicYearBadge").textContent =
+                       "Academic Year: Error";
+               });
+
+       });
+
+
+</script> *@
+
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/TeacherLayout.cshtml";
+}
+
+<main class="main-content">
+    <div id="mainContent">
+
+        <!-- Greeting Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card greeting-card">
+                    <div class="card-body">
+                        <h1 class="card-title">
+                            <span id="greetingText">Good Day</span>,
+                            <span class="text-white">
+                                @{
+                                    var fullName = User.Identity?.Name;
+                                    var firstName = fullName?.Split(' ')[0];
+                                }
+                                @firstName
+                            </span>!
+                        </h1>
+
+                        <p class="card-text">Have a great day at work.</p>
+
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-light text-dark me-3" id="academicYearBadge">
+                                Academic Year: Loading...
+                            </span>
+
+                            <span class="badge bg-light text-dark">
+                                Today: <span id="currentDate"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN ROW : LEFT CARDS + RIGHT CHART -->
+        <div class="row mb-4">
+
+            <!-- LEFT SIDE : STUDENTS + ATTENDANCE CARDS -->
+            <div class="col-lg-6">
+                <div class="row">
+                    <div class="col-md-6 col-sm-6 mb-3">
+                        <div class="card stat-card h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-people text-primary mb-3" style="font-size:2rem;"></i>
+                                <h5 class="card-title">Students</h5>
+                                <div class="number text-primary">142</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 col-sm-6 mb-3">
+                        <div class="card stat-card h-100">
+                            <div class="card-body text-center">
+                                <i class="bi bi-check-circle text-warning mb-3" style="font-size:2rem;"></i>
+                                <h5 class="card-title">Attendance</h5>
+                                <div class="number text-warning">94%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT SIDE : ATTENDANCE CHART -->
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Attendance Overview</h5>
+                        <select class="form-select form-select-sm w-auto">
+                            <option>This Week</option>
+                            <option>Last Week</option>
+                            <option>This Month</option>
+                        </select>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="attendance-chart">
+                            <div class="attendance-bar" style="height:80%">
+                                <span>Mon</span>
+                            </div>
+                            <div class="attendance-bar" style="height:90%">
+                                <span>Tue</span>
+                            </div>
+                            <div class="attendance-bar" style="height:75%">
+                                <span>Wed</span>
+                            </div>
+                            <div class="attendance-bar" style="height:95%">
+                                <span>Thu</span>
+                            </div>
+                            <div class="attendance-bar" style="height:60%">
+                                <span>Fri</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<!-- ===================== SCRIPTS ===================== -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // Greeting
+        const hour = new Date().getHours();
+        let greeting = "Good Day";
+
+        if (hour >= 5 && hour < 12) greeting = "Good Morning";
+        else if (hour >= 12 && hour < 17) greeting = "Good Afternoon";
+        else if (hour >= 17 && hour < 21) greeting = "Good Evening";
+        else greeting = "Good Night";
+
+        document.getElementById("greetingText").textContent = greeting;
+
+        // Current Date
+        const today = new Date();
+        const options = { day: '2-digit', month: 'short', year: 'numeric' };
+        document.getElementById("currentDate").textContent =
+            today.toLocaleDateString('en-GB', options);
+
+        // Academic Session
+        fetch('/Admin/GetCurrentSession')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById("academicYearBadge").textContent =
+                    data?.sessionName
+                        ? `Academic Year: ${data.sessionName}`
+                        : "Academic Year: Not Set";
+            })
+            .catch(() => {
+                document.getElementById("academicYearBadge").textContent =
+                    "Academic Year: Error";
+            });
+    });
+</script>
+
+<!-- ===================== OPTIONAL CSS ===================== -->
+<style>
+    /* FORCE CHART TO SHOW ON MOBILE */
+    .attendance-chart {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 180px; /* 🔥 KEY FIX */
+        height: 180px;
+    }
+
+    .attendance-bar {
+        flex: 1;
+        background: linear-gradient(180deg, #4e73df, #224abe);
+        border-radius: 6px;
+        position: relative;
+        min-height: 20px; /* 🔥 prevents collapse */
+    }
+
+        .attendance-bar span {
+            position: absolute;
+            bottom: -22px;
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            color: #555;
+        }
+
+    /* MOBILE FIX */
+    @@media (max-width: 768px) {
+        .attendance-chart
+
+    {
+        height: 160px;
+        min-height: 160px;
+    }
+
+    }
+</style>

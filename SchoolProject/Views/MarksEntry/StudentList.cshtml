@@ -1,0 +1,50 @@
+﻿@model List<SchoolProject.Models.Student>
+@{
+    Layout = "~/Views/Shared/TeacherLayout.cshtml";
+}
+
+<h3>Students – Enter Marks</h3>
+
+<input type="text"
+       class="form-control mb-3"
+       placeholder="Search by Admission Number"
+       onkeyup="filterStudents(this.value)" />
+
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Admission No</th>
+            <th>Name</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="studentTable">
+        @foreach (var s in Model)
+        {
+            <tr>
+                <td>@s.AdmissionNumber</td>
+                <td>@s.Name</td>
+                <td>
+                    <a asp-action="EnterMarks"
+                       asp-route-examId="@ViewBag.ExamId"
+                       asp-route-studentId="@s.StudentId"
+                       class="btn btn-sm btn-success">
+                        Enter Marks
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    function filterStudents(val) {
+        val = val.toUpperCase();
+        document.querySelectorAll("#studentTable tr").forEach(r => {
+            r.style.display =
+                r.cells[0].innerText.toUpperCase().includes(val)
+                    ? "" : "none";
+        });
+    }
+</script>
+ 

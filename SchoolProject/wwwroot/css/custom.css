@@ -762,7 +762,7 @@ header.main-header .header-sticky.active{
 	color: var(--white-color);
 	line-height: normal;
 	margin: 0;
-	border-radius: 0 !important;
+	border-radius: 7px !important;
 	transition: all 0.3s ease-in-out;
 }
 
@@ -804,19 +804,21 @@ header.main-header .header-sticky.active{
 /***         04. Hero css	      ***/
 /************************************/
 
-.hero{
+.hero {
 	position: relative;
 	/* background-image: url('../images/hero-bg.jpg'); */
-	background-image: url('../images/School-images/Schoolimages\ \(31\).jpeg');
+
+	background-image: url('../images/school-images/schoolbackgroundimage.jpeg');
+/*	background-image: url('../images/School-images/Schoolimages\ \(31\).jpeg');*/
 	background-repeat: no-repeat;
 	background-position: center center;
 	background-size: cover;
-    padding: 195px 0 80px;
-    min-height: 100vh;
-    margin-top: 20px;
-    align-content: end;
-    overflow: hidden;
-    z-index: 1;
+	padding: 195px 0 80px;
+	min-height: 100vh;
+	margin-top: 20px;
+	align-content: end;
+	overflow: hidden;
+	z-index: 1;
 }
 
 .hero::before{
@@ -2284,14 +2286,15 @@ header.main-header .header-sticky.active{
 /***     17. About Us Page css    ***/
 /************************************/
 
-.page-header{
-    position: relative;
-    background: url('../images/School-images/Schoolimages\ \(31\).jpeg') no-repeat;
-    background-position: center center;
-    background-size: cover;
+.page-header {
+	position: relative;
+	background: url('../images/school-images/schoolbackgroundimage.jpeg') no-repeat;
+/*	background: url('../images/School-images/Schoolimages\ \(31\).jpeg') no-repeat;*/
+	background-position: center center;
+	background-size: cover;
 	padding: 265px 0 150px;
 	margin-top: 20px;
-    overflow: hidden;
+	overflow: hidden;
 }
 
 .page-header::before{
@@ -4378,14 +4381,58 @@ header.main-header .header-sticky.active{
 	}
 }
 
+.login-btn {
+	padding: 0;
+	background: none;
+	color: inherit;
+	
+}
+
+@media (min-width: 992px) {
+	.login-mobile-btn {
+		display: none !important;
+	}
+}
+
+
 @media only screen and (max-width: 991px){
+
+
+	.login-mobile-btn {
+		margin-top: 12px;
+		margin-left: 17px;
+		text-align: start;
+		border-radius: 20px;
+		padding-bottom: 10px;
+	}
+
+	.login-btn {
+		display: inline-block;
+		width: 84px;
+		/* ?? START MARGIN */
+		padding: 12px 21px;
+		background-color: #fff;
+		color: #000 !important;
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+
+		.login-btn:hover {
+			background-color: #222;
+			color: #fff;
+		}
+
+
+
+
 
 	.btn-default{
 		padding: 15px 37px 15px 15px;
 	}
 
 	.btn-default::before{
-		right: 15px;
+		right: 338px;
 		width: 12px;
 		height: 12px;
 	}
@@ -5075,7 +5122,20 @@ header.main-header .header-sticky.active{
 @media only screen and (max-width: 767px){
 
 
+	.btn-default {
+		padding: 15px 37px 15px 15px;
+	}
 
+		.btn-default::before {
+			right: 350px;
+			width: 12px;
+			height: 12px;
+		}
+
+		.btn-default.btn-border {
+			padding: 14px 37px 14px 15px;
+		}
+	
 	
 	.section-row{
 		margin-bottom: 30px;

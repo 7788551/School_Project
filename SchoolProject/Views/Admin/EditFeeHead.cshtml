@@ -1,0 +1,115 @@
+﻿@model SchoolProject.Models.FeeSchedules
+
+@{
+    ViewData["Title"] = "Edit Fee Head";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+
+    // Detect if this FeeHead uses Custom months
+    bool isCustom = Model.Schedules.Any(s => int.TryParse(s, out _));
+}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">Edit Fee Head</h5>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="EditFeeHead" asp-controller="Admin" method="post">
+
+                <!-- Hidden FeeHeadId -->
+                <input type="hidden" name="feeHeadId" value="@Model.FeeHeadId" />
+
+                <!-- Fee Head Name -->
+                <div class="mb-3">
+                    <label class="form-label">Fee Head Name</label>
+                    <input type="text"
+                           class="form-control"
+                           name="feeHeadName"
+                           value="@Model.FeeHeadName"
+                           required />
+                </div>
+
+                <!-- Frequency -->
+                <div class="mb-3">
+                    <label class="form-label">Frequency</label>
+                    <select class="form-select" name="frequency" id="frequency" required onchange="toggleMonth()">
+                        <option value="">-- Select Frequency --</option>
+
+                        <option value="Monthly" selected="@(Model.Schedules.Contains("Monthly"))">
+                            Monthly
+                        </option>
+
+                        <option value="Yearly" selected="@(Model.Schedules.Contains("Yearly"))">
+                            Yearly
+                        </option>
+
+                        <option value="Custom" selected="@(isCustom)">
+                            Custom
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Month Selection (Only for Custom) -->
+                <div class="mb-3" id="monthDiv" style="display:none;">
+                    <label class="form-label">Select Months (For Custom)</label>
+                    <select class="form-select" name="monthNumbers" multiple size="6">
+                        <option value="1" selected="@(Model.Schedules.Contains("1"))">January</option>
+                        <option value="2" selected="@(Model.Schedules.Contains("2"))">February</option>
+                        <option value="3" selected="@(Model.Schedules.Contains("3"))">March</option>
+                        <option value="4" selected="@(Model.Schedules.Contains("4"))">April</option>
+                        <option value="5" selected="@(Model.Schedules.Contains("5"))">May</option>
+                        <option value="6" selected="@(Model.Schedules.Contains("6"))">June</option>
+                        <option value="7" selected="@(Model.Schedules.Contains("7"))">July</option>
+                        <option value="8" selected="@(Model.Schedules.Contains("8"))">August</option>
+                        <option value="9" selected="@(Model.Schedules.Contains("9"))">September</option>
+                        <option value="10" selected="@(Model.Schedules.Contains("10"))">October</option>
+                        <option value="11" selected="@(Model.Schedules.Contains("11"))">November</option>
+                        <option value="12" selected="@(Model.Schedules.Contains("12"))">December</option>
+                    </select>
+                    <small class="text-muted">Hold Ctrl (or Cmd on Mac) to select multiple months</small>
+                </div>
+
+                <!-- Status (Read-only) -->
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <div>
+                        <input type="checkbox" disabled @(Model.IsActive ? "checked" : "") />
+                        <span class="ms-1">@((Model.IsActive) ? "Active" : "Inactive")</span>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save me-1"></i> Update
+                    </button>
+
+                    <a asp-action="FeeHeads" asp-controller="Admin" class="btn btn-secondary ms-2">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        toggleMonth(); // Auto-show month section if Custom is selected
+    });
+
+    function toggleMonth() {
+        var freq = document.getElementById("frequency").value;
+        var monthDiv = document.getElementById("monthDiv");
+
+        if (freq === "Custom") {
+            monthDiv.style.display = "block";
+        } else {
+            monthDiv.style.display = "none";
+        }
+    }
+</script>

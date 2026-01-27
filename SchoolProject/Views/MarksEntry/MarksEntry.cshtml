@@ -1,0 +1,131 @@
+﻿@{
+    ViewData["Title"] = "Marks Entry";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+
+    var evaluationType = ViewBag.EvaluationType as string;
+    var maxMarks = (decimal)ViewBag.MaxMarks;
+    var students = ViewBag.Students as List<SchoolProject.Models.Student>;
+    var grades = ViewBag.Grades as List<SchoolProject.Models.GradeMaster>;
+}
+
+<h2 class="mb-4">Marks Entry</h2>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+
+        <div class="mb-3">
+            <strong>Evaluation Type:</strong> @evaluationType <br />
+            <strong>Max Marks:</strong> @maxMarks
+        </div>
+
+        <form asp-action="Save" method="post">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="ExamId" value="@ViewBag.ExamId" />
+            <input type="hidden" name="ClassId" value="@ViewBag.ClassId" />
+            <input type="hidden" name="SubjectId" value="@ViewBag.SubjectId" />
+
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Admission No</th>
+                            <th>Student Name</th>
+                            <th class="text-center">Marks</th>
+                            <th class="text-center">Grade</th>
+                            <th class="text-center">Absent</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var s in students)
+                        {
+                            <tr>
+                                <!-- Student -->
+                                <td>@s.AdmissionNumber</td>
+                                <td>@s.Name</td>
+
+                                <!-- Hidden StudentId -->
+                                <input type="hidden" name="StudentId" value="@s.StudentId" />
+
+                                <!-- MARKS INPUT -->
+                                <td class="text-center">
+                                    <input type="number"
+                                           step="0.01"
+                                           name="MarksObtained"
+                                           class="form-control marks-input"
+                                           max="@maxMarks"
+                                           @(evaluationType == "Grade" ? "disabled" : "") />
+                                </td>
+
+                                <!-- GRADE DROPDOWN -->
+                                <td class="text-center">
+                                    @if (evaluationType == "Grade")
+                                    {
+                                        <select name="GradeId"
+                                                class="form-select grade-select"
+                                                required>
+                                            <option value="">-- Select --</option>
+                                            @foreach (var g in grades)
+                                            {
+                                                <option value="@g.GradeId">@g.Grade</option>
+                                            }
+                                        </select>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">—</span>
+                                    }
+                                </td>
+
+                                <!-- ABSENT -->
+                                <td class="text-center">
+                                    <input type="checkbox"
+                                           name="IsAbsent"
+                                           class="form-check-input absent-checkbox"
+                                           onclick="toggleAbsent(this)" />
+                                </td>
+
+                                <!-- SAVE -->
+                                <td class="text-center">
+                                    <button type="submit"
+                                            class="btn btn-success btn-sm">
+                                        Save
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function toggleAbsent(checkbox) {
+            const row = checkbox.closest('tr');
+            const marksInput = row.querySelector('.marks-input');
+            const gradeSelect = row.querySelector('.grade-select');
+
+            if (checkbox.checked) {
+                if (marksInput) {
+                    marksInput.value = '';
+                    marksInput.disabled = true;
+                }
+                if (gradeSelect) {
+                    gradeSelect.value = '';
+                    gradeSelect.disabled = true;
+                }
+            } else {
+                if (marksInput) marksInput.disabled = false;
+                if (gradeSelect) gradeSelect.disabled = false;
+            }
+        }
+    </script>
+}

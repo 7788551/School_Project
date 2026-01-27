@@ -1,0 +1,59 @@
+﻿@model List<SchoolProject.Models.ExamSchedule>
+
+@{
+    ViewData["Title"] = "Exam Schedule";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h2 class="mb-4">Schedule Exam</h2>
+
+<form asp-controller="Exam"
+      asp-action="ExamSchedule"
+      method="post">
+
+    @Html.AntiForgeryToken()
+
+    <table class="table table-bordered">
+        <tbody>
+            @{
+                int i = 0;
+            }
+
+            @foreach (var item in ViewBag.Subjects)
+            {
+                <tr>
+                    <!-- 🔑 REQUIRED FOR LIST BINDING -->
+                    <input type="hidden" name="schedule.Index" value="@i" />
+
+                    <input type="hidden" name="schedule[@i].ExamId" value="@ViewBag.ExamId" />
+                    <input type="hidden" name="schedule[@i].ClassId" value="@item.ClassId" />
+                    <input type="hidden" name="schedule[@i].SubjectId" value="@item.SubjectId" />
+
+                    <td>@item.ClassName</td>
+                    <td>@item.SubjectName</td>
+
+                    <td>
+                        <input type="date"
+                               name="schedule[@i].StartDate"
+                               class="form-control"
+                               required />
+                    </td>
+
+                    <td>
+                        <input type="date"
+                               name="schedule[@i].EndDate"
+                               class="form-control"
+                               required />
+                    </td>
+                </tr>
+                i++;
+            }
+        </tbody>
+    </table>
+
+    <div class="text-end mt-3">
+        <button type="submit" class="btn btn-success">
+            Save Exam Schedule
+        </button>
+    </div>
+</form>

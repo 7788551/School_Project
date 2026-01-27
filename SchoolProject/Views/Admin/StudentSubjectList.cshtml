@@ -1,0 +1,58 @@
+﻿@{
+    ViewData["Title"] = "Student Subject List";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h2>Student Subject List</h2>
+<hr />
+
+<form asp-action="StudentSubjectList" method="post">
+    <label>Admission Number</label>
+    <input type="text"
+           name="admissionNumber"
+           class="form-control"
+           value="@ViewBag.AdmissionNumber"
+           required />
+
+    <br />
+    <button class="btn btn-primary">Search</button>
+</form>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger mt-3">
+        @ViewBag.Error
+    </div>
+}
+
+@if (ViewBag.Subjects != null)
+{
+    <hr />
+
+    <h4>Student Details</h4>
+    <p>
+        <strong>Name:</strong> @ViewBag.StudentName <br />
+        <strong>Admission No:</strong> @ViewBag.AdmissionNumber <br />
+        <strong>Class:</strong> @ViewBag.ClassName
+    </p>
+
+    <h4>Assigned Subjects</h4>
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Subject Name</th>
+                <th>Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (System.Data.DataRow row in (ViewBag.Subjects as System.Data.DataTable).Rows)
+            {
+                <tr>
+                    <td>@row["SubjectName"]</td>
+                    <td>@row["SubjectType"]</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

@@ -1,0 +1,79 @@
+﻿@{
+    ViewData["Title"] = "Assign Subjects to Class";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h2>Assign Subjects to Class</h2>
+<hr />
+
+<form asp-action="AssignSubjectsToClass" method="post">
+    <label>Class</label>
+
+    <select name="classId" class="form-control" required>
+        <option value="">-- Select Class --</option>
+
+        @{
+            int selectedClassId = ViewBag.SelectedClassId != null
+            ? Convert.ToInt32(ViewBag.SelectedClassId)
+            : 0;
+        }
+
+        @foreach (System.Data.DataRow row in (ViewBag.Classes as System.Data.DataTable).Rows)
+        {
+            int classId = Convert.ToInt32(row["ClassId"]);
+
+            if (classId == selectedClassId)
+            {
+                <option value="@classId" selected="selected">
+                    @row["ClassName"]
+                </option>
+            }
+            else
+            {
+                <option value="@classId">
+                    @row["ClassName"]
+                </option>
+            }
+        }
+    </select>
+
+    <br />
+    <button class="btn btn-primary">Load Subjects</button>
+</form>
+
+@if (ViewBag.SelectedClassId != null)
+{
+    <hr />
+
+    <form asp-action="SaveClassSubjects" method="post">
+        <input type="hidden" name="classId" value="@ViewBag.SelectedClassId" />
+
+        <h4>Select Subjects</h4>
+
+        @{
+            var subjects = ViewBag.Subjects as System.Data.DataTable;
+            var assignedIds = ViewBag.AssignedSubjectIds as List<int>;
+        }
+
+        @foreach (System.Data.DataRow row in subjects.Rows)
+        {
+            int subjectId = Convert.ToInt32(row["SubjectId"]);
+            bool isChecked = assignedIds != null && assignedIds.Contains(subjectId);
+
+            <div class="form-check">
+                <input type="checkbox"
+                       class="form-check-input"
+                       name="subjectIds"
+                       value="@subjectId"
+                       @(isChecked ? "checked" : "") />
+
+                <label class="form-check-label">
+                    @row["SubjectName"]
+                </label>
+            </div>
+        }
+
+        <br />
+        <button class="btn btn-success">Save Subjects</button>
+    </form>
+}
