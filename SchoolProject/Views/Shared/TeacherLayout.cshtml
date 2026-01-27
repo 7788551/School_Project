@@ -406,8 +406,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Custom JavaScript -->
-   
-
     <script>
         document.addEventListener("DOMContentLoaded", function () {
 
@@ -430,7 +428,6 @@
                 }
             });
 
-            // Close sidebar on mobile when clicking outside
             document.addEventListener('click', function (event) {
                 if (
                     window.innerWidth < 992 &&
@@ -444,6 +441,9 @@
 
         });
     </script>
+
+    <!-- ✅ REQUIRED FIX -->
+    @RenderSection("Scripts", required: false)
 
 </body>
 </html>

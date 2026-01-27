@@ -1,4 +1,4 @@
-﻿@model List<AttendanceList>
+﻿@* @model List<AttendanceList>
 
 @{
     ViewData["Title"] = "AttendanceList";
@@ -62,3 +62,254 @@ else
     </table>
 }
 </main>
+@model List<AttendanceList>
+@{
+    Layout = "~/Views/Shared/TeacherLayout.cshtml";
+}
+
+<main class="main-content">
+    <h2 class="mb-3">Marked Attendance</h2>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>Date</th>
+                <th>Class</th>
+                <th>Section</th>
+                <th>Student</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                bool isToday = item.AttendanceDate.Date == DateTime.Today;
+
+                <tr data-student-id="@item.StudentId"
+                    data-date="@item.AttendanceDate.ToString("yyyy-MM-dd")">
+
+                    <td>@item.AttendanceDate.ToString("dd-MM-yyyy")</td>
+                    <td>@item.ClassName</td>
+                    <td>@item.SectionName</td>
+                    <td>@item.StudentName</td>
+
+                    <td>
+                        <span class="status-text">@item.Status</span>
+
+                        <select class="form-select form-select-sm status-select d-none">
+                            <option value="true" selected="@(item.Status == "Present")">Present</option>
+                            <option value="false" selected="@(item.Status == "Absent")">Absent</option>
+                        </select>
+                    </td>
+
+                    <td>
+                        @if (isToday)
+                        {
+                            <button type="button" class="btn btn-sm btn-warning edit-btn">
+                                Edit
+                            </button>
+
+                            <button type="button"
+                                    class="btn btn-sm btn-success save-btn d-none">
+                                Save
+                            </button>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Locked</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</main>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll(".edit-btn").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const row = this.closest("tr");
+                row.querySelector(".status-text").classList.add("d-none");
+                row.querySelector(".status-select").classList.remove("d-none");
+
+                this.classList.add("d-none");
+                row.querySelector(".save-btn").classList.remove("d-none");
+            });
+        });
+
+        document.querySelectorAll(".save-btn").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const row = this.closest("tr");
+                const studentId = row.dataset.studentId;
+                const attendanceDate = row.dataset.date;
+                const isPresent = row.querySelector(".status-select").value;
+
+                fetch('@Url.Action("UpdateSingleAttendance", "Attendance")', {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "RequestVerificationToken":
+                            document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body:
+                        `studentId=${studentId}&attendanceDate=${attendanceDate}&isPresent=${isPresent}`
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        row.querySelector(".status-text").innerText =
+                            isPresent === "true" ? "Present" : "Absent";
+
+                        row.querySelector(".status-text").classList.remove("d-none");
+                        row.querySelector(".status-select").classList.add("d-none");
+
+                        row.querySelector(".save-btn").classList.add("d-none");
+                        row.querySelector(".edit-btn").classList.remove("d-none");
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            });
+        });
+    </script>
+} *@
+
+@model List<AttendanceList>
+@{
+    Layout = "~/Views/Shared/TeacherLayout.cshtml";
+}
+
+<main class="main-content attendance-page">
+
+    <h2 class="mb-3">Marked Attendance</h2>
+
+    <!-- ✅ Responsive wrapper prevents bottom bar -->
+    <div class="table-responsive attendance-table-wrapper">
+        <table class="table table-bordered table-striped align-middle w-100">
+            <thead class="table-light">
+                <tr>
+                    <th>Date</th>
+                    <th>Class</th>
+                    <th>Section</th>
+                    <th>Student</th>
+                    <th>Status</th>
+                    <th style="width:140px;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    bool isToday = item.AttendanceDate.Date == DateTime.Today;
+
+                    <tr data-student-id="@item.StudentId"
+                        data-date="@item.AttendanceDate.ToString("yyyy-MM-dd")">
+
+                        <td>@item.AttendanceDate.ToString("dd-MM-yyyy")</td>
+                        <td>@item.ClassName</td>
+                        <td>@item.SectionName</td>
+                        <td class="text-truncate" style="max-width:200px;">
+                            @item.StudentName
+                        </td>
+
+                        <td>
+                            <span class="status-text">@item.Status</span>
+
+                            <select class="form-select form-select-sm status-select d-none">
+                                <option value="true" selected="@(item.Status == "Present")">Present</option>
+                                <option value="false" selected="@(item.Status == "Absent")">Absent</option>
+                            </select>
+                        </td>
+
+                        <td>
+                            @if (isToday)
+                            {
+                                <button type="button"
+                                        class="btn btn-sm btn-warning edit-btn">
+                                    Edit
+                                </button>
+
+                                <button type="button"
+                                        class="btn btn-sm btn-success save-btn d-none">
+                                    Save
+                                </button>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Locked</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</main>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll(".edit-btn").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const row = this.closest("tr");
+                row.querySelector(".status-text").classList.add("d-none");
+                row.querySelector(".status-select").classList.remove("d-none");
+
+                this.classList.add("d-none");
+                row.querySelector(".save-btn").classList.remove("d-none");
+            });
+        });
+
+        document.querySelectorAll(".save-btn").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const row = this.closest("tr");
+                const studentId = row.dataset.studentId;
+                const attendanceDate = row.dataset.date;
+                const isPresent = row.querySelector(".status-select").value;
+
+                fetch('@Url.Action("UpdateSingleAttendance", "Attendance")', {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "RequestVerificationToken":
+                            document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body:
+                        `studentId=${studentId}&attendanceDate=${attendanceDate}&isPresent=${isPresent}`
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        row.querySelector(".status-text").innerText =
+                            isPresent === "true" ? "Present" : "Absent";
+
+                        row.querySelector(".status-text").classList.remove("d-none");
+                        row.querySelector(".status-select").classList.add("d-none");
+
+                        row.querySelector(".save-btn").classList.add("d-none");
+                        row.querySelector(".edit-btn").classList.remove("d-none");
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            });
+        });
+    </script>
+
+    <!-- ✅ HARD FIX FOR BOTTOM BAR -->
+    <style>
+        .attendance-page {
+            overflow-x: hidden;
+        }
+
+        .attendance-table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            max-width: 100%;
+            white-space: nowrap;
+        }
+    </style>
+}

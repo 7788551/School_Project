@@ -1,78 +1,66 @@
 ﻿@{
     ViewData["Title"] = "AttendanceIndex";
-    Layout = "~/Views/Shared/TeacherLayout.cshtml"; // use your layout
+    Layout = "~/Views/Shared/TeacherLayout.cshtml";
 }
 
+<main class="main-content">
 
-@* 
-<!-- Page Header Start -->
-<div class="page-header bg-section dark-section parallaxie">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <!-- Page Header Box Start -->
-                <div class="page-header-box">
-                    <h1 class="text-anime-style-3" data-cursor="-opaque">Assign ClassTeacher</h1>
-                    <nav class="wow fadeInUp">
-                        <ol class="breadcrumb">
-                            <!-- <li class="breadcrumb-item"><a href="index-2.html">Home</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Contact us</li> -->
-                        </ol>
-                    </nav>
-                </div>
-                <!-- Page Header Box End -->
-            </div>
+    <h3 class="mb-3">📝 Mark Attendance</h3>
+
+    <!-- Class Info -->
+    <div class="alert alert-info">
+        <strong>Class:</strong> @ViewBag.ClassName <br />
+        <strong>Section:</strong> @ViewBag.SectionName <br />
+        <strong>Date:</strong> @ViewBag.Today
+    </div>
+
+    <form method="post" asp-action="MarkAttendance">
+
+        <!-- Same day attendance -->
+        <input type="hidden"
+               name="attendanceDate"
+               value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+
+        <!-- ✅ Responsive Table -->
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width:50%">Student Name</th>
+                        <th style="width:25%">Present</th>
+                        <th style="width:25%">Absent</th>
+                    </tr>
+                </thead>
+                <tbody id="studentRows">
+                    <!-- Rows loaded via JS -->
+                </tbody>
+            </table>
         </div>
-    </div>
-</div>
-<!-- Page Header End --> *@
 
+        <div class="text-end mt-3">
+            <button type="submit" class="btn btn-success px-4">
+                💾 Save Attendance
+            </button>
+        </div>
 
-<h3 class="mb-3">📝 Mark Attendance</h3>
+    </form>
 
-<!-- Class Info -->
-<div class="alert alert-info">
-    <strong>Class:</strong> @ViewBag.ClassName <br />
-    <strong>Section:</strong> @ViewBag.SectionName <br />
-    <strong>Date:</strong> @ViewBag.Today
-</div>
+    <!-- Alerts -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success mt-3">
+            @TempData["Success"]
+        </div>
+    }
 
-<form method="post" asp-action="MarkAttendance">
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger mt-3">
+            @TempData["Error"]
+        </div>
+    }
 
-    <!-- Same day attendance -->
-    <input type="hidden"
-           name="attendanceDate"
-           value="@DateTime.Today.ToString("yyyy-MM-dd")" />
-
-    <table class="table table-bordered align-middle text-center">
-        <thead class="table-dark">
-            <tr>
-                <th style="width:50%">Student Name</th>
-                <th style="width:25%">Present</th>
-                <th style="width:25%">Absent</th>
-            </tr>
-        </thead>
-        <tbody id="studentRows">
-            <!-- Rows loaded via JS -->
-        </tbody>
-    </table>
-
-    <div class="text-end">
-        <button type="submit" class="btn btn-success px-4">
-            💾 Save Attendance
-        </button>
-    </div>
-</form>
-
-<!-- Alerts -->
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success mt-3">@TempData["Success"]</div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger mt-3">@TempData["Error"]</div>
-}
+</main>
 
 @section Scripts {
     <script>
@@ -97,7 +85,8 @@
                             <input type="radio"
                                    name="model[${index}].IsPresent"
                                    value="true"
-                                   class="form-check-input present-radio" />
+                                   class="form-check-input present-radio"
+                                   required />
                         </td>
 
                         <!-- Absent -->
@@ -105,7 +94,8 @@
                             <input type="radio"
                                    name="model[${index}].IsPresent"
                                    value="false"
-                                   class="form-check-input absent-radio" />
+                                   class="form-check-input absent-radio"
+                                   required />
                         </td>
                     </tr>`;
                 });
