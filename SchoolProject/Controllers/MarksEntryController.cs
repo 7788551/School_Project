@@ -295,11 +295,10 @@ namespace SchoolProject.Controllers
             return Convert.ToInt32(cmd.ExecuteScalar());
         }
 
-
-
+        
         [Authorize(Roles = "Teacher")]
         [HttpGet]
-        public IActionResult TeacherExams()
+       public IActionResult TeacherExams()
         {
             int teacherId = GetLoggedInTeacherId();
             int sessionId = GetCurrentSessionId();
@@ -307,43 +306,42 @@ namespace SchoolProject.Controllers
             using SqlConnection con = GetConnection();
             con.Open();
 
-            // 1️⃣ Get assigned Class & Section for this teacher
-            int classId, sectionId;
+            var assignedClassIds = new List<int>();
 
-            using (SqlCommand assignCmd = new SqlCommand(@"
-        SELECT TOP 1 ClassId, SectionId
-        FROM ClassTeacherAssignments
-        WHERE TeacherId = @TeacherId
-          AND SessionId = @SessionId
-          AND IsActive = 1", con))
+            using (SqlCommand cmd = new SqlCommand(@"
+            SELECT DISTINCT ClassId
+            FROM ClassTeacherAssignments
+            WHERE TeacherId = @TeacherId
+              AND SessionId = @SessionId
+              AND IsActive = 1", con))
             {
-                assignCmd.Parameters.AddWithValue("@TeacherId", teacherId);
-                assignCmd.Parameters.AddWithValue("@SessionId", sessionId);
+                cmd.Parameters.AddWithValue("@TeacherId", teacherId);
+                cmd.Parameters.AddWithValue("@SessionId", sessionId);
 
-                using var rdr = assignCmd.ExecuteReader();
-
-                if (!rdr.Read())
+                using var rdr = cmd.ExecuteReader();
+                while (rdr.Read())
                 {
-                    TempData["Error"] = "You are not assigned to any class for this session.";
-                    return RedirectToAction("TeacherDashboard", "Teacher");
+                    assignedClassIds.Add(Convert.ToInt32(rdr["ClassId"]));
                 }
-
-                classId = Convert.ToInt32(rdr["ClassId"]);
-                sectionId = Convert.ToInt32(rdr["SectionId"]);
             }
 
-            // 2️⃣ Get exams mapped to this class & session
+            if (!assignedClassIds.Any())
+            {
+                TempData["Error"] = "You are not assigned to any class for this session.";
+                return RedirectToAction("TeacherDashboard", "Teacher");
+            }
+
+            // Step 2: Fetch exams for ALL assigned classes
             var exams = new List<Exam>();
 
             using (SqlCommand examCmd = new SqlCommand(@"
         SELECT DISTINCT e.ExamId, e.ExamName
         FROM Exams e
         INNER JOIN ExamSubjects es ON e.ExamId = es.ExamId
-        WHERE es.ClassId = @ClassId
+        WHERE es.ClassId IN (" + string.Join(",", assignedClassIds) + @")
           AND e.SessionId = @SessionId
         ORDER BY e.ExamName", con))
             {
-                examCmd.Parameters.AddWithValue("@ClassId", classId);
                 examCmd.Parameters.AddWithValue("@SessionId", sessionId);
 
                 using var rdr = examCmd.ExecuteReader();
@@ -357,10 +355,11 @@ namespace SchoolProject.Controllers
                 }
             }
 
-            return View(exams);
+            return View();
         }
 
 
+        [Authorize(Roles = "Teacher")]
         [HttpGet]
         public IActionResult StudentList(int examId)
         {
@@ -370,42 +369,72 @@ namespace SchoolProject.Controllers
             using SqlConnection con = GetConnection();
             con.Open();
 
-            // Assigned class & section
-            SqlCommand assignCmd = new SqlCommand(@"
-                SELECT ClassId, SectionId
-                FROM ClassTeacherAssignments
-                WHERE TeacherId = @TeacherId
-                  AND SessionId = @SessionId
-                  AND IsActive = 1", con);
+            // 1️⃣ Get ALL assigned class-section pairs
+            var assignments = new List<(int ClassId, int SectionId)>();
 
-            assignCmd.Parameters.AddWithValue("@TeacherId", teacherId);
-            assignCmd.Parameters.AddWithValue("@SessionId", sessionId);
-
-            int classId, sectionId;
-            using (var r = assignCmd.ExecuteReader())
+            using (SqlCommand cmd = new SqlCommand(@"
+        SELECT ClassId, SectionId
+        FROM ClassTeacherAssignments
+        WHERE TeacherId = @TeacherId
+          AND SessionId = @SessionId
+          AND IsActive = 1", con))
             {
-                if (!r.Read())
-                    return Unauthorized();
+                cmd.Parameters.AddWithValue("@TeacherId", teacherId);
+                cmd.Parameters.AddWithValue("@SessionId", sessionId);
 
-                classId = (int)r["ClassId"];
-                sectionId = (int)r["SectionId"];
+                using var r = cmd.ExecuteReader();
+                while (r.Read())
+                {
+                    assignments.Add((
+                        (int)r["ClassId"],
+                        (int)r["SectionId"]
+                    ));
+                }
             }
 
-            // Students of that class & section
-            SqlCommand studentCmd = new SqlCommand(@"
-                SELECT StudentId, AdmissionNumber, Name
-                FROM Students
-                WHERE ClassId = @ClassId
-                  AND SectionId = @SectionId
-                  AND IsActive = 1
-                ORDER BY Name", con);
-
-            studentCmd.Parameters.AddWithValue("@ClassId", classId);
-            studentCmd.Parameters.AddWithValue("@SectionId", sectionId);
-
-            var students = new List<Student>();
-            using (var dr = studentCmd.ExecuteReader())
+            if (!assignments.Any())
             {
+                TempData["Error"] = "You are not assigned to any class.";
+                return RedirectToAction("TeacherDashboard", "Teacher");
+            }
+
+            // 2️⃣ Validate exam belongs to one of teacher's classes
+            bool examAllowed;
+            using (SqlCommand examCmd = new SqlCommand(@"
+        SELECT COUNT(1)
+        FROM ExamSubjects es
+        INNER JOIN Exams e ON e.ExamId = es.ExamId
+        WHERE es.ExamId = @ExamId
+          AND e.SessionId = @SessionId
+          AND es.ClassId IN (" + string.Join(",", assignments.Select(a => a.ClassId).Distinct()) + ")", con))
+            {
+                examCmd.Parameters.AddWithValue("@ExamId", examId);
+                examCmd.Parameters.AddWithValue("@SessionId", sessionId);
+
+                examAllowed = (int)examCmd.ExecuteScalar() > 0;
+            }
+
+            if (!examAllowed)
+            {
+                TempData["Error"] = "You are not authorized for this exam.";
+                return RedirectToAction("TeacherExams");
+            }
+
+            // 3️⃣ Load students for ALL assigned sections
+            var students = new List<Student>();
+
+            using (SqlCommand studentCmd = new SqlCommand(@"
+        SELECT StudentId, AdmissionNumber, Name
+        FROM Students
+        WHERE IsActive = 1
+          AND (" +
+                  string.Join(" OR ",
+                      assignments.Select(a =>
+                          $"(ClassId = {a.ClassId} AND SectionId = {a.SectionId})")) +
+                @")
+        ORDER BY Name", con))
+            {
+                using var dr = studentCmd.ExecuteReader();
                 while (dr.Read())
                 {
                     students.Add(new Student
@@ -421,6 +450,7 @@ namespace SchoolProject.Controllers
             return View(students);
         }
 
-   
+
+
     }
 }

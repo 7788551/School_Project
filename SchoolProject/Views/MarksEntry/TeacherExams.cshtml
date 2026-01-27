@@ -1,10 +1,10 @@
-﻿@model List<SchoolProject.Models.Exam>
+﻿@* @model List<SchoolProject.Models.Exam> *@
 @{
     Layout = "~/Views/Shared/TeacherLayout.cshtml";
 }
 
 <h3>Select Exam</h3>
-
+@* 
 <table class="table table-bordered">
     <thead class="table-dark">
         <tr>
@@ -18,13 +18,15 @@
             <tr>
                 <td>@exam.ExamName</td>
                 <td>
-                    <a asp-action="StudentList"
+                    <a asp-controller="MarksEntry"
+                       asp-action="StudentList"
                        asp-route-examId="@exam.ExamId"
                        class="btn btn-sm btn-primary">
                         Enter Marks
                     </a>
+
                 </td>
             </tr>
         }
     </tbody>
-</table>
+</table> *@
