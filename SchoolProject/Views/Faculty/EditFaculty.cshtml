@@ -1,0 +1,98 @@
+﻿@model SchoolProject.Models.Faculty
+
+@{
+    ViewData["Title"] = "Edit Faculty";
+    Layout = "~/Views/Shared/AdminLayout.cshtml"; // adjust if needed
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+
+        <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0">Edit Faculty</h4>
+        </div>
+
+        <div class="card-body">
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">
+                    @TempData["Error"]
+                </div>
+            }
+
+            <form asp-action="EditFaculty"
+                  asp-controller="Faculty"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                @Html.AntiForgeryToken()
+
+                <!-- HIDDEN ID -->
+                <input type="hidden" asp-for="FacultyId" />
+                <input type="hidden" asp-for="ImagePath" />
+
+                <!-- NAME -->
+                <div class="mb-3">
+                    <label class="form-label">Faculty Name</label>
+                    <input asp-for="Name"
+                           class="form-control"
+                           required />
+                </div>
+
+                <!-- DESIGNATION -->
+                <div class="mb-3">
+                    <label class="form-label">Designation</label>
+                    <input asp-for="Designation"
+                           class="form-control"
+                           required />
+                </div>
+
+                <!-- CURRENT IMAGE -->
+                <div class="mb-3">
+                    <label class="form-label">Current Image</label>
+                    <div>
+                        @if (!string.IsNullOrEmpty(Model.ImagePath))
+                        {
+                            <img src="~/uploads/faculty/@Model.ImagePath"
+                                 class="img-thumbnail mb-2"
+                                 style="width:150px;height:150px;object-fit:cover;" />
+                        }
+                        else
+                        {
+                            <p class="text-muted">No image uploaded</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- NEW IMAGE -->
+                <div class="mb-3">
+                    <label class="form-label">Change Image (optional)</label>
+                    <input type="file"
+                           name="ImageFile"
+                           class="form-control"
+                           accept="image/*" />
+                    <small class="text-muted">
+                        Leave blank to keep existing image
+                    </small>
+                </div>
+
+                <!-- BUTTONS -->
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Faculty"
+                       asp-controller="Faculty"
+                       class="btn btn-secondary">
+                        Back
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-success">
+                        Update Faculty
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>

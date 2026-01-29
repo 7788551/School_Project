@@ -1,0 +1,58 @@
+﻿@model SchoolProject.Models.GalleryImage
+
+@{
+    ViewData["Title"] = "Upload Gallery Image";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h3 class="mb-4">Upload Gallery Image</h3>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">
+        @ViewBag.Error
+    </div>
+}
+
+<form asp-action="AddGalleryImage"
+      asp-controller="AdminGallery"
+      method="post"
+      enctype="multipart/form-data">
+
+    <div class="mb-3">
+        <label class="form-label">Image Title</label>
+        <input asp-for="Title"
+               class="form-control"
+               placeholder="e.g. Annual Function"
+               required />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Select Image</label>
+        <input type="file"
+               name="ImageFile"
+               class="form-control"
+               accept="image/*"
+               required />
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        Upload Image
+    </button>
+
+    <a asp-action="Showdata" class="btn btn-secondary ms-2">
+        Back
+    </a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,83 @@
+﻿@model SchoolProject.Models.Mentor
+
+@{
+    ViewData["Title"] = "Add Mentor";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h4 class="mb-3">Add Mentor</h4>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        Please fix the errors below.
+    </div>
+}
+
+<form asp-action="AddMentor"
+      asp-controller="Mentor"
+      method="post"
+      enctype="multipart/form-data">
+
+    <div class="row">
+        <!-- Name -->
+        <div class="col-md-6 mb-3">
+            <label asp-for="Name" class="form-label">Name</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <!-- Designation -->
+        <div class="col-md-6 mb-3">
+            <label asp-for="Designation" class="form-label">Designation</label>
+            <input asp-for="Designation" class="form-control" />
+            <span asp-validation-for="Designation" class="text-danger"></span>
+        </div>
+
+        <!-- Display Order -->
+        <div class="col-md-6 mb-3">
+            <label asp-for="DisplayOrder" class="form-label">Display Order</label>
+            <input asp-for="DisplayOrder"
+                   type="number"
+                   min="1"
+                   max="2"
+                   class="form-control" />
+            <small class="text-muted">
+                Use 1 for Director, 2 for Principal
+            </small>
+            <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+        </div>
+
+        <!-- Image -->
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Photo</label>
+            <input type="file"
+                   name="ImageFile"
+                   class="form-control"
+                   accept="image/*" />
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-success">
+            Save Mentor
+        </button>
+
+        <a asp-action="Mentor"
+           asp-controller="Mentor"
+           class="btn btn-secondary ms-2">
+            Cancel
+        </a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

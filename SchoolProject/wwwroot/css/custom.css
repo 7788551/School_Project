@@ -1873,15 +1873,16 @@ header.main-header .header-sticky.active{
 	margin-bottom: 0;
 }
 
-.core-feature-item-body ul li::before{
-	content: '\f058';
-    position: absolute;
-    font-family: 'Font Awesome 7 Free';
-    font-size: 16px;
-    color: var(--accent-color);
-    top: 0;
-    left: 0;
-}
+	.core-feature-item-body ul li::before {
+		content: "\f26a"; /* bi-check-square-fill */
+		position: absolute;
+		font-family: "bootstrap-icons";
+		font-size: 16px;
+		color: var(--accent-color);
+		top: 1px;
+		left: 0;
+	}
+
 
 .core-feature-footer{
 	display: flex;

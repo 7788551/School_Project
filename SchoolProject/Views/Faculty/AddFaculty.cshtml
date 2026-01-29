@@ -1,0 +1,77 @@
+﻿@model SchoolProject.Models.Faculty
+
+@{
+    ViewData["Title"] = "Add Faculty";
+    Layout = "~/Views/Shared/AdminLayout.cshtml"; // change if needed
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Add Faculty</h4>
+        </div>
+
+        <div class="card-body">
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">
+                    @ViewBag.Error
+                </div>
+            }
+
+            <form asp-action="AddFaculty"
+                  asp-controller="Faculty"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                <!-- NAME -->
+                <div class="mb-3">
+                    <label class="form-label">Faculty Name</label>
+                    <input asp-for="Name"
+                           class="form-control"
+                           placeholder="Enter faculty name"
+                           required />
+                </div>
+
+                <!-- DESIGNATION -->
+                <div class="mb-3">
+                    <label class="form-label">Designation</label>
+                    <input asp-for="Designation"
+                           class="form-control"
+                           placeholder="Enter designation"
+                           required />
+                </div>
+
+                <!-- IMAGE -->
+                <div class="mb-3">
+                    <label class="form-label">Faculty Image</label>
+                    <input type="file"
+                           name="ImageFile"
+                           class="form-control"
+                           accept="image/*"
+                           required />
+                    <small class="text-muted">
+                        Allowed: JPG, PNG, JPEG
+                    </small>
+                </div>
+
+                <!-- BUTTONS -->
+                <div class="d-flex justify-content-between">
+                    <a asp-action="ShowData"
+                       asp-controller="Faculty"
+                       class="btn btn-secondary">
+                        Back
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-success">
+                        Save Faculty
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>

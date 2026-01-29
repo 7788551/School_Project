@@ -1,4 +1,7 @@
-﻿<style>
+﻿@* @model IEnumerable<SchoolProject.Models.GalleryImage> *@
+ @model List<SchoolProject.Models.GalleryImage>
+
+<style>
     /* ===== SCHOOL IMAGE GALLERY ===== */
 
     .school-gallery {
@@ -72,7 +75,7 @@
     </div>
 </div>
 
-<section class="py-5 text-center school-gallery">
+@* <section class="py-5 text-center school-gallery">
     <div class="container">
 
         <!-- Section Heading -->
@@ -235,6 +238,41 @@
             <!-- Just change image name and heading text -->
 
         </div>
+    </div>
+</section>
+ *@
+
+
+
+<section class="py-5 text-center school-gallery">
+    <div class="container">
+
+        <!-- Section Heading -->
+        <div class="ourmentor mb-5">
+            <span class="dot"></span>
+            <h3>School Image Gallery</h3>
+        </div>
+
+        <!-- Gallery Grid -->
+        <div class="row g-5 my-2">
+
+            @foreach (var item in Model)
+            {
+                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6">
+                    <div class="gallery-card">
+
+                        <!-- 🔥 ONLY THIS LINE CHANGED -->
+                        <img src="~/uploads/gallery/@item.ImagePath" alt="@item.Title">
+
+                        <!-- 🔥 ONLY THIS LINE CHANGED -->
+                        <h6>@item.Title</h6>
+
+                    </div>
+                </div>
+            }
+
+        </div>
+
     </div>
 </section>
 

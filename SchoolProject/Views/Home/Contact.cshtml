@@ -1,4 +1,85 @@
-﻿
+﻿@model Enquiry
+ <style>
+
+    /* =====================================
+       REMOVE HOVER EFFECT COMPLETELY
+       ===================================== */
+
+    /* Disable hover background, overlay & filter */
+    .contact-info-item:hover {
+        background: inherit !important;
+        filter: none !important;
+    }
+
+        /* Disable any pseudo-element overlay on hover */
+        .contact-info-item::before,
+        .contact-info-item::after,
+        .contact-info-item:hover::before,
+        .contact-info-item:hover::after {
+            opacity: 0 !important;
+            background: transparent !important;
+        }
+
+    /* Remove transitions to prevent flicker */
+    .contact-info-item,
+    .contact-info-item * {
+        transition: none !important;
+    }
+
+        /* Lock icon & text color permanently */
+        .contact-info-item .icon-box i,
+        .contact-info-item h3,
+        .contact-info-item p,
+        .contact-info-item a {
+            color: #ffffff !important;
+        }
+
+    /* Prevent cursor change */
+    .contact-info-item {
+        cursor: default;
+    }
+    /* =====================================
+       KEEP ICON VISIBLE ON HOVER (FINAL)
+       ===================================== */
+
+    /* Ensure contact card is stacking context */
+    .contact-info-item {
+        position: relative;
+        overflow: hidden;
+    }
+
+        /* Push icon box above hover overlay */
+        .contact-info-item .icon-box {
+            position: relative;
+            z-index: 5;
+        }
+
+            /* Force icon visibility */
+            .contact-info-item .icon-box i {
+                color: #ffffff !important;
+                font-size: 26px;
+            }
+
+    /* Also keep text visible */
+    .contact-info-item-content {
+        position: relative;
+        z-index: 5;
+    }
+
+        .contact-info-item-content h3,
+        .contact-info-item-content p,
+        .contact-info-item-content a {
+            color: #ffffff !important;
+        }
+
+    /* If theme uses ::before / ::after overlay */
+    .contact-info-item::before,
+    .contact-info-item::after {
+        z-index: 1;
+    }
+
+
+</style> 
 <!-- Page Header Start -->
 <div class="page-header bg-section dark-section parallaxie">
     <div class="container">
@@ -36,30 +117,34 @@
                     <!-- Contact Us Image End -->
                     <!-- Contact Info List Start -->
                     <div class="contact-info-list">
-                        <!-- Contact Info Item Start  -->
+
+                        <!-- Contact Info Item Start -->
                         <div class="contact-info-item">
                             <div class="icon-box">
-                                @* <img src="images/icon-phone-white.png" alt=""> *@
-                                <i class="fa-regular fa-phone"></i>
+                                <!-- Bootstrap Icon: Phone -->
+                                <i class="bi bi-telephone-fill"></i>
                             </div>
                             <div class="contact-info-item-content">
                                 <h3>Contact Us</h3>
                                 <p><a href="tel:+919470235587">+91 9470235587</a></p>
                             </div>
                         </div>
-                        <!-- Contact Info Item End  -->
-                        <!-- Contact Info Item Start  -->
+                        <!-- Contact Info Item End -->
+                        <!-- Contact Info Item Start -->
                         <div class="contact-info-item">
                             <div class="icon-box">
-                                <img src="images/icon-mail-white.svg" alt="">
+                                <!-- Bootstrap Icon: Email -->
+                                <i class="bi bi-envelope-fill"></i>
                             </div>
                             <div class="contact-info-item-content">
                                 <h3>E-mail Address</h3>
                                 <p><a href="mailto:gpsagarwa1997@gmail.com">gpsagarwa1997@gmail.com</a></p>
                             </div>
                         </div>
-                        <!-- Contact Info Item End  -->
+                        <!-- Contact Info Item End -->
+
                     </div>
+
                     <!-- Contact Info List End -->
                 </div>
                 <!-- Contact Us Image Box End -->
@@ -76,7 +161,7 @@
                     <!-- Section Title End -->
                     <!-- Contact Form Start -->
                     <div class="contact-form">
-                        <form id="contactForm" action="#" method="POST" data-toggle="validator" class="wow fadeInUp" data-wow-delay="0.2s">
+                        @*  <form id="contactForm" action="#" method="POST" data-toggle="validator" class="wow fadeInUp" data-wow-delay="0.2s">
                             <div class="row">
                                 <div class="form-group col-md-6 mb-4">
                                     <input type="text" name="fname" class="form-control" id="fname" placeholder="First Name" required>
@@ -110,7 +195,91 @@
                                     </div>
                                 </div>
                             </div>
-                        </form>
+                        </form>  *@
+                        @if (TempData["Success"] != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                @TempData["Success"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        }
+
+                        <form asp-controller="Enquiry"
+      asp-action="Submit"
+      method="post"
+      data-toggle="validator"
+      class="wow fadeInUp"
+      data-wow-delay="0.2s">
+
+    <div class="row">
+
+        <!-- First Name -->
+        <div class="form-group col-md-6 mb-4">
+            <input type="text"
+                   name="FirstName"
+                   class="form-control"
+                   placeholder="First Name"
+                   required>
+            <div class="help-block with-errors"></div>
+        </div>
+
+        <!-- Last Name -->
+        <div class="form-group col-md-6 mb-4">
+            <input type="text"
+                   name="LastName"
+                   class="form-control"
+                   placeholder="Last Name">
+            <div class="help-block with-errors"></div>
+        </div>
+
+        <!-- Phone -->
+        <div class="form-group col-md-6 mb-4">
+            <input type="text"
+                   name="PhoneNumber"
+                   class="form-control"
+                   placeholder="Phone No."
+                   required>
+            <div class="help-block with-errors"></div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group col-md-6 mb-4">
+            <input type="email"
+                   name="Email"
+                   class="form-control"
+                   placeholder="E-mail Address">
+            <div class="help-block with-errors"></div>
+        </div>
+
+        <!-- Message -->
+        <div class="form-group col-md-12 mb-5">
+            <textarea name="Message"
+                      class="form-control"
+                      rows="5"
+                      placeholder="Write your message here..."
+                      required></textarea>
+            <div class="help-block with-errors"></div>
+        </div>
+
+        <!-- Button -->
+        <div class="col-lg-12">
+            <div class="contact-form-btn">
+                <button type="submit" class="btn-default">
+                    <span>Send Message</span>
+                </button>
+                <div id="msgSubmit" class="h3 hidden"></div>
+            </div>
+        </div>
+
+    </div>
+</form>
+
+
+
+
+
+                       
+
                     </div>
                     <!-- Contact Form End -->
                 </div>

@@ -62,7 +62,19 @@
     <!-- Your main style (final override) -->
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
 
-    
+    <style>
+        .footer-links-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 40px;
+        }
+
+        .footer-links {
+            flex: 1;
+        }
+
+    </style>
 
     @RenderSection("Styles", false)
 
@@ -174,52 +186,36 @@
                     </div>
                 </div>
 
-                <div class="col-lg-8 footer-links-box">
-                    <div class="footer-links">
-                        <h3>Quick Links</h3>
-                        <ul>
-                            <li><a asp-controller="Home" asp-action="Index">Home</a></li>
-                            <li><a asp-controller="Home" asp-action="About">About Us</a></li>
-                            <li><a asp-controller="Home" asp-action="Programs">Programs</a></li>
-                            <li><a asp-controller="Home" asp-action="Gallery">Gallery</a></li>
-                            <li><a asp-controller="Home" asp-action="Contact">Contact Us</a></li>
-                        </ul>
-                    </div>
+              
 
-                    <div class="footer-links footer-schedule-box">
-                        <h3>School Hours</h3>
 
-                        <div class="footer-schedule-item">
-                            <p>Mon – Sat:</p>
-                            <p>8:00 AM – 2:00 PM</p>
+                <div class="col-lg-8">
+                    <div class="row">
+                        <div class="col-md-4 footer-links">
+                            <h3>Quick Links</h3>
+                            <ul>
+                                <li><a asp-controller="Home" asp-action="Index">Home</a></li>
+                                <li><a asp-controller="Home" asp-action="About">About Us</a></li>
+                                <li><a asp-controller="Home" asp-action="Gallery">Gallery</a></li>
+                                <li><a asp-controller="Home" asp-action="Contact">Contact Us</a></li>
+                            </ul>
                         </div>
 
-                        <div class="footer-schedule-item">
-                            <p>Sunday:</p>
-                            <p>Closed</p>
-                        </div>
-                    </div>
-
-                    <div class="footer-links footer-contact-box">
-                        <h3>Contact Information</h3>
-
-                        <div class="footer-contact-item">
-                            <p>Phone:</p>
-                            <p><a href="tel:+919470235587">+91 9470235587</a></p>
-                            <p><a href="tel:+919430008812">+91 9430008812</a></p>
+                        <div class="col-md-4 footer-links">
+                            <h3>School Hours</h3>
+                            <p>Mon – Sat:<br>8:00 AM – 2:00 PM</p>
+                            <p>Sunday:<br>Closed</p>
                         </div>
 
-                        <div class="footer-contact-item">
-                            <p>Email:</p>
-                            <p><a href="mailto:gpsagarwa1997@gmail.com">gpsagarwa1997@gmail.com</a></p>
-                        </div>
-
-                        <div class="footer-contact-item">
-                            <p>Address:</p>
-                            <p>Gyan Sagar Public School, Agarwa, Motihari, Bihar 845401</p>
+                        <div class="col-md-4 footer-links">
+                            <h3>Contact Information</h3>
+                            <p>📞 +91 9470235587<br>+91 9430008812</p>
+                            <p>✉ gpsagarwa1997@gmail.com</p>
+                            <p>📍 Motihari, Bihar 845401</p>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
 

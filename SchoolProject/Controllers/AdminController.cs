@@ -167,6 +167,90 @@ namespace SchoolProject.Controllers
         }
 
 
+
+        [HttpGet]
+        public IActionResult Enquiries()
+        {
+            List<Enquiry> enquiries = new();
+
+            string cs = _configuration.GetConnectionString("DefaultConnection");
+
+            using SqlConnection con = new(cs);
+            using SqlCommand cmd = new(@"
+        SELECT 
+            EnquiryId,
+            FirstName,
+            LastName,
+            PhoneNumber,
+            Email,
+            Message,
+            CreatedDate,
+            IsRead
+        FROM Enquiries
+        ORDER BY CreatedDate DESC
+    ", con);
+
+            con.Open();
+
+            using SqlDataReader dr = cmd.ExecuteReader();
+            while (dr.Read())
+            {
+                enquiries.Add(new Enquiry
+                {
+                    EnquiryId = Convert.ToInt32(dr["EnquiryId"]),
+                    FirstName = dr["FirstName"]?.ToString(),
+                    LastName = dr["LastName"]?.ToString(),
+                    PhoneNumber = dr["PhoneNumber"]?.ToString(),
+                    Email = dr["Email"]?.ToString(),
+                    Message = dr["Message"]?.ToString(),
+                    CreatedDate = Convert.ToDateTime(dr["CreatedDate"]),
+                    IsRead = Convert.ToBoolean(dr["IsRead"])
+                });
+            }
+
+            return View(enquiries);
+        }
+
+
+        [HttpGet]
+        public IActionResult MarkAsRead(int id)
+        {
+            string cs = _configuration.GetConnectionString("DefaultConnection");
+
+            using SqlConnection con = new(cs);
+            using SqlCommand cmd = new(
+                "UPDATE Enquiries SET IsRead = 1 WHERE EnquiryId = @Id", con);
+
+            cmd.Parameters.AddWithValue("@Id", id);
+
+            con.Open();
+            cmd.ExecuteNonQuery();
+
+            return RedirectToAction(nameof(Enquiries));
+        }
+
+        [HttpPost]
+        [Authorize] // Admin only (global auth already applies)
+        public IActionResult DeleteAllEnquiries()
+        {
+            string cs = _configuration.GetConnectionString("DefaultConnection");
+
+            using SqlConnection con = new(cs);
+            using SqlCommand cmd = new(
+                "DELETE FROM Enquiries",
+                con
+            );
+
+            con.Open();
+            cmd.ExecuteNonQuery();
+
+            TempData["Success"] = "All enquiries have been deleted successfully!";
+            return RedirectToAction("Enquiries");
+        }
+
+
+        
+
         [HttpGet]
         public IActionResult GetTeacherTypes()
         {

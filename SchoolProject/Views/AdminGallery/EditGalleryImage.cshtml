@@ -1,0 +1,78 @@
+﻿@model SchoolProject.Models.GalleryImage
+
+@{
+    ViewData["Title"] = "Edit Gallery Image";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<form asp-controller="AdminGallery"
+      asp-action="EditGalleryImage"
+      method="post"
+      enctype="multipart/form-data">
+
+    @Html.AntiForgeryToken()
+
+    <!-- ===============================
+         REQUIRED HIDDEN FIELDS (CRITICAL)
+    =============================== -->
+    <input type="hidden" asp-for="GalleryImageId" />
+    <input type="hidden" asp-for="ImagePath" /> <!-- Existing Image -->
+    <!-- ===============================
+         VALIDATION SUMMARY
+    =============================== -->
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <!-- ===============================
+         TITLE
+    =============================== -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label>Image Title</label>
+            <input asp-for="Title"
+                   class="form-control"
+                   placeholder="Enter image title" />
+        </div>
+    </div>
+
+    <!-- ===============================
+         GALLERY IMAGE (STUDENT STYLE)
+    =============================== -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label>Gallery Image</label>
+
+            @if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <div class="mb-2">
+                    <img src="~/uploads/gallery/@Model.ImagePath"
+                         style="width:150px;height:150px;object-fit:cover;border-radius:8px;" />
+                </div>
+            }
+
+            <input type="file"
+                   name="ImageFile"
+                   class="form-control"
+                   accept="image/*" />
+
+            <small class="text-muted">
+                Upload a new image only if you want to replace the existing one
+            </small>
+        </div>
+    </div>
+
+    <!-- ===============================
+         BUTTONS
+    =============================== -->
+    <div class="mt-4">
+        <button type="submit" class="btn btn-success">
+            Update
+        </button>
+
+        <a asp-controller="AdminGallery"
+           asp-action="Showdata"
+           class="btn btn-secondary ms-2">
+            Cancel
+        </a>
+    </div>
+
+</form>

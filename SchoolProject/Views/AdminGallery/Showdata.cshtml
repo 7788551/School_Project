@@ -1,0 +1,91 @@
+﻿@model List<SchoolProject.Models.GalleryImage>
+
+@{
+    ViewData["Title"] = "Gallery Images";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <h3 class="mb-4">Gallery Image List</h3>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col">Image</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">Created Date</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <tr>
+                            <td colspan="4">
+                                <div class="alert alert-success alert-dismissible fade show mb-0" role="alert">
+                                    @TempData["SuccessMessage"]
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.ImagePath))
+                                {
+                                    <img src="~/uploads/gallery/@item.ImagePath"
+                                         class="img-thumbnail"
+                                         style="height:40px; width:60px;" />
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No Image</span>
+                                }
+                            </td>
+
+                            <td>@item.Title</td>
+
+                            <td>@item.CreatedDate.ToString("dd-MMM-yyyy")</td>
+
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a asp-action="EditGalleryImage"
+                                       asp-controller="AdminGallery"
+                                       asp-route-id="@item.GalleryImageId"
+                                       class="btn btn-sm btn-primary">
+                                        Edit
+                                    </a>
+
+                                    <form asp-action="Delete"
+                                          asp-controller="AdminGallery"
+                                          method="post"
+                                          onsubmit="return confirm('Are you sure you want to delete this image?');">
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@item.GalleryImageId" />
+                                        <button type="submit"
+                                                class="btn btn-sm btn-danger">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">No gallery images found.</div>
+    }
+</div>

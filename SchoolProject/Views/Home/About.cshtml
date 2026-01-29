@@ -1,4 +1,7 @@
-﻿<style>
+﻿@model SchoolProject.Models.ViewModels.AboutViewModel
+
+
+<style>
 
     .ourmentor {
         display: flex;
@@ -238,32 +241,39 @@
         <!-- Cards Row -->
         <div class="row justify-content-center g-4">
 
-            <!-- Mentor Card 1 -->
-            <div class="col-6 col-md-6 col-lg-4 col-xl-3">
-                <div class="card border-0 shadow-sm h-100">
-                    <img src="~/images/director.png" class="card-img-top" alt="Director">
+            @if (Model != null && Model.MentorList.Count > 0)
+            {
+                foreach (var mentor in Model.MentorList)
+                {
+                    <div class="col-6 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card border-0 shadow-sm h-100">
 
-                    <div class="text-area">
-                        <h6 class="fw-bold text-dark mb-1">Mr. Anwar Ansari</h6>
-                        <p class="mb-0 text-dark">Director, Gyan Sagar Public School</p>
+                            <img src="~/uploads/mentors/@mentor.ImagePath"
+                                 class="card-img-top"
+                                 alt="@mentor.Name">
+
+                            <div class="text-area text-center py-3">
+                                <h6 class="fw-bold text-dark mb-1">
+                                    @mentor.Name
+                                </h6>
+                                <p class="mb-0 text-dark">
+                                    @mentor.Designation
+                                </p>
+                            </div>
+
+                        </div>
                     </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center text-muted">
+                    No mentors available.
                 </div>
-            </div>
-
-            <!-- Mentor Card 2 -->
-            <div class="col-6 col-md-6 col-lg-4 col-xl-3">
-                <div class="card border-0 shadow-sm h-100">
-                
-                    <img src="~/images/mentors/faculty (1).jpeg" class="card-img-top" alt="Principal">
-
-                    <div class="text-area">
-                        <h6 class="fw-bold text-dark mb-1">Mr. Dharmendra Mishra</h6>
-                        <p class="mb-0 text-dark">Principal, Gyan Sagar Public School</p>
-                    </div>
-                </div>
-            </div>
+            }
 
         </div>
+
 
     </div>
 </section>
@@ -281,173 +291,34 @@
                 </div>
             </div>
         </div>
+        
+      
 
         <!-- ✅ Owl Carousel Wrapper -->
         <div class="owl-carousel owl-theme mt-4">
 
-            <!-- ✅ ITEM 1 -->
-            <div class="item">
-                <div class="team-item wow fadeInUp">
-                    <div class="team-item-image">
-                        <a >
+            @foreach (var item in Model.FacultyList)
+            {
+                <div class="item">
+                    <div class="team-item wow fadeInUp">
+                        <div class="team-item-image">
                             <figure class="image-anime">
-                                <img src="~/images/teachers image/faculty (10).jpeg" />
-                               
+                                <img src="~/uploads/faculty/@item.ImagePath"
+                                     alt="@item.Name" />
                             </figure>
-                        </a>
-                    </div>
-                    <div class="team-item-content text-center">
-                        <h3><a>Ethan Walker</a></h3>
-                        <p>Martial Arts Trainer</p>
-                    </div>
-                </div>
-            </div>
+                        </div>
 
-            <!-- ✅ ITEM 2 -->
-            <div class="item">
-                <div class="team-item wow fadeInUp" data-wow-delay="0.2s">
-                    <div class="team-item-image">
-                        <a>
-                            <figure class="image-anime">
-                                <img src="~/images/teachers image/faculty (11).jpeg" />
-                               
-                            </figure>
-                        </a>
-                    </div>
-                    <div class="team-item-content text-center">
-                        <h3><a>Sophia Martinez</a></h3>
-                        <p>Championship Coach</p>
+                        <div class="team-item-content text-center">
+                            <h3>@item.Name</h3>
+                            <p>@item.Designation</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- ✅ ITEM 3 -->
-            <div class="item">
-                <div class="team-item wow fadeInUp" data-wow-delay="0.4s">
-                    <div class="team-item-image">
-                        <a >
-                            <figure class="image-anime">
-                                <img src="~/images/teachers image/faculty (2).jpeg" />
-                                
-                            </figure>
-                        </a>
-                    </div>
-                    <div class="team-item-content text-center">
-                        <h3><a>Lucas Bennett</a></h3>
-                        <p>Self-Defense Specialist</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ✅ ITEM 4 -->
-            <div class="item">
-                <div class="team-item wow fadeInUp" data-wow-delay="0.6s">
-                    <div class="team-item-image">
-                        <a>
-                            <figure class="image-anime">
-                                <img src="~/images/teachers image/faculty (3).jpeg" />
-                            </figure>
-                        </a>
-                    </div>
-                    <div class="team-item-content text-center">
-                        <h3><a>Olivia Harris</a></h3>
-                        <p>Junior Program Mentor</p>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="team-item wow fadeInUp" data-wow-delay="0.6s">
-                    <div class="team-item-image">
-                        <a>
-                            <figure class="image-anime">
-                                <img src="~/images/teachers image/Faculty (4).jpeg" />
-                            </figure>
-                        </a>
-                    </div>
-                    <div class="team-item-content text-center">
-                        <h3><a>Olivia Harris</a></h3>
-                        <p>Junior Program Mentor</p>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="team-item wow fadeInUp" data-wow-delay="0.6s">
-                    <div class="team-item-image">
-                        <a>
-                            <figure class="image-anime">
-                                <img src="~/images/teachers image/Faculty (5).jpeg" />
-                            </figure>
-                        </a>
-                    </div>
-                    <div class="team-item-content text-center">
-                        <h3><a>Olivia Harris</a></h3>
-                        <p>Junior Program Mentor</p>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="team-item wow fadeInUp" data-wow-delay="0.6s">
-                    <div class="team-item-image">
-                        <a>
-                            <figure class="image-anime">
-                                <img src="~/images/teachers image/Faculty (6).jpeg" />
-                            </figure>
-                        </a>
-                    </div>
-                    <div class="team-item-content text-center">
-                        <h3><a>Olivia Harris</a></h3>
-                        <p>Junior Program Mentor</p>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="team-item wow fadeInUp" data-wow-delay="0.6s">
-                    <div class="team-item-image">
-                        <a>
-                            <figure class="image-anime">
-                                <img src="~/images/teachers image/Faculty (7).jpeg" />
-                            </figure>
-                        </a>
-                    </div>
-                    <div class="team-item-content text-center">
-                        <h3><a>Olivia Harris</a></h3>
-                        <p>Junior Program Mentor</p>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="team-item wow fadeInUp" data-wow-delay="0.6s">
-                    <div class="team-item-image">
-                        <a>
-                            <figure class="image-anime">
-                                <img src="~/images/teachers image/Faculty (8).jpeg" />
-                            </figure>
-                        </a>
-                    </div>
-                    <div class="team-item-content text-center">
-                        <h3><a>Olivia Harris</a></h3>
-                        <p>Junior Program Mentor</p>
-                    </div>
-                </div>
-            </div>
-            <div class="item">
-                <div class="team-item wow fadeInUp" data-wow-delay="0.6s">
-                    <div class="team-item-image">
-                        <a>
-                            <figure class="image-anime">
-                                <img src="~/images/teachers image/Faculty (9).jpeg" />
-                            </figure>
-                        </a>
-                    </div>
-                    <div class="team-item-content text-center">
-                        <h3><a>Olivia Harris</a></h3>
-                        <p>Junior Program Mentor</p>
-                    </div>
-                </div>
-            </div>
+            }
 
         </div>
         <!-- ✅ Owl Carousel End -->
+
     </div>
 </div>
 

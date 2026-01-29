@@ -1,0 +1,101 @@
+﻿@model SchoolProject.Models.Mentor
+
+@{
+    ViewData["Title"] = "Edit Mentor";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h4 class="mb-3">Edit Mentor</h4>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+<form asp-action="EditMentor"
+      asp-controller="Mentor"
+      method="post"
+      enctype="multipart/form-data">
+
+    @Html.AntiForgeryToken()
+
+    <!-- REQUIRED HIDDEN FIELDS -->
+    <input type="hidden" asp-for="MentorId" />
+    <input type="hidden" asp-for="ImagePath" />
+
+    <div class="row">
+        <!-- Name -->
+        <div class="col-md-6 mb-3">
+            <label asp-for="Name" class="form-label">Name</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <!-- Designation -->
+        <div class="col-md-6 mb-3">
+            <label asp-for="Designation" class="form-label">Designation</label>
+            <input asp-for="Designation" class="form-control" />
+            <span asp-validation-for="Designation" class="text-danger"></span>
+        </div>
+
+        <!-- Display Order -->
+        <div class="col-md-6 mb-3">
+            <label asp-for="DisplayOrder" class="form-label">Display Order</label>
+            <input asp-for="DisplayOrder"
+                   type="number"
+                   min="1"
+                   max="2"
+                   class="form-control" />
+            <small class="text-muted">
+                1 = Director, 2 = Principal
+            </small>
+            <span asp-validation-for="DisplayOrder" class="text-danger"></span>
+        </div>
+
+        <!-- Current Image -->
+        <div class="col-md-6 mb-3">
+            <label class="form-label d-block">Current Photo</label>
+
+            @if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <img src="~/uploads/mentors/@Model.ImagePath"
+                     class="img-thumbnail"
+                     style="height:100px;width:100px;object-fit:cover;" />
+            }
+            else
+            {
+                <span class="text-muted">No image uploaded</span>
+            }
+        </div>
+
+        <!-- New Image -->
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Change Photo</label>
+            <input type="file"
+                   name="ImageFile"
+                   class="form-control"
+                   accept="image/*" />
+            <small class="text-muted">
+                Leave empty to keep existing image
+            </small>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-success">
+            Update Mentor
+        </button>
+
+        <a asp-action="Mentor"
+           asp-controller="Mentor"
+           class="btn btn-secondary ms-2">
+            Cancel
+        </a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
