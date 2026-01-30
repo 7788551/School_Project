@@ -48,7 +48,7 @@
 
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered table-hover align-middle">
+                <table id="myTable" class="table table-bordered table-hover align-middle">
                     <thead class="table-dark">
                         <tr>
                             <th>#</th>
@@ -129,3 +129,10 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        new DataTable('#myTable');
+    });
+</script>
+
+
