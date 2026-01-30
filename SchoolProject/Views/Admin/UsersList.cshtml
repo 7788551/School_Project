@@ -1,0 +1,71 @@
+﻿@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "Users List";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h3 class="mb-3">👤 System Users</h3>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>User ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Role</th>
+                <th>Password</th> <!-- ⚠️ -->
+                <th>Status</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model)
+            {
+                <tr>
+                    <td>@u.UserId</td>
+                    <td>@u.Name</td>
+
+                    <td>
+                        @if (string.IsNullOrWhiteSpace(u.Email))
+                        {
+                            <span class="text-muted">N/A</span>
+                        }
+                        else
+                        {
+                            @u.Email
+                        }
+                    </td>
+
+                    <td>@u.Phone</td>
+
+                    <td>
+                        <span class="badge bg-info text-dark">
+                            @u.Role
+                        </span>
+                    </td>
+
+                    <!-- PASSWORD (VISIBLE) -->
+                    <td style="font-family: monospace;">
+                        @u.Password
+                    </td>
+
+                    <td>
+                        @if (u.IsActive)
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Inactive</span>
+                        }
+                    </td>
+
+                    <td>@u.CreatedDate.ToString("dd-MM-yyyy")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

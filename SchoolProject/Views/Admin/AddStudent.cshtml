@@ -10,11 +10,14 @@
     </div>
 </div>
 
-<form asp-controller="Admin"
+@* <form asp-controller="Admin"
       asp-action="AddStudent"
       method="post"
       enctype="multipart/form-data"
       id="studentForm">
+
+    @Html.AntiForgeryToken()
+
 
     <h3>Basic Details</h3>
 
@@ -24,6 +27,7 @@
     <input asp-for="PhoneNumber" class="form-control" placeholder="Phone Number" required />
     <br />
 
+    <label>Date of Birth</label>
     <input asp-for="DateOfBirth" type="date" class="form-control" required />
     <br />
 
@@ -35,7 +39,7 @@
 
     <hr />
 
-    <!-- ✅ STUDENT IMAGE -->
+    <!-- STUDENT IMAGE -->
     <h3>Student Photo</h3>
 
     <input asp-for="StudentImage"
@@ -50,7 +54,7 @@
 
     <h3>Academic Details</h3>
 
-    <!-- SESSION -->
+    <!-- SESSION (DISPLAY ONLY) -->
     <label>Academic Session</label>
     <input type="text" id="sessionName" class="form-control" readonly />
     <input type="hidden" asp-for="SessionId" id="sessionId" />
@@ -58,14 +62,22 @@
 
     <!-- CLASS -->
     <label>Class</label>
-    <select asp-for="ClassId" class="form-control" id="classId">
+    <select asp-for="ClassId"
+            class="form-control"
+            id="classId"
+            required
+            disabled>
         <option value="">Select Class</option>
     </select>
     <br />
 
     <!-- SECTION -->
     <label>Section</label>
-    <select asp-for="SectionId" class="form-control" id="sectionId">
+    <select asp-for="SectionId"
+            class="form-control"
+            id="sectionId"
+            required
+            disabled>
         <option value="">Select Section</option>
     </select>
 
@@ -101,8 +113,150 @@
     <br />
 
     <button type="submit" class="btn btn-primary">Add Student</button>
+</form> *@
 
+
+
+<form asp-controller="Admin"
+      asp-action="AddStudent"
+      method="post"
+      enctype="multipart/form-data"
+      id="studentForm">
+
+    @Html.AntiForgeryToken()
+
+    <h3>Basic Details</h3>
+
+    <label>Student Name</label>
+    <input asp-for="Name" class="form-control" placeholder="Enter student name" required />
+    <br />
+
+    <label>Phone Number</label>
+    <input asp-for="PhoneNumber" class="form-control" placeholder="Enter phone number" required />
+    <br />
+
+    <label>Date of Birth</label>
+    <input asp-for="DateOfBirth" type="date" class="form-control" required />
+    <br />
+
+    <label>Gender</label>
+    <select asp-for="Gender" class="form-control" required>
+        <option value="">Select Gender</option>
+        <option>Male</option>
+        <option>Female</option>
+    </select>
+
+    <hr />
+
+    <!-- STUDENT IMAGE -->
+    <h3>Student Photo</h3>
+
+    <label>Upload Student Photo</label>
+    <input asp-for="StudentImage"
+           type="file"
+           class="form-control"
+           accept=".jpg,.jpeg,.png" />
+    <small class="text-muted">
+        Allowed formats: JPG, JPEG, PNG
+    </small>
+
+    <hr />
+
+    <h3>Academic Details</h3>
+
+    <!-- SESSION -->
+    <label>Academic Session</label>
+    <input type="text" id="sessionName" class="form-control" readonly />
+    <input type="hidden" asp-for="SessionId" id="sessionId" />
+    <br />
+
+    <!-- CLASS -->
+    <label>Class</label>
+    <select asp-for="ClassId"
+            class="form-control"
+            id="classId"
+            required
+            disabled>
+        <option value="">Select Class</option>
+    </select>
+    <br />
+
+    <!-- SECTION -->
+    <label>Section</label>
+    <select asp-for="SectionId"
+            class="form-control"
+            id="sectionId"
+            required
+            disabled>
+        <option value="">Select Section</option>
+    </select>
+
+    <hr />
+
+    <label>Admission Number</label>
+    <input asp-for="AdmissionNumber"
+           class="form-control"
+           placeholder="Enter admission number"
+           required />
+    <br />
+
+    <label>Roll Number</label>
+    <input asp-for="RollNumber"
+           class="form-control"
+           placeholder="Enter roll number (optional)" />
+    <br />
+
+    <h3>Parent & Address</h3>
+
+    <label>Father's Name</label>
+    <input asp-for="FatherName"
+           class="form-control"
+           placeholder="Enter father's name"
+           required />
+    <br />
+
+    <label>Mother's Name</label>
+    <input asp-for="MotherName"
+           class="form-control"
+           placeholder="Enter mother's name" />
+    <br />
+
+    <label>Address Line 1</label>
+    <input asp-for="AddressLine1"
+           class="form-control"
+           placeholder="House no., street, locality"
+           required />
+    <br />
+
+    <label>Address Line 2</label>
+    <input asp-for="AddressLine2"
+           class="form-control"
+           placeholder="Area, landmark (optional)" />
+    <br />
+
+    <label>City</label>
+    <input asp-for="City"
+           class="form-control"
+           placeholder="City" />
+    <br />
+
+    <label>State</label>
+    <input asp-for="State"
+           class="form-control"
+           placeholder="State" />
+    <br />
+
+    <label>Pincode</label>
+    <input asp-for="Pincode"
+           class="form-control"
+           placeholder="Pincode" />
+    <br />
+
+    <button type="submit" class="btn btn-primary">
+        Add Student
+    </button>
 </form>
+
 
 @section Scripts {
     <script>
@@ -125,8 +279,11 @@
                 .then(data => {
                     const ddl = document.getElementById('classId');
                     ddl.innerHTML = '<option value="">Select Class</option>';
+                    ddl.disabled = false;
+
                     data.forEach(c => {
-                        ddl.innerHTML += `<option value="${c.classId}">${c.className}</option>`;
+                        ddl.innerHTML +=
+                            `<option value="${c.classId}">${c.className}</option>`;
                     });
                 });
         }
@@ -137,10 +294,14 @@
             const sectionSelect = document.getElementById('sectionId');
 
             sectionSelect.innerHTML = '<option value="">Select Section</option>';
+            sectionSelect.disabled = true;
+
+            if (!classId) return;
 
             fetch(`/Admin/GetSectionsByClass?sessionId=${sessionId}&classId=${classId}`)
                 .then(res => res.json())
                 .then(data => {
+                    sectionSelect.disabled = false;
                     data.forEach(s => {
                         sectionSelect.innerHTML +=
                             `<option value="${s.sectionId}">${s.sectionName}</option>`;

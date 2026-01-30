@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using SchoolProject.Helpers;
 using SchoolProject.Models;
 using System.Data;
 using System.Security.Claims;
@@ -28,7 +29,7 @@ namespace SchoolProject.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> Login(string PhoneNumber, string Password)
+        public async Task<IActionResult> Login(string LoginId, string Password)
         {
             string cs = _configuration.GetConnectionString("DefaultConnection");
 
@@ -41,11 +42,14 @@ namespace SchoolProject.Controllers
             int roleId;
             string adminImage = "default.png"; // ✅ fallback
 
+            // 🔹 Detect Email or Phone
+            bool isEmail = LoginId.Contains("@");
+
             using SqlConnection con = new SqlConnection(cs);
             con.Open();
 
             // ================================
-            // 1️⃣ LOGIN QUERY
+            // 1️⃣ LOGIN QUERY (EMAIL OR PHONE)
             // ================================
             using (SqlCommand cmd = new SqlCommand(@"
         SELECT  
@@ -58,14 +62,19 @@ namespace SchoolProject.Controllers
             r.RoleId
         FROM Users u
         INNER JOIN Roles r ON u.RoleId = r.RoleId
-        WHERE u.PhoneNumber = @PhoneNumber", con))
+        WHERE 
+        (
+            (@IsEmail = 1 AND u.Email = @LoginId)
+         OR (@IsEmail = 0 AND u.PhoneNumber = @LoginId)
+        )", con))
             {
-                cmd.Parameters.AddWithValue("@PhoneNumber", PhoneNumber);
+                cmd.Parameters.AddWithValue("@LoginId", LoginId);
+                cmd.Parameters.AddWithValue("@IsEmail", isEmail ? 1 : 0);
 
                 using SqlDataReader reader = cmd.ExecuteReader();
                 if (!reader.Read())
                 {
-                    ViewBag.Error = "Invalid phone number or password";
+                    ViewBag.Error = "Invalid phone/email or password";
                     return View();
                 }
 
@@ -83,7 +92,7 @@ namespace SchoolProject.Controllers
             // ================================
             if (Password != dbPassword)
             {
-                ViewBag.Error = "Invalid phone number or password";
+                ViewBag.Error = "Invalid phone/email or password";
                 return View();
             }
 
@@ -160,7 +169,7 @@ namespace SchoolProject.Controllers
             HttpContext.Session.SetInt32("RoleId", roleId);
             HttpContext.Session.SetInt32("SessionId", sessionId);
             HttpContext.Session.SetString("SessionName", sessionName);
-            HttpContext.Session.SetString("AdminImage", adminImage); // ✅ FIXED
+            HttpContext.Session.SetString("AdminImage", adminImage);
 
             // ================================
             // 7️⃣ FORCE PASSWORD CHANGE
@@ -180,6 +189,7 @@ namespace SchoolProject.Controllers
                 _ => RedirectToAction("Login", "Account")
             };
         }
+
 
 
         [HttpGet]
@@ -301,6 +311,202 @@ namespace SchoolProject.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-       
+
+
+        [AllowAnonymous]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword(string phoneNumber)
+        {
+            using SqlConnection con = new SqlConnection(
+                _configuration.GetConnectionString("DefaultConnection"));
+
+            SqlCommand cmd = new SqlCommand(
+                @"SELECT UserId, RoleId 
+          FROM Users 
+          WHERE PhoneNumber = @Phone 
+          AND IsActive = 1", con);
+
+            cmd.Parameters.AddWithValue("@Phone", phoneNumber);
+
+            con.Open();
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            if (!reader.Read())
+            {
+                ViewBag.Error = "Phone number not found";
+                return View();
+            }
+
+            int roleId = Convert.ToInt32(reader["RoleId"]);
+            int userId = Convert.ToInt32(reader["UserId"]);
+
+            // ❌ STUDENT BLOCKED (RoleId = 4)
+            if (roleId == 4)
+            {
+                ViewBag.Error = "Please contact school admin for password reset";
+                return View();
+            }
+
+            // ✅ ONLY Admin, Teacher, Accountant ALLOWED
+            if (roleId != 1 && roleId != 2 && roleId != 3)
+            {
+                ViewBag.Error = "You are not allowed to reset password";
+                return View();
+            }
+
+            TempData["UserId"] = userId;
+            return RedirectToAction("EnterEmail");
+        }
+
+
+        [AllowAnonymous]
+        public IActionResult EnterEmail()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public IActionResult EnterEmail(string email)
+        {
+            if (TempData["UserId"] == null)
+                return RedirectToAction("ForgotPassword");
+
+            int userId = Convert.ToInt32(TempData["UserId"]);
+            TempData.Keep("UserId");
+
+            string otp = new Random().Next(100000, 999999).ToString();
+            DateTime expiry = DateTime.Now.AddMinutes(5);
+
+            using SqlConnection con = new SqlConnection(
+                _configuration.GetConnectionString("DefaultConnection"));
+
+            con.Open();
+
+            // ✅ 1️⃣ DELETE any existing OTPs for this user (old or unexpired)
+            SqlCommand deleteCmd = new SqlCommand(
+                "DELETE FROM PasswordResetOtp WHERE UserId = @UserId", con);
+            deleteCmd.Parameters.AddWithValue("@UserId", userId);
+            deleteCmd.ExecuteNonQuery();
+
+            // ✅ 2️⃣ INSERT new OTP
+            SqlCommand insertCmd = new SqlCommand(
+                @"INSERT INTO PasswordResetOtp
+          (UserId, OtpCode, ExpiryTime)
+          VALUES (@UserId, @Otp, @Expiry)", con);
+
+            insertCmd.Parameters.AddWithValue("@UserId", userId);
+            insertCmd.Parameters.AddWithValue("@Otp", otp);
+            insertCmd.Parameters.AddWithValue("@Expiry", expiry);
+            insertCmd.ExecuteNonQuery();
+
+            // ✅ 3️⃣ Send OTP email
+            EmailHelper.SendOtpEmail(
+                _configuration,
+                email,
+                otp
+            );
+
+            return RedirectToAction("VerifyOtp");
+        }
+
+        [AllowAnonymous]
+        public IActionResult VerifyOtp()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public IActionResult VerifyOtp(string otp)
+        {
+            if (TempData["UserId"] == null)
+                return RedirectToAction("ForgotPassword");
+
+            int userId = Convert.ToInt32(TempData["UserId"]);
+            TempData.Keep("UserId");
+
+            using SqlConnection con = new SqlConnection(
+                _configuration.GetConnectionString("DefaultConnection"));
+
+            // 🔍 Check OTP (no IsUsed column)
+            SqlCommand cmd = new SqlCommand(
+                @"SELECT OtpId 
+          FROM dbo.PasswordResetOtp
+          WHERE UserId = @UserId
+          AND OtpCode = @Otp
+          AND ExpiryTime >= GETDATE()", con);
+
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            cmd.Parameters.AddWithValue("@Otp", otp);
+
+            con.Open();
+            object otpId = cmd.ExecuteScalar();
+
+            if (otpId == null)
+            {
+                ViewBag.Error = "Invalid or expired OTP";
+                return View();
+            }
+
+            // 🗑️ DELETE OTP AFTER SUCCESSFUL USE
+            SqlCommand deleteCmd = new SqlCommand(
+                "DELETE FROM dbo.PasswordResetOtp WHERE OtpId = @Id", con);
+
+            deleteCmd.Parameters.AddWithValue("@Id", otpId);
+            deleteCmd.ExecuteNonQuery();
+
+            TempData["ResetUserId"] = userId;
+            return RedirectToAction("ResetPassword");
+        }
+
+
+        [AllowAnonymous]
+        public IActionResult ResetPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        public IActionResult ResetPassword(string newPassword, string confirmPassword)
+        {
+            if (newPassword != confirmPassword)
+            {
+                ViewBag.Error = "Passwords do not match";
+                return View();
+            }
+
+            if (TempData["ResetUserId"] == null)
+                return RedirectToAction("ForgotPassword");
+
+            int userId = Convert.ToInt32(TempData["ResetUserId"]);
+
+            using SqlConnection con = new SqlConnection(
+                _configuration.GetConnectionString("DefaultConnection"));
+
+            SqlCommand cmd = new SqlCommand(
+                @"UPDATE Users 
+          SET Password = @Pwd,
+              ForceChangePassword = 0
+          WHERE UserId = @Id", con);
+
+            cmd.Parameters.AddWithValue("@Pwd", newPassword);
+            cmd.Parameters.AddWithValue("@Id", userId);
+
+            con.Open();
+            cmd.ExecuteNonQuery();
+
+            return RedirectToAction("Login");
+        }
+
+
+
     }
 }

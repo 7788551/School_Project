@@ -7,7 +7,7 @@ using System.Data;
 
 namespace SchoolProject.Controllers
 {
-    //[Authorize(Roles = "Teacher")]
+    [Authorize(Roles = "Teacher")]
     public class MarksEntryController : Controller
     {
         private readonly IConfiguration _configuration;
@@ -21,17 +21,13 @@ namespace SchoolProject.Controllers
             _teacherHelper = teacherHelper;
         }
 
-        private int GetLoggedInTeacherId()
-        {
-            int userId = int.Parse(User.FindFirst("UserId")!.Value);
-            return _teacherHelper.GetTeacherIdFromUserId(userId);
-        }
 
         private SqlConnection GetConnection()
         {
             return new SqlConnection(
                 _configuration.GetConnectionString("DefaultConnection"));
         }
+
 
         // 🔹 GET: Marks Entry Page
         [HttpGet]
@@ -281,6 +277,18 @@ namespace SchoolProject.Controllers
         //    con.Open();
         //    return Convert.ToInt32(cmd.ExecuteScalar());
         //}
+        private int GetLoggedInTeacherId()
+        {
+            var userIdClaim = User.FindFirst("UserId");
+
+            if (userIdClaim == null)
+                throw new UnauthorizedAccessException("UserId claim missing.");
+
+            int userId = int.Parse(userIdClaim.Value);
+
+            return _teacherHelper.GetTeacherIdFromUserId(userId);
+        }
+
 
         // 📅 Current Academic Session
         private int GetCurrentSessionId()

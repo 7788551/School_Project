@@ -1,66 +1,58 @@
 ﻿@{
-    ViewData["Title"] = "AssignClassTeacher";
-    Layout = "~/Views/Shared/AdminLayout.cshtml"; // use your layout
+    ViewData["Title"] = "Assign Class Teacher";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
 }
 
-
-
-
 <h4>Assign Class Teacher</h4>
+
 <div class="container mt-4">
 
-    <input type="hidden" id="SessionId" />
+    <!-- SESSION -->
+    <input type="hidden" id="sessionId" />
 
     <div class="mb-3">
-        <label>Session</label>
-        <input type="text" id="SessionName" class="form-control" readonly />
+        <label>Current Academic Session</label>
+        <input type="text" id="sessionName" class="form-control" readonly />
     </div>
 
+    <!-- CLASS -->
     <div class="mb-3">
         <label>Class</label>
-        <select id="ClassId" class="form-control">
-            <option value="">-- Select Class --</option>
+        <select id="classId" class="form-control" disabled>
+            <option value="">Select Class</option>
         </select>
     </div>
 
+    <!-- SECTION -->
     <div class="mb-3">
         <label>Section</label>
-        <select id="SectionId" class="form-control">
-            <option value="">-- Select Section --</option>
+        <select id="sectionId" class="form-control" disabled>
+            <option value="">Select Section</option>
         </select>
     </div>
 
+    <!-- TEACHER -->
     <div class="mb-3">
         <label>Teacher</label>
-        <select id="TeacherId" class="form-control">
-            <option value="">-- Select Teacher --</option>
+        <select id="teacherId" class="form-control">
+            <option value="">Select Teacher</option>
         </select>
     </div>
 
     <button id="btnAssign" class="btn btn-primary">
-        Assign
+        Assign / Replace Teacher
     </button>
 
 </div>
 
 
-
-
-
 @section Scripts {
     <script>
+
         document.addEventListener('DOMContentLoaded', function () {
-
-            console.log("Assign Class Teacher JS Loaded");
-
             loadCurrentSession();
-            loadTeachers();
-
-            document.getElementById('ClassId').addEventListener('change', function () {
-                loadSections();
-            });
-
-            document.getElementById('btnAssign').addEventListener('click', saveAssignment);
+            document.getElementById('btnAssign')
+                .addEventListener('click', saveAssignment);
         });
 
         // ============================
@@ -70,70 +62,88 @@
             fetch('/Admin/GetCurrentSession')
                 .then(res => res.json())
                 .then(data => {
-                    if (!data) {
-                        alert('No academic session found');
+
+                    if (!data || !data.sessionId) {
+                        alert('No active academic session found.');
                         return;
                     }
 
-                    document.getElementById('SessionId').value = data.sessionId;
-                    document.getElementById('SessionName').value = data.sessionName;
+                    document.getElementById('sessionId').value = data.sessionId;
+                    document.getElementById('sessionName').value = data.sessionName;
 
                     loadClasses(data.sessionId);
-                })
-                .catch(err => console.error(err));
-        }
-
-        // ============================
-        // LOAD CLASSES
-        // ============================
-        function loadClasses(sessionId) {
-            fetch(`/Admin/GetClassesBySession?sessionId=${sessionId}`)
-                .then(res => res.json())
-                .then(data => {
-                    const ddl = document.getElementById('ClassId');
-                    ddl.innerHTML = '<option value="">-- Select Class --</option>';
-
-                    data.forEach(c => {
-                        ddl.innerHTML += `<option value="${c.classId}">${c.className}</option>`;
-                    });
+                    loadTeachers(data.sessionId);
                 });
         }
 
         // ============================
-        // LOAD SECTIONS
+        // LOAD CLASSES BY SESSION
         // ============================
-        function loadSections() {
-            const sessionId = document.getElementById('SessionId').value;
-            const classId = document.getElementById('ClassId').value;
-            const ddl = document.getElementById('SectionId');
+        function loadClasses(sessionId) {
 
-            ddl.innerHTML = '<option value="">-- Select Section --</option>';
+            fetch(`/Admin/GetClassesBySession?sessionId=${sessionId}`)
+                .then(res => res.json())
+                .then(data => {
+
+                    const ddl = document.getElementById('classId');
+                    ddl.innerHTML = '<option value="">Select Class</option>';
+                    ddl.disabled = false;
+
+                    data.forEach(c => {
+                        ddl.innerHTML +=
+                            `<option value="${c.classId}">${c.className}</option>`;
+                    });
+                });
+
+            document.getElementById('classId')
+                .addEventListener('change', onClassChange);
+        }
+
+        // ============================
+        // LOAD SECTIONS BY CLASS + SESSION
+        // ============================
+        function onClassChange() {
+
+            const classId = this.value;
+            const sessionId = document.getElementById('sessionId').value;
+            const ddl = document.getElementById('sectionId');
+
+            ddl.innerHTML = '<option value="">Select Section</option>';
+            ddl.disabled = true;
 
             if (!classId) return;
 
             fetch(`/Admin/GetSectionsByClass?sessionId=${sessionId}&classId=${classId}`)
                 .then(res => res.json())
                 .then(data => {
+
+                    ddl.disabled = false;
+
                     data.forEach(s => {
-                        ddl.innerHTML += `<option value="${s.sectionId}">${s.sectionName}</option>`;
+                        ddl.innerHTML +=
+                            `<option value="${s.sectionId}">${s.sectionName}</option>`;
                     });
                 });
         }
 
         // ============================
-        // LOAD TEACHERS
+        // LOAD TEACHERS BY SESSION
         // ============================
-        function loadTeachers() {
-            fetch('/Admin/GetTeachers')
+               function loadTeachers() {
+
+            fetch('/Admin/GetTeachersByCurrentSession')
                 .then(res => res.json())
                 .then(data => {
-                    const ddl = document.getElementById('TeacherId');
-                    ddl.innerHTML = '<option value="">-- Select Teacher --</option>';
+
+                    const ddl = document.getElementById('teacherId');
+                    ddl.innerHTML = '<option value="">Select Teacher</option>';
 
                     data.forEach(t => {
-                        ddl.innerHTML += `<option value="${t.teacherId}">${t.teacherName}</option>`;
+                        ddl.innerHTML +=
+                            `<option value="${t.teacherId}">${t.teacherName}</option>`;
                     });
-                });
+                })
+                .catch(() => alert('Failed to load teachers.'));
         }
 
         // ============================
@@ -142,16 +152,17 @@
         function saveAssignment() {
 
             const payload = {
-                SessionId: document.getElementById('SessionId').value,
-                ClassId: document.getElementById('ClassId').value,
-                SectionId: document.getElementById('SectionId').value,
-                TeacherId: document.getElementById('TeacherId').value
+                ClassId: document.getElementById('classId').value,
+                SectionId: document.getElementById('sectionId').value,
+                TeacherId: document.getElementById('teacherId').value
             };
 
             if (!payload.ClassId || !payload.SectionId || !payload.TeacherId) {
-                alert('Please select Class, Section and Teacher');
+                alert('Please select Class, Section, and Teacher.');
                 return;
             }
+
+            if (!confirm('Replace existing class teacher for this section?')) return;
 
             fetch('/Admin/AssignClassTeacher', {
                 method: 'POST',
@@ -159,13 +170,15 @@
                 body: JSON.stringify(payload)
             })
             .then(res => res.json())
-            .then(result => {
-                if (result.success) {
-                    alert('Class Teacher Assigned Successfully');
+            .then(r => {
+                if (r.success) {
+                    alert('Class teacher assigned successfully.');
                 } else {
-                    alert('Assignment Failed');
+                    alert(r.message || 'Assignment failed.');
                 }
             });
         }
+
     </script>
 }
+

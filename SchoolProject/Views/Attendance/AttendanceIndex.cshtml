@@ -21,7 +21,7 @@
                name="attendanceDate"
                value="@DateTime.Today.ToString("yyyy-MM-dd")" />
 
-        <!-- ✅ Responsive Table -->
+        <!-- Responsive Table -->
         <div class="table-responsive">
             <table class="table table-bordered align-middle text-center">
                 <thead class="table-dark">
@@ -68,6 +68,18 @@
             .then(res => res.json())
             .then(data => {
 
+                const tbody = document.getElementById('studentRows');
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">
+                                No students found for your assigned class.
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
                 let rows = '';
 
                 data.forEach((student, index) => {
@@ -80,13 +92,13 @@
                                    value="${student.studentId}" />
                         </td>
 
-                        <!-- Present -->
+                        <!-- Present (default selected) -->
                         <td>
                             <input type="radio"
                                    name="model[${index}].IsPresent"
                                    value="true"
                                    class="form-check-input present-radio"
-                                   required />
+                                   checked />
                         </td>
 
                         <!-- Absent -->
@@ -94,25 +106,32 @@
                             <input type="radio"
                                    name="model[${index}].IsPresent"
                                    value="false"
-                                   class="form-check-input absent-radio"
-                                   required />
+                                   class="form-check-input absent-radio" />
                         </td>
                     </tr>`;
                 });
 
-                document.getElementById('studentRows').innerHTML = rows;
+                tbody.innerHTML = rows;
+            })
+            .catch(() => {
+                document.getElementById('studentRows').innerHTML = `
+                    <tr>
+                        <td colspan="3" class="text-danger text-center">
+                            Failed to load students.
+                        </td>
+                    </tr>`;
             });
     </script>
 
     <style>
         .present-radio {
             transform: scale(1.2);
-            accent-color: #198754; /* Bootstrap green */
+            accent-color: #198754; /* green */
         }
 
         .absent-radio {
             transform: scale(1.2);
-            accent-color: #dc3545; /* Bootstrap red */
+            accent-color: #dc3545; /* red */
         }
     </style>
 }

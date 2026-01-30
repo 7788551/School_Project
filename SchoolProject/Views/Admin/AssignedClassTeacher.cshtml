@@ -1,57 +1,91 @@
 ﻿@model List<AssignedClassTeacher>
 
 @{
-    ViewData["Title"] = "AssignedClassTeacher";
-    Layout = "~/Views/Shared/AdminLayout.cshtml"; // use your layout
+    ViewData["Title"] = "Assigned Class Teachers";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
 }
 
-
 <div class="container mt-4">
-    <h4>Assigned Class Teachers</h4>
 
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>Session</th>
-                <th>Class</th>
-                <th>Section</th>
-                <th>Teacher</th>
-                <th>Status</th>
-                <th>Assigned On</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (!Model.Any())
-            {
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Assigned Class Teachers</h4>
+
+        <a asp-controller="Admin"
+           asp-action="AssignClassTeacher"
+           class="btn btn-sm btn-primary">
+            <i class="bi bi-person-plus-fill"></i>
+            Assign / Replace Teacher
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-dark">
                 <tr>
-                    <td colspan="6" class="text-center">
-                        No class teachers assigned
-                    </td>
+                    <th style="width: 18%;">Session</th>
+                    <th style="width: 15%;">Class</th>
+                    <th style="width: 15%;">Section</th>
+                    <th>Teacher</th>
+                    <th style="width: 10%;">Status</th>
+                    <th style="width: 15%;">Assigned On</th>
                 </tr>
-            }
-            else
-            {
-                foreach (var item in Model)
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
                 {
                     <tr>
-                        <td>@item.SessionName</td>
-                        <td>@item.ClassName</td>
-                        <td>@item.SectionName</td>
-                        <td>@item.TeacherName</td>
-                        <td>
-                            @if (item.IsActive)
-                            {
-                                <span class="badge bg-success">Active</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-secondary">Inactive</span>
-                            }
+                        <td colspan="6" class="text-center text-muted">
+                            No class teachers assigned for the current academic session.
                         </td>
-                        <td>@item.CreatedDate.ToString("dd-MMM-yyyy")</td>
                     </tr>
                 }
-            }
-        </tbody>
-    </table>
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="fw-semibold">@item.SessionName</span>
+                            </td>
+
+                            <td>@item.ClassName</td>
+
+                            <td>@item.SectionName</td>
+
+                            <td>
+                                <i class="bi bi-person-badge me-1"></i>
+                                @item.TeacherName
+                            </td>
+
+                            <td class="text-center">
+                                @if (item.IsActive)
+                                {
+                                    <span class="badge bg-success">
+                                        Active
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        Inactive
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                @item.CreatedDate.ToString("dd-MMM-yyyy")
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="alert alert-info mt-3 small">
+        <i class="bi bi-info-circle"></i>
+        Reassigning a class teacher will <strong>not</strong> affect attendance data.
+        Previous assignments are preserved for audit and history.
+    </div>
+
 </div>

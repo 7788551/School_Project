@@ -67,6 +67,19 @@
             min-height: 55vh;
         }
     }
+
+    .forgot-password-link {
+        font-size: 14px;
+        color: #6c757d; /* Bootstrap muted color */
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+        .forgot-password-link:hover {
+            color: #0d6efd; /* Bootstrap primary */
+            text-decoration: none; /* force no underline */
+        }
+
 </style>
 <!-- Page Header Start -->
 <div class="page-header bg-section dark-section parallaxie">
@@ -90,6 +103,8 @@
 </div>
 <!-- Page Header End -->
 
+
+
 <section class="login-section d-flex align-items-center">
     <div class="container">
         <div class="row justify-content-center">
@@ -99,18 +114,20 @@
                     <div class="text-center mb-4">
                         <img src="~/images/School-images/COLOURLOGO.png" class="login-logo" />
                         <h3 class="mt-3 fw-bold">School Login</h3>
-                        <p class="text-muted">Login using your registered mobile number</p>
+                        <p class="text-muted">
+                            Login using your registered phone number or email
+                        </p>
                     </div>
 
                     <form asp-controller="Account" asp-action="Login" method="post">
 
                         <div class="form-group mb-3">
-                            <label>Phone Number</label>
-                            <input type="tel"
+                            <label>Phone Number or Email</label>
+                            <input type="text"
+                                   id="loginId"
+                                   name="LoginId"
                                    class="form-control"
-                                   name="PhoneNumber"
-                                   placeholder="Enter phone number"
-                                   maxlength="10"
+                                   placeholder="Enter phone number or email"
                                    required />
                         </div>
 
@@ -123,9 +140,19 @@
                                    required />
                         </div>
 
-                        <button type="submit" class="btn btn-default btn-highlighted w-100 mt-3">
+                        <button type="submit"
+                                class="btn btn-default btn-highlighted w-100 mt-3">
                             Login
                         </button>
+
+                        <!-- Forgot Password -->
+                        <div class="text-center mt-3">
+                            <a asp-controller="Account"
+                               asp-action="ForgotPassword"
+                               class="forgot-password-link">
+                                Forgot Password?
+                            </a>
+                        </div>
 
                     </form>
 
@@ -136,47 +163,68 @@
                         </div>
                     }
 
-
-
                 </div>
             </div>
         </div>
     </div>
 </section>
 
+
 <script>
-        // Show / Hide Password
-    document.querySelector(".toggle-password").addEventListener("click", function () {
-        let input = document.getElementById("password");
-        this.classList.toggle("bi-eye");
+    // ===============================
+    // 1️⃣ Phone OR Email max-length logic
+    // ===============================
+    const loginInput = document.getElementById("loginId");
 
-        if (input.type === "password") {
-            input.type = "text";
+    loginInput.addEventListener("input", function () {
+        const value = this.value.trim();
+
+        // Only digits → Phone number
+        if (/^\d+$/.test(value)) {
+            this.maxLength = 10;
         } else {
-            input.type = "password";
+            // Email or mixed → remove phone restriction
+            this.removeAttribute("maxLength");
         }
     });
 
-    // Form Validation
-    document.getElementById("loginForm").addEventListener("submit", function (e) {
-        e.preventDefault();
+    // ===============================
+    // 2️⃣ Show / Hide Password (SAFE)
+    // ===============================
+    const togglePassword = document.querySelector(".toggle-password");
+    const passwordInput = document.querySelector("input[name='Password']");
 
-        let phone = document.getElementById("phone").value.trim();
-        let password = document.getElementById("password").value.trim();
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener("click", function () {
+            const type =
+                passwordInput.type === "password" ? "text" : "password";
+            passwordInput.type = type;
+            this.classList.toggle("bi-eye");
+            this.classList.toggle("bi-eye-slash");
+        });
+    }
 
-        if (phone.length !== 10) {
-            alert("Enter valid 10-digit phone number");
+    // ===============================
+    // 3️⃣ Client-side Validation (OPTIONAL but SAFE)
+    // ===============================
+    document.querySelector("form").addEventListener("submit", function (e) {
+        const loginValue = loginInput.value.trim();
+        const passwordValue = passwordInput.value.trim();
+
+        // If numeric, validate phone length
+        if (/^\d+$/.test(loginValue) && loginValue.length !== 10) {
+            e.preventDefault();
+            alert("Please enter a valid 10-digit phone number");
             return;
         }
 
-        if (password.length < 4) {
-            alert("Password too short");
+        // Basic password check
+        if (passwordValue.length < 4) {
+            e.preventDefault();
+            alert("Password is too short");
             return;
         }
 
-        alert("Login validation successful ✅");
-
-        // TODO: Submit to server via AJAX or form submit
+        // ✅ Let form submit normally
     });
-
 </script>

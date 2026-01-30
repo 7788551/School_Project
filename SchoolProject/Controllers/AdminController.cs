@@ -25,6 +25,61 @@ namespace SchoolProject.Controllers
         // DASHBOARD
         // ============================
 
+        [HttpGet]
+        [Authorize]
+        public IActionResult GetCurrentSession()
+        {
+            using SqlConnection con = new SqlConnection(
+                _configuration.GetConnectionString("DefaultConnection"));
+
+            using SqlCommand cmd = new SqlCommand(@"
+        SELECT SessionId, SessionName
+        FROM AcademicSessions
+        WHERE IsCurrent = 1", con);
+
+            con.Open();
+
+            using SqlDataReader dr = cmd.ExecuteReader();
+
+            if (!dr.Read())
+            {
+                return Json(new
+                {
+                    sessionId = 0,
+                    sessionName = "Error"
+                });
+            }
+
+            return Json(new
+            {
+                sessionId = dr.GetInt32(0),
+                sessionName = dr.GetString(1)
+            });
+        }
+
+
+        private int GetCurrentSessionId()
+        {
+            using SqlConnection con = new SqlConnection(
+                _configuration.GetConnectionString("DefaultConnection"));
+
+            using SqlCommand cmd = new SqlCommand(@"
+        SELECT SessionId
+        FROM AcademicSessions
+        WHERE IsCurrent = 1", con);
+
+            con.Open();
+
+            object? result = cmd.ExecuteScalar();
+
+            if (result == null || result == DBNull.Value)
+                throw new Exception("Current academic session is not configured.");
+
+            return Convert.ToInt32(result);
+        }
+
+
+
         public IActionResult AdminDashboard()
         {
             var session = _feeService.GetCurrentSession();
@@ -36,6 +91,51 @@ namespace SchoolProject.Controllers
 
             return View();
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public IActionResult UsersList()
+        {
+            var list = new List<dynamic>();
+
+            using SqlConnection con = new SqlConnection(
+                _configuration.GetConnectionString("DefaultConnection"));
+
+            using SqlCommand cmd = new SqlCommand(@"
+        SELECT 
+            u.UserId,
+            u.Name,
+            u.Email,
+            u.PhoneNumber,
+            r.RoleName,
+            u.Password,
+            u.IsActive,
+            u.CreatedDate
+        FROM Users u
+        INNER JOIN Roles r ON u.RoleId = r.RoleId
+        ORDER BY u.CreatedDate DESC", con);
+
+            con.Open();
+            using SqlDataReader dr = cmd.ExecuteReader();
+
+            while (dr.Read())
+            {
+                list.Add(new
+                {
+                    UserId = dr.GetInt32(0),
+                    Name = dr.GetString(1),
+                    Email = dr["Email"] == DBNull.Value ? "" : dr.GetString(2),
+                    Phone = dr.GetString(3),
+                    Role = dr.GetString(4),
+                    Password = dr.GetString(5),   // ⚠️ PLAIN TEXT
+                    IsActive = dr.GetBoolean(6),
+                    CreatedDate = Convert.ToDateTime(dr["CreatedDate"])
+                });
+            }
+
+            return View(list);
+        }
+
 
         [HttpGet]
         public IActionResult AdminProfiledata()
@@ -282,143 +382,7 @@ namespace SchoolProject.Controllers
             return View();
         }
 
-        //        [HttpPost]
-        //        [ValidateAntiForgeryToken]
-        //        public IActionResult AddTeacher(AddTeacher dto)
-        //        {
-        //            // ✅ REQUIRED: Stop if model is invalid
-        //            if (!ModelState.IsValid)
-        //            {
-        //                return View(dto);
-        //            }
-
-        //            string cs = _configuration.GetConnectionString("DefaultConnection");
-
-        //            // Default password = DOB (ddMMyyyy)
-        //            string rawPassword = dto.DateOfBirth.ToString("ddMMyyyy");
-
-        //            using SqlConnection con = new SqlConnection(cs);
-        //            con.Open();
-
-        //            try
-        //            {
-        //                // ================================
-        //                // STEP 1: Check duplicate phone number
-        //                // ================================
-        //                string checkQuery =
-        //                    "SELECT COUNT(*) FROM Users WHERE PhoneNumber = @PhoneNumber";
-
-        //                using SqlCommand checkCmd = new SqlCommand(checkQuery, con);
-        //                checkCmd.Parameters.AddWithValue("@PhoneNumber", dto.PhoneNumber);
-
-        //                int phoneCount = Convert.ToInt32(checkCmd.ExecuteScalar());
-
-        //                if (phoneCount > 0)
-        //                {
-        //                    ModelState.AddModelError("PhoneNumber", "Phone number already exists");
-        //                    return View(dto);
-        //                }
-        //                // STEP 2: Insert into Users
-        //                string emailCheckQuery =
-        //    "SELECT COUNT(*) FROM Users WHERE Email = @Email";
-
-        //                using SqlCommand emailCmd = new SqlCommand(emailCheckQuery, con);
-        //                emailCmd.Parameters.AddWithValue("@Email", dto.Email);
-
-        //                int emailCount = Convert.ToInt32(emailCmd.ExecuteScalar());
-
-        //                if (emailCount > 0)
-        //                {
-        //                    ModelState.AddModelError("Email", "Email already exists");
-        //                    return View(dto);
-        //                }
-
-
-        //                // ================================
-        //                // STEP 2: Insert into Users
-        //                // ================================
-        //                string userInsertQuery = @"
-        //INSERT INTO Users
-        //(Name, Email, PhoneNumber, Password, RoleId, ForceChangePassword, IsActive)
-        //OUTPUT INSERTED.UserId
-        //VALUES
-        //(@Name, @Email, @PhoneNumber, @Password,
-        // (SELECT RoleId FROM Roles WHERE RoleName = 'Teacher'),
-        // 1, 1)
-        //";
-
-        //                int userId;
-
-        //                using (SqlCommand userCmd = new SqlCommand(userInsertQuery, con))
-        //                {
-        //                    userCmd.Parameters.AddWithValue("@Name", dto.Name);
-        //                    userCmd.Parameters.AddWithValue("@Email", dto.Email);
-        //                    userCmd.Parameters.AddWithValue("@PhoneNumber", dto.PhoneNumber);
-        //                    userCmd.Parameters.AddWithValue("@Password", rawPassword);
-
-
-        //                    userId = Convert.ToInt32(userCmd.ExecuteScalar());
-        //                }
-
-        //                // ================================
-        //                // STEP 3: Insert into Teachers
-        //                // ================================
-        //                string teacherInsertQuery = @"
-        //                INSERT INTO Teachers
-        //(
-        //    UserId, SessionId, TeacherTypeId,Name,
-        //    DateOfBirth, Qualification, ExperienceYears,
-        //    JoiningDate, Designation, Subject,
-        //    PhoneNumber,
-        //    AddressLine1, AddressLine2,
-        //    City, State, Pincode,
-        //    IsActive, CreatedDate
-        //)
-        //VALUES
-        //(
-        //    @UserId, @SessionId, @TeacherTypeId,@Name,
-        //    @DateOfBirth, @Qualification, @ExperienceYears,
-        //    @JoiningDate, @Designation, @Subject,
-        //    @PhoneNumber,
-        //    @AddressLine1, @AddressLine2,
-        //    @City, @State, @Pincode,
-        //    1, GETDATE()
-        //)";
-
-        //                using (SqlCommand teacherCmd = new SqlCommand(teacherInsertQuery, con))
-        //                {
-        //                    teacherCmd.Parameters.AddWithValue("@UserId", userId);
-        //                    teacherCmd.Parameters.AddWithValue("@SessionId", dto.SessionId);
-        //                    teacherCmd.Parameters.AddWithValue("@TeacherTypeId", dto.TeacherTypeId);
-        //                    teacherCmd.Parameters.AddWithValue("@Name", dto.Name);
-
-        //                    teacherCmd.Parameters.AddWithValue("@DateOfBirth", dto.DateOfBirth);
-
-        //                    teacherCmd.Parameters.AddWithValue("@Qualification", (object?)dto.Qualification ?? DBNull.Value);
-        //                    teacherCmd.Parameters.AddWithValue("@ExperienceYears", (object?)dto.ExperienceYears ?? DBNull.Value);
-        //                    teacherCmd.Parameters.AddWithValue("@JoiningDate", (object?)dto.JoiningDate ?? DBNull.Value);
-        //                    teacherCmd.Parameters.AddWithValue("@Designation", (object?)dto.Designation ?? DBNull.Value);
-        //                    teacherCmd.Parameters.AddWithValue("@Subject", (object?)dto.Subject ?? DBNull.Value);
-
-        //                    teacherCmd.Parameters.AddWithValue("@PhoneNumber", dto.PhoneNumber);
-        //                    teacherCmd.Parameters.AddWithValue("@AddressLine1", (object?)dto.AddressLine1 ?? DBNull.Value);
-        //                    teacherCmd.Parameters.AddWithValue("@AddressLine2", (object?)dto.AddressLine2 ?? DBNull.Value);
-        //                    teacherCmd.Parameters.AddWithValue("@City", (object?)dto.City ?? DBNull.Value);
-        //                    teacherCmd.Parameters.AddWithValue("@State", (object?)dto.State ?? DBNull.Value);
-        //                    teacherCmd.Parameters.AddWithValue("@Pincode", (object?)dto.Pincode ?? DBNull.Value);
-
-        //                    teacherCmd.ExecuteNonQuery();
-        //                }
-
-        //                TempData["Success"] = "Teacher added successfully. Default password is DOB.";
-        //                return RedirectToAction("Teacher");
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                ModelState.AddModelError("", ex.Message);
-        //                return View(dto);
-        //            }
-        //        }
+       
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -869,106 +833,128 @@ VALUES
         }
 
 
-      
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult AddStudent(AddStudent dto)
         {
             string cs = _configuration.GetConnectionString("DefaultConnection");
 
-            // 1️⃣ Default password = DOB (ddMMyyyy)
+            int currentSessionId;
+            try
+            {
+                currentSessionId = GetCurrentSessionId();
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(dto);
+            }
+
+            if (dto.ClassId <= 0 || dto.SectionId <= 0)
+            {
+                ModelState.AddModelError("", "Please select valid Class and Section.");
+                return View(dto);
+            }
+
             string rawPassword = dto.DateOfBirth.ToString("ddMMyyyy");
 
             // ================================
-            // IMAGE UPLOAD (STUDENT)
-            // ================================
-            // ================================
-            // IMAGE UPLOAD (STUDENT)
-            // ================================
-            // ================================
-            // IMAGE UPLOAD (STUDENT)
+            // IMAGE UPLOAD (SAME AS TEACHER)
             // ================================
             string? studentImageName = null;
 
             if (dto.StudentImage != null && dto.StudentImage.Length > 0)
             {
+                // Original filename
+                string originalFileName = Path.GetFileName(dto.StudentImage.FileName);
+
+                // Sanitize filename
+                string safeFileName = string.Concat(
+                    originalFileName.Split(Path.GetInvalidFileNameChars())
+                ).Replace(" ", "_");
+
                 string uploadFolder = Path.Combine(
                     Directory.GetCurrentDirectory(),
                     "wwwroot",
+                    "Content",
                     "images",
-                    "StudentImage"
+                    "Students"
                 );
 
                 if (!Directory.Exists(uploadFolder))
-                    Directory.CreateDirectory(uploadFolder);
-
-                // original filename (safe)
-                string originalFileName = Path.GetFileName(dto.StudentImage.FileName)
-                                            .Replace(" ", "_");
-
-                string physicalPath = Path.Combine(uploadFolder, originalFileName);
-
-                // avoid overwrite
-                if (System.IO.File.Exists(physicalPath))
                 {
-                    string name = Path.GetFileNameWithoutExtension(originalFileName);
-                    string ext = Path.GetExtension(originalFileName);
-                    originalFileName = $"{name}_{DateTime.Now:yyyyMMddHHmmss}{ext}";
-                    physicalPath = Path.Combine(uploadFolder, originalFileName);
+                    Directory.CreateDirectory(uploadFolder);
                 }
 
-                using var stream = new FileStream(physicalPath, FileMode.Create);
+                string filePath = Path.Combine(uploadFolder, safeFileName);
+
+                // Handle duplicate filename
+                if (System.IO.File.Exists(filePath))
+                {
+                    string name = Path.GetFileNameWithoutExtension(safeFileName);
+                    string ext = Path.GetExtension(safeFileName);
+
+                    safeFileName = $"{name}_{DateTime.Now:yyyyMMddHHmmss}{ext}";
+                    filePath = Path.Combine(uploadFolder, safeFileName);
+                }
+
+                using var stream = new FileStream(filePath, FileMode.Create);
                 dto.StudentImage.CopyTo(stream);
 
-                // ✅ SAVE ORIGINAL FILE NAME
-                studentImageName = originalFileName;
+                studentImageName = safeFileName; // save only filename
             }
-
-
-
 
             using SqlConnection con = new SqlConnection(cs);
             con.Open();
 
+            SqlTransaction? tx = null;
+
             try
             {
-                // ================================
-                // STEP 1: Duplicate phone check
-                // ================================
+                tx = con.BeginTransaction();
+
+                // Validate Class–Section
+                using SqlCommand csCmd = new SqlCommand(@"
+            SELECT 1
+            FROM ClassSections
+            WHERE SessionId = @SessionId
+              AND ClassId = @ClassId
+              AND SectionId = @SectionId", con, tx);
+
+                csCmd.Parameters.AddWithValue("@SessionId", currentSessionId);
+                csCmd.Parameters.AddWithValue("@ClassId", dto.ClassId);
+                csCmd.Parameters.AddWithValue("@SectionId", dto.SectionId);
+
+                if (csCmd.ExecuteScalar() == null)
+                    throw new Exception("Selected Class and Section are not valid for the current session.");
+
+                // Duplicate phone
                 using SqlCommand checkCmd = new SqlCommand(
-                    "SELECT COUNT(*) FROM Users WHERE PhoneNumber = @PhoneNumber", con);
+                    "SELECT COUNT(*) FROM Users WHERE PhoneNumber = @PhoneNumber",
+                    con, tx);
+
                 checkCmd.Parameters.AddWithValue("@PhoneNumber", dto.PhoneNumber);
 
                 if (Convert.ToInt32(checkCmd.ExecuteScalar()) > 0)
-                {
-                    ModelState.AddModelError("", "Phone number already exists");
-                    return View(dto);
-                }
+                    throw new Exception("Phone number already exists.");
 
-                // ================================
-                // STEP 2: Insert into Users
-                // ================================
-                string userInsertQuery = @"
+                // Insert User
+                int userId;
+                using SqlCommand userCmd = new SqlCommand(@"
             INSERT INTO Users
             (Name, PhoneNumber, Password, RoleId, ForceChangePassword, IsActive)
             OUTPUT INSERTED.UserId
             VALUES
-            (@Name, @PhoneNumber, @Password, 3, 0, 1)";
+            (@Name, @PhoneNumber, @Password, 3, 0, 1)", con, tx);
 
-                int userId;
-
-                using SqlCommand userCmd = new SqlCommand(userInsertQuery, con);
                 userCmd.Parameters.AddWithValue("@Name", dto.Name);
                 userCmd.Parameters.AddWithValue("@PhoneNumber", dto.PhoneNumber);
                 userCmd.Parameters.AddWithValue("@Password", rawPassword);
 
                 userId = Convert.ToInt32(userCmd.ExecuteScalar());
 
-                // ================================
-                // STEP 3: Insert into Students (IMAGE INCLUDED)
-                // ================================
-                string studentInsertQuery = @"
+                // Insert Student
+                using SqlCommand studentCmd = new SqlCommand(@"
             INSERT INTO Students
             (UserId, SessionId, ClassId, SectionId,
              AdmissionNumber, RollNumber,
@@ -980,46 +966,45 @@ VALUES
              @AdmissionNumber, @RollNumber,
              @DateOfBirth, @Gender, @FatherName, @MotherName,
              @AddressLine1, @AddressLine2, @City, @State, @Pincode,
-             @StudentImage, 1)";
-
-                using SqlCommand studentCmd = new SqlCommand(studentInsertQuery, con);
+             @StudentImage, 1)", con, tx);
 
                 studentCmd.Parameters.AddWithValue("@UserId", userId);
-                studentCmd.Parameters.AddWithValue("@SessionId", dto.SessionId);
+                studentCmd.Parameters.AddWithValue("@SessionId", currentSessionId);
                 studentCmd.Parameters.AddWithValue("@ClassId", dto.ClassId);
                 studentCmd.Parameters.AddWithValue("@SectionId", dto.SectionId);
                 studentCmd.Parameters.AddWithValue("@AdmissionNumber", dto.AdmissionNumber);
-                studentCmd.Parameters.AddWithValue("@RollNumber",
-                    (object?)dto.RollNumber ?? DBNull.Value);
+                studentCmd.Parameters.AddWithValue("@RollNumber", (object?)dto.RollNumber ?? DBNull.Value);
                 studentCmd.Parameters.AddWithValue("@DateOfBirth", dto.DateOfBirth);
                 studentCmd.Parameters.AddWithValue("@Gender", dto.Gender);
                 studentCmd.Parameters.AddWithValue("@FatherName", dto.FatherName);
-                studentCmd.Parameters.AddWithValue("@MotherName",
-                    (object?)dto.MotherName ?? DBNull.Value);
+                studentCmd.Parameters.AddWithValue("@MotherName", (object?)dto.MotherName ?? DBNull.Value);
                 studentCmd.Parameters.AddWithValue("@AddressLine1", dto.AddressLine1);
-                studentCmd.Parameters.AddWithValue("@AddressLine2",
-                    (object?)dto.AddressLine2 ?? DBNull.Value);
-                studentCmd.Parameters.AddWithValue("@City",
-                    (object?)dto.City ?? DBNull.Value);
-                studentCmd.Parameters.AddWithValue("@State",
-                    (object?)dto.State ?? DBNull.Value);
-                studentCmd.Parameters.AddWithValue("@Pincode",
-                    (object?)dto.Pincode ?? DBNull.Value);
-                studentCmd.Parameters.AddWithValue("@StudentImage",
-    (object?)studentImageName ?? DBNull.Value);
-
+                studentCmd.Parameters.AddWithValue("@AddressLine2", (object?)dto.AddressLine2 ?? DBNull.Value);
+                studentCmd.Parameters.AddWithValue("@City", (object?)dto.City ?? DBNull.Value);
+                studentCmd.Parameters.AddWithValue("@State", (object?)dto.State ?? DBNull.Value);
+                studentCmd.Parameters.AddWithValue("@Pincode", (object?)dto.Pincode ?? DBNull.Value);
+                studentCmd.Parameters.AddWithValue("@StudentImage", (object?)studentImageName ?? DBNull.Value);
 
                 studentCmd.ExecuteNonQuery();
+
+                tx.Commit();
+                tx = null;
 
                 TempData["Success"] = "Student added successfully";
                 return RedirectToAction("Student", "Admin");
             }
             catch (Exception ex)
             {
+                if (tx != null)
+                {
+                    try { tx.Rollback(); } catch { }
+                }
+
                 ModelState.AddModelError("", ex.Message);
                 return View(dto);
             }
         }
+
 
         [HttpGet]
         public IActionResult Student()
@@ -1783,55 +1768,26 @@ WHERE UserId = @UserId", con, tran);
         // ============================
         // CREATE NEXT SESSION
         // ============================
+
+        [HttpPost]
         public IActionResult CreateNextSession()
         {
-            try
-            {
-                using SqlConnection con =
-                    new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
-                using SqlCommand cmd =
-                    new SqlCommand("CreateNextAcademicSession", con);
+            using SqlConnection con =
+                new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
 
-                cmd.CommandType = CommandType.StoredProcedure;
-                con.Open();
-                cmd.ExecuteNonQuery();
+            using SqlCommand cmd =
+                new SqlCommand("CreateNextAcademicSession", con);
 
-                TempData["Success"] = "Next academic session created";
-                return RedirectToAction("Index");
-            }
-            catch (SqlException ex)
-            {
-                TempData["Error"] = ex.Message;
-                return RedirectToAction("Login", "Account");
-            }
-        }
-
-       
-        [HttpGet]
-        public JsonResult GetCurrentSession()
-        {
-            string cs = _configuration.GetConnectionString("DefaultConnection");
-
-            using SqlConnection con = new SqlConnection(cs);
-            using SqlCommand cmd = new SqlCommand(@"
-        SELECT TOP 1 SessionId, SessionName
-        FROM AcademicSessions
-        ORDER BY SessionId DESC", con);
+            cmd.CommandType = CommandType.StoredProcedure;
 
             con.Open();
-            using SqlDataReader dr = cmd.ExecuteReader();
+            cmd.ExecuteNonQuery();
 
-            if (dr.Read())
-            {
-                return Json(new
-                {
-                    sessionId = dr.GetInt32(0),
-                    sessionName = dr.GetString(1)
-                });
-            }
-
-            return Json(null);
+            return RedirectToAction("Index"); // reload sessions list
         }
+
+
+
 
 
         [HttpGet]
@@ -1842,19 +1798,24 @@ WHERE UserId = @UserId", con, tran);
 
             using SqlConnection con = new SqlConnection(cs);
             using SqlCommand cmd = new SqlCommand(@"
-        SELECT c.ClassId, c.ClassName
-        FROM ClassSections cs
-        INNER JOIN Classes c ON cs.ClassId = c.ClassId
-        WHERE cs.SessionId = @SessionId
-        GROUP BY c.ClassId, c.ClassName
-        ORDER BY
-            CASE
-                WHEN c.ClassName = 'Nursery' THEN 1
-                WHEN c.ClassName = 'LKG' THEN 2
-                WHEN c.ClassName = 'UKG' THEN 3
-                WHEN ISNUMERIC(c.ClassName) = 1 THEN 100 + CAST(c.ClassName AS INT)
-                ELSE 1000
-            END", con);
+        SELECT ClassId, ClassName
+        FROM (
+            SELECT DISTINCT
+                c.ClassId,
+                c.ClassName,
+                CASE
+                    WHEN c.ClassName = 'Nursery' THEN 1
+                    WHEN c.ClassName = 'LKG' THEN 2
+                    WHEN c.ClassName = 'UKG' THEN 3
+                    WHEN ISNUMERIC(c.ClassName) = 1
+                        THEN 100 + CAST(c.ClassName AS INT)
+                    ELSE 1000
+                END AS SortOrder
+            FROM ClassSections cs
+            INNER JOIN Classes c ON cs.ClassId = c.ClassId
+            WHERE cs.SessionId = @SessionId
+        ) x
+        ORDER BY x.SortOrder;", con);
 
             cmd.Parameters.AddWithValue("@SessionId", sessionId);
 
@@ -1874,6 +1835,7 @@ WHERE UserId = @UserId", con, tran);
         }
 
 
+
         [HttpGet]
         public IActionResult GetSectionsByClass(int sessionId, int classId)
         {
@@ -1884,7 +1846,7 @@ WHERE UserId = @UserId", con, tran);
             using SqlCommand cmd = new SqlCommand(@"
         SELECT s.SectionId, s.SectionName
         FROM ClassSections cs
-        JOIN Sections s ON cs.SectionId = s.SectionId
+        INNER JOIN Sections s ON cs.SectionId = s.SectionId
         WHERE cs.SessionId = @SessionId
           AND cs.ClassId = @ClassId
         ORDER BY s.SectionName", con);
@@ -1907,24 +1869,29 @@ WHERE UserId = @UserId", con, tran);
             return Json(list);
         }
 
+
+
         [HttpGet]
-        public IActionResult GetTeachers()
+        public IActionResult GetTeachersByCurrentSession()
         {
             var list = new List<object>();
             string cs = _configuration.GetConnectionString("DefaultConnection");
 
             using SqlConnection con = new SqlConnection(cs);
-            using SqlCommand cmd = new SqlCommand(@"
-        SELECT u.UserId, u.Name
-        FROM Users u
-        INNER JOIN Roles r ON u.RoleId = r.RoleId
-        WHERE r.RoleName = 'Teacher'
-          AND u.IsActive = 1
-        ORDER BY u.Name", con);
-
             con.Open();
-            using SqlDataReader dr = cmd.ExecuteReader();
 
+            int sessionId = GetCurrentSessionId();
+
+            using SqlCommand cmd = new SqlCommand(@"
+        SELECT t.TeacherId, t.Name
+        FROM Teachers t
+        WHERE t.SessionId = @SessionId
+          AND t.IsActive = 1
+        ORDER BY t.Name", con);
+
+            cmd.Parameters.AddWithValue("@SessionId", sessionId);
+
+            using SqlDataReader dr = cmd.ExecuteReader();
             while (dr.Read())
             {
                 list.Add(new
@@ -1937,11 +1904,18 @@ WHERE UserId = @UserId", con, tran);
             return Json(list);
         }
 
+
+
+
+
+
+
         [HttpGet]
         public IActionResult AssignClassTeacher()
         {
             return View();
         }
+
 
         [HttpPost]
         public JsonResult AssignClassTeacher([FromBody] ClassTeacherAssignment model)
@@ -1955,34 +1929,70 @@ WHERE UserId = @UserId", con, tran);
 
             try
             {
-                // 1️⃣ Deactivate existing assignment for same session + class + section
-                SqlCommand deactivateCmd = new SqlCommand(@"
+                // 1️⃣ Get CURRENT academic session
+                int currentSessionId;
+                using (SqlCommand cmd = new SqlCommand(@"
+            SELECT SessionId
+            FROM AcademicSessions
+            WHERE IsCurrent = 1", con, tran))
+                {
+                    object result = cmd.ExecuteScalar();
+                    if (result == null)
+                        throw new Exception("No active academic session found.");
+
+                    currentSessionId = Convert.ToInt32(result);
+                }
+
+                // 2️⃣ Validate teacher exists IN CURRENT SESSION
+                using (SqlCommand validateTeacher = new SqlCommand(@"
+            SELECT 1
+            FROM Teachers
+            WHERE TeacherId = @TeacherId
+              AND SessionId = @SessionId
+              AND IsActive = 1", con, tran))
+                {
+                    validateTeacher.Parameters.AddWithValue("@TeacherId", model.TeacherId);
+                    validateTeacher.Parameters.AddWithValue("@SessionId", currentSessionId);
+
+                    if (validateTeacher.ExecuteScalar() == null)
+                    {
+                        tran.Rollback();
+                        return Json(new
+                        {
+                            success = false,
+                            message = "Selected teacher does not belong to the current academic session."
+                        });
+                    }
+                }
+
+                // 3️⃣ Deactivate existing ACTIVE assignment (soft replace)
+                using (SqlCommand deactivate = new SqlCommand(@"
             UPDATE ClassTeacherAssignments
             SET IsActive = 0
             WHERE SessionId = @SessionId
               AND ClassId = @ClassId
               AND SectionId = @SectionId
-              AND IsActive = 1", con, tran);
+              AND IsActive = 1", con, tran))
+                {
+                    deactivate.Parameters.AddWithValue("@SessionId", currentSessionId);
+                    deactivate.Parameters.AddWithValue("@ClassId", model.ClassId);
+                    deactivate.Parameters.AddWithValue("@SectionId", model.SectionId);
+                    deactivate.ExecuteNonQuery();
+                }
 
-                deactivateCmd.Parameters.AddWithValue("@SessionId", model.SessionId);
-                deactivateCmd.Parameters.AddWithValue("@ClassId", model.ClassId);
-                deactivateCmd.Parameters.AddWithValue("@SectionId", model.SectionId);
-
-                deactivateCmd.ExecuteNonQuery();
-
-                // 2️⃣ Insert new active assignment
-                SqlCommand insertCmd = new SqlCommand(@"
+                // 4️⃣ Insert NEW active assignment
+                using (SqlCommand insert = new SqlCommand(@"
             INSERT INTO ClassTeacherAssignments
-            (SessionId, TeacherId, ClassId, SectionId, IsActive, CreatedDate)
+                (SessionId, TeacherId, ClassId, SectionId, IsActive, CreatedDate)
             VALUES
-            (@SessionId, @TeacherId, @ClassId, @SectionId, 1, GETDATE())", con, tran);
-
-                insertCmd.Parameters.AddWithValue("@SessionId", model.SessionId);
-                insertCmd.Parameters.AddWithValue("@TeacherId", model.TeacherId);
-                insertCmd.Parameters.AddWithValue("@ClassId", model.ClassId);
-                insertCmd.Parameters.AddWithValue("@SectionId", model.SectionId);
-
-                insertCmd.ExecuteNonQuery();
+                (@SessionId, @TeacherId, @ClassId, @SectionId, 1, GETDATE())", con, tran))
+                {
+                    insert.Parameters.AddWithValue("@SessionId", currentSessionId);
+                    insert.Parameters.AddWithValue("@TeacherId", model.TeacherId);
+                    insert.Parameters.AddWithValue("@ClassId", model.ClassId);
+                    insert.Parameters.AddWithValue("@SectionId", model.SectionId);
+                    insert.ExecuteNonQuery();
+                }
 
                 tran.Commit();
                 return Json(new { success = true });
@@ -1990,28 +2000,9 @@ WHERE UserId = @UserId", con, tran);
             catch (Exception ex)
             {
                 tran.Rollback();
-                return Json(new
-                {
-                    success = false,
-                    message = ex.Message
-                });
+                return Json(new { success = false, message = ex.Message });
             }
         }
-
-        private int GetCurrentSessionId()
-        {
-            using SqlConnection con = new SqlConnection(
-                _configuration.GetConnectionString("DefaultConnection"));
-
-            using SqlCommand cmd = new SqlCommand(@"
-        SELECT TOP 1 SessionId
-        FROM AcademicSessions
-        ORDER BY SessionId DESC", con);
-
-            con.Open();
-            return Convert.ToInt32(cmd.ExecuteScalar());
-        }
-
 
         [HttpGet]
         public IActionResult AssignedClassTeacher()
@@ -2021,34 +2012,28 @@ WHERE UserId = @UserId", con, tran);
 
             using SqlConnection con = new SqlConnection(cs);
             using SqlCommand cmd = new SqlCommand(@"
-        SELECT 
-    a.AssignmentId,
-    s.SessionName,
-    c.ClassName,
-    sec.SectionName,
-
-    u.Name AS TeacherName,
-
-    a.IsActive,
-    a.CreatedDate
-FROM ClassTeacherAssignments a
-
-INNER JOIN AcademicSessions s 
-    ON a.SessionId = s.SessionId
-
-INNER JOIN Classes c 
-    ON a.ClassId = c.ClassId
-
-INNER JOIN Sections sec 
-    ON a.SectionId = sec.SectionId
-
--- ✅ CORRECT: Assignment → Users
-INNER JOIN Users u
-    ON a.TeacherId = u.UserId
-
-WHERE a.IsActive = 1
-ORDER BY c.ClassName, sec.SectionName;
-
+        SELECT
+            a.AssignmentId,
+            s.SessionName,
+            c.ClassName,
+            sec.SectionName,
+            u.Name AS TeacherName,
+            a.IsActive,
+            a.CreatedDate
+        FROM ClassTeacherAssignments a
+        INNER JOIN AcademicSessions s
+            ON s.SessionId = a.SessionId
+        INNER JOIN Classes c
+            ON c.ClassId = a.ClassId
+        INNER JOIN Sections sec
+            ON sec.SectionId = a.SectionId
+        INNER JOIN Teachers t
+            ON t.TeacherId = a.TeacherId
+        INNER JOIN Users u
+            ON u.UserId = t.UserId
+        WHERE s.IsCurrent = 1
+          AND a.IsActive = 1
+        ORDER BY c.ClassName, sec.SectionName;
     ", con);
 
             con.Open();
