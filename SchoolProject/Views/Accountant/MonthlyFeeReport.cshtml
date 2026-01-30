@@ -1,0 +1,204 @@
+﻿@model List<MonthlyFeeStatus>
+
+@{
+    ViewBag.Title = "Monthly Fee Status";
+    Layout = "~/Views/Shared/AccountantLayout.cshtml";
+}
+
+<h4 class="mb-3">
+    Monthly Fee Status
+    <small class="text-muted">(@ViewBag.SessionName)</small>
+</h4>
+
+<!-- ================= FILTER FORM ================= -->
+<form method="get"
+      asp-action="MonthlyFeeReport"
+      class="row gy-2 gx-2 align-items-end mb-4">
+
+    <!-- Class -->
+    <div class="col-12 col-sm-6 col-lg-3">
+        <label class="form-label d-sm-none">Class</label>
+        <select id="ClassId" name="classId" class="form-select">
+            <option value="">-- All Classes --</option>
+        </select>
+    </div>
+
+    <!-- Section -->
+    <div class="col-12 col-sm-6 col-lg-3">
+        <label class="form-label d-sm-none">Section</label>
+        <select id="SectionId" name="sectionId" class="form-select">
+            <option value="">-- All Sections --</option>
+        </select>
+    </div>
+
+    <!-- Admission Number -->
+    <div class="col-12 col-sm-6 col-lg-3">
+        <label class="form-label d-sm-none">Admission No</label>
+        <input type="text"
+               name="admissionNumber"
+               value="@ViewBag.AdmissionNumber"
+               class="form-control"
+               placeholder="Admission Number" />
+    </div>
+
+    <!-- Submit -->
+    <div class="col-12 col-sm-6 col-lg-3">
+        <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-search"></i> Search
+        </button>
+    </div>
+</form>
+
+<!-- ================= RESULT TABLE ================= -->
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-warning">
+        No fee records found.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Adm No</th>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th>Month</th>
+                    <th class="text-end">Due</th>
+                    <th class="text-end">Paid</th>
+                    <th class="text-end">Balance</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var x in Model)
+                {
+                    <tr>
+                        <td>@x.AdmissionNumber</td>
+                        <td>@x.StudentName</td>
+                        <td>@x.ClassName - @x.SectionName</td>
+                        <td>@x.FeeMonth</td>
+
+                        <td class="text-end">@x.TotalDue.ToString("0.00")</td>
+                        <td class="text-end">@x.TotalPaid.ToString("0.00")</td>
+
+                        <td class="text-end">
+                            <strong class="@(x.Balance > 0 ? "text-danger" : "text-success")">
+                                @x.Balance.ToString("0.00")
+                            </strong>
+                        </td>
+
+                        <td>
+                            <span class="badge @(x.Balance == 0 ? "bg-success" : "bg-danger")">
+                                @(x.Balance == 0 ? "Paid" : "Pending")
+                            </span>
+                        </td>
+
+                        <td>
+                            @if (x.ReceiptId != null)
+                            {
+                                <a class="btn btn-sm btn-outline-primary"
+                                   href="@Url.Action("Receipt",
+                                                                                    "Accountant",
+                                                                                    new { id = x.ReceiptId })">
+                        View Receipt
+                    </a>
+                                        }
+                            else
+                            {
+                                <a class="btn btn-sm btn-outline-warning"
+                                   href="@Url.Action("CollectFee",
+                                                                                    "Accountant",
+                                                                                    new { studentId = x.StudentId })">
+                        Collect
+                    </a>
+                                        }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<!-- ================= SCRIPTS ================= -->
+@section Scripts {
+    <script>
+        const selectedClassId = '@ViewBag.SelectedClassId';
+        const selectedSectionId = '@ViewBag.SelectedSectionId';
+
+        const classSelect = document.getElementById('ClassId');
+        const sectionSelect = document.getElementById('SectionId');
+
+        // ============================
+        // LOAD CURRENT SESSION FIRST
+        // ============================
+        fetch('/Admin/GetCurrentSession')
+            .then(res => res.json())
+            .then(session => {
+                const sessionId = session.sessionId;
+                loadClasses(sessionId);
+            });
+
+        // ============================
+        // LOAD CLASSES
+        // ============================
+        function loadClasses(sessionId) {
+            fetch(`/Admin/GetClassesBySession?sessionId=${sessionId}`)
+                .then(res => res.json())
+                .then(data => {
+                    classSelect.innerHTML = '<option value="">-- All Classes --</option>';
+
+                    data.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.classId;
+                        opt.textContent = c.className;
+                        if (c.classId == selectedClassId) opt.selected = true;
+                        classSelect.appendChild(opt);
+                    });
+
+                    if (selectedClassId) {
+                        loadSections(sessionId, selectedClassId);
+                    }
+                });
+        }
+
+        // ============================
+        // LOAD SECTIONS
+        // ============================
+        function loadSections(sessionId, classId) {
+            sectionSelect.innerHTML = '<option value="">-- All Sections --</option>';
+
+            fetch(`/Admin/GetSectionsByClass?sessionId=${sessionId}&classId=${classId}`)
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.sectionId;
+                        opt.textContent = s.sectionName;
+                        if (s.sectionId == selectedSectionId) opt.selected = true;
+                        sectionSelect.appendChild(opt);
+                    });
+                });
+        }
+
+        // ============================
+        // CLASS CHANGE HANDLER
+        // ============================
+        classSelect.addEventListener('change', function () {
+            if (!this.value) {
+                sectionSelect.innerHTML = '<option value="">-- All Sections --</option>';
+                return;
+            }
+
+            fetch('/Admin/GetCurrentSession')
+                .then(res => res.json())
+                .then(session => {
+                    loadSections(session.sessionId, this.value);
+                });
+        });
+    </script>
+}

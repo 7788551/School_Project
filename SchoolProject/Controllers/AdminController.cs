@@ -8,7 +8,7 @@ using System.Data;
 
 namespace SchoolProject.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly FeeService _feeService;
@@ -1791,6 +1791,8 @@ WHERE UserId = @UserId", con, tran);
 
 
         [HttpGet]
+        [AllowAnonymous]
+        [Authorize(Roles = "Admin,Accountant")]
         public IActionResult GetClassesBySession(int sessionId)
         {
             var list = new List<object>();
@@ -1837,6 +1839,8 @@ WHERE UserId = @UserId", con, tran);
 
 
         [HttpGet]
+        [AllowAnonymous]
+        [Authorize(Roles = "Admin,Accountant")]
         public IActionResult GetSectionsByClass(int sessionId, int classId)
         {
             var list = new List<object>();
@@ -2360,133 +2364,57 @@ WHERE UserId = @UserId", con, tran);
 
 
         [HttpPost]
-        public IActionResult AddFeeSchedule(int feeHeadId, string frequency, int[] monthNumbers)
+        public IActionResult AddFeeSchedule(
+      int classId,
+      int feeHeadId,
+      string frequency,
+      int[] monthNumbers)
         {
-            using SqlConnection con = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            // 1️⃣ Resolve CURRENT session (CRITICAL)
+            var (sessionId, _) = _feeService.GetCurrentSession();
+
+            // 2️⃣ Convert frequency + months → string
+            string applicableMonths;
+
+            if (frequency == "Monthly")
+            {
+                applicableMonths = "ALL";
+            }
+            else if (frequency == "Yearly")
+            {
+                // Admin can later choose which month (default April)
+                applicableMonths = "April";
+            }
+            else // 🔁 Custom
+            {
+                applicableMonths = string.Join(",",
+                    monthNumbers.Select(m =>
+                        new DateTime(2000, m, 1).ToString("MMMM")));
+            }
+
+            using SqlConnection con =
+                new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             con.Open();
 
-            // ================================
-            // 🔁 CUSTOM (Multiple Months)
-            // ================================
-            if (frequency == "Custom")
-            {
-                foreach (var month in monthNumbers)
-                {
-                    // 🔍 Prevent duplicate month entries
-                    using SqlCommand checkCmd = new SqlCommand(@"
-                SELECT COUNT(*) FROM FeeSchedules
-                WHERE FeeHeadId = @FeeHeadId
-                  AND Frequency = 'Custom'
-                  AND MonthNumber = @MonthNumber", con);
+            // 3️⃣ Update CURRENT SESSION ONLY
+            using SqlCommand cmd = new SqlCommand(@"
+        UPDATE ClassFeeStructure
+        SET ApplicableMonths = @Months
+        WHERE SessionId = @SessionId
+          AND ClassId = @ClassId
+          AND FeeHeadId = @FeeHeadId
+    ", con);
 
-                    checkCmd.Parameters.AddWithValue("@FeeHeadId", feeHeadId);
-                    checkCmd.Parameters.AddWithValue("@MonthNumber", month);
+            cmd.Parameters.AddWithValue("@Months", applicableMonths);
+            cmd.Parameters.AddWithValue("@SessionId", sessionId);
+            cmd.Parameters.AddWithValue("@ClassId", classId);
+            cmd.Parameters.AddWithValue("@FeeHeadId", feeHeadId);
 
-                    int exists = Convert.ToInt32(checkCmd.ExecuteScalar());
+            cmd.ExecuteNonQuery();
 
-                    if (exists == 0)
-                    {
-                        using SqlCommand insertCmd = new SqlCommand(@"
-                    INSERT INTO FeeSchedules (FeeHeadId, Frequency, MonthNumber)
-                    VALUES (@FeeHeadId, @Frequency, @MonthNumber)", con);
-
-                        insertCmd.Parameters.AddWithValue("@FeeHeadId", feeHeadId);
-                        insertCmd.Parameters.AddWithValue("@Frequency", frequency);
-                        insertCmd.Parameters.AddWithValue("@MonthNumber", month);
-
-                        insertCmd.ExecuteNonQuery();
-                    }
-                }
-            }
-            else
-            {
-                // ================================
-                // 📅 MONTHLY / YEARLY
-                // ================================
-
-                // 🔍 Prevent duplicate schedule
-                using SqlCommand checkCmd = new SqlCommand(@"
-            SELECT COUNT(*) FROM FeeSchedules
-            WHERE FeeHeadId = @FeeHeadId
-              AND Frequency = @Frequency", con);
-
-                checkCmd.Parameters.AddWithValue("@FeeHeadId", feeHeadId);
-                checkCmd.Parameters.AddWithValue("@Frequency", frequency);
-
-                int exists = Convert.ToInt32(checkCmd.ExecuteScalar());
-
-                if (exists == 0)
-                {
-                    using SqlCommand insertCmd = new SqlCommand(@"
-                INSERT INTO FeeSchedules (FeeHeadId, Frequency, MonthNumber)
-                VALUES (@FeeHeadId, @Frequency, NULL)", con);
-
-                    insertCmd.Parameters.AddWithValue("@FeeHeadId", feeHeadId);
-                    insertCmd.Parameters.AddWithValue("@Frequency", frequency);
-
-                    insertCmd.ExecuteNonQuery();
-                }
-            }
-
-            TempData["Success"] = "Fee schedule saved successfully.";
-            return RedirectToAction("FeeHeads");
+            TempData["Success"] = "Fee schedule saved for current session.";
+            return RedirectToAction("ClassFeeStructure");
         }
-
-        //    [HttpGet]
-        //    public IActionResult ClassFeeStructure(int? classId)
-        //    {
-        //        List<ClassFeeStructure> list = new();
-
-        //        string cs = _configuration.GetConnectionString("DefaultConnection");
-
-        //        using SqlConnection con = new SqlConnection(cs);
-        //        using SqlCommand cmd = new SqlCommand(@"
-        //    SELECT 
-        //        cfs.StructureId,
-        //        cfs.SessionId,
-        //        s.SessionName,
-        //        cfs.ClassId,
-        //        c.ClassName,
-        //        cfs.FeeHeadId,
-        //        fh.FeeHeadName,
-        //        cfs.Amount,
-        //        cfs.IsActive,
-        //        cfs.CreatedDate
-        //    FROM ClassFeeStructure cfs
-        //    INNER JOIN AcademicSessions s ON cfs.SessionId = s.SessionId
-        //    INNER JOIN Classes c ON cfs.ClassId = c.ClassId
-        //    INNER JOIN FeeHeads fh ON cfs.FeeHeadId = fh.FeeHeadId
-        //    WHERE (@ClassId IS NULL OR cfs.ClassId = @ClassId)
-        //    ORDER BY c.ClassName, fh.FeeHeadName
-        //", con);
-
-        //        cmd.Parameters.AddWithValue("@ClassId", (object?)classId ?? DBNull.Value);
-
-        //        con.Open();
-        //        using SqlDataReader dr = cmd.ExecuteReader();
-
-        //        while (dr.Read())
-        //        {
-        //            list.Add(new ClassFeeStructure
-        //            {
-        //                StructureId = Convert.ToInt32(dr["StructureId"]),
-        //                SessionId = Convert.ToInt32(dr["SessionId"]),
-        //                SessionName = dr["SessionName"].ToString(),
-
-        //                ClassId = Convert.ToInt32(dr["ClassId"]),
-        //                ClassName = dr["ClassName"].ToString(),
-
-        //                FeeHeadId = Convert.ToInt32(dr["FeeHeadId"]),
-        //                FeeHeadName = dr["FeeHeadName"].ToString(),
-
-        //                Amount = Convert.ToDecimal(dr["Amount"]),
-        //                IsActive = Convert.ToBoolean(dr["IsActive"]),
-        //                CreatedDate = Convert.ToDateTime(dr["CreatedDate"])
-        //            });
-        //        }
-
-        //        return View(list);
-        //    }
 
 
 
@@ -2497,7 +2425,7 @@ WHERE UserId = @UserId", con, tran);
 
             string cs = _configuration.GetConnectionString("DefaultConnection");
 
-            // 🔹 Get Current Academic Session
+            // 🔹 Always use CURRENT academic session
             var session = _feeService.GetCurrentSession();
 
             using SqlConnection con = new SqlConnection(cs);
@@ -2511,13 +2439,19 @@ WHERE UserId = @UserId", con, tran);
             cfs.FeeHeadId,
             fh.FeeHeadName,
             cfs.Amount,
+            cfs.ApplicableMonths,
             cfs.IsActive,
             cfs.CreatedDate
         FROM ClassFeeStructure cfs
-        INNER JOIN AcademicSessions s ON cfs.SessionId = s.SessionId
-        INNER JOIN Classes c ON cfs.ClassId = c.ClassId
-        INNER JOIN FeeHeads fh ON cfs.FeeHeadId = fh.FeeHeadId
+        INNER JOIN AcademicSessions s 
+            ON cfs.SessionId = s.SessionId
+        INNER JOIN Classes c 
+            ON cfs.ClassId = c.ClassId
+        INNER JOIN FeeHeads fh 
+            ON cfs.FeeHeadId = fh.FeeHeadId
         WHERE cfs.SessionId = @SessionId
+          AND cfs.IsActive = 1
+          AND fh.FeeHeadName <> 'Transport Fee'   -- 🚫 transport handled separately
           AND (@ClassId IS NULL OR cfs.ClassId = @ClassId)
         ORDER BY c.ClassName, fh.FeeHeadName
     ", con);
@@ -2534,15 +2468,17 @@ WHERE UserId = @UserId", con, tran);
                 {
                     StructureId = Convert.ToInt32(dr["StructureId"]),
                     SessionId = Convert.ToInt32(dr["SessionId"]),
-                    SessionName = dr["SessionName"].ToString(),
+                    SessionName = dr["SessionName"]?.ToString(),
 
                     ClassId = Convert.ToInt32(dr["ClassId"]),
-                    ClassName = dr["ClassName"].ToString(),
+                    ClassName = dr["ClassName"]?.ToString(),
 
                     FeeHeadId = Convert.ToInt32(dr["FeeHeadId"]),
-                    FeeHeadName = dr["FeeHeadName"].ToString(),
+                    FeeHeadName = dr["FeeHeadName"]?.ToString(),
 
                     Amount = Convert.ToDecimal(dr["Amount"]),
+                    ApplicableMonths = dr["ApplicableMonths"]?.ToString(),
+
                     IsActive = Convert.ToBoolean(dr["IsActive"]),
                     CreatedDate = Convert.ToDateTime(dr["CreatedDate"])
                 });

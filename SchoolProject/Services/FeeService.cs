@@ -19,15 +19,17 @@ namespace SchoolProject.Services
         {
             using SqlConnection con = new SqlConnection(_cs);
             using SqlCommand cmd = new SqlCommand(@"
-                SELECT TOP 1 SessionId, SessionName
-                FROM AcademicSessions
-                ORDER BY SessionId DESC", con);
+        SELECT SessionId, SessionName
+        FROM AcademicSessions
+        WHERE IsCurrent = 1", con);
 
             con.Open();
             using SqlDataReader dr = cmd.ExecuteReader();
-            return dr.Read()
-                ? (dr.GetInt32(0), dr.GetString(1))
-                : (0, "");
+
+            if (!dr.Read())
+                throw new Exception("No current academic session set.");
+
+            return (dr.GetInt32(0), dr.GetString(1));
         }
 
         // ======================================================
@@ -130,31 +132,44 @@ namespace SchoolProject.Services
             using SqlConnection con = new SqlConnection(_cs);
             con.Open();
 
+            // 🔹 Month name as string (April, May, etc.)
             string currentMonth = DateTime.Now.ToString("MMMM");
 
             using SqlCommand cmd = new SqlCommand(@"
-                INSERT INTO StudentMonthlyFee
-                (StudentId, SessionId, ClassId, FeeHeadId, FeeMonth, DueAmount, PaidAmount)
-                SELECT 
-                    s.StudentId,
-                    @SessionId,
-                    s.ClassId,
-                    cfs.FeeHeadId,
-                    @FeeMonth,
-                    cfs.Amount,
-                    0
-                FROM Students s
-                INNER JOIN ClassFeeStructure cfs ON s.ClassId = cfs.ClassId
-                WHERE s.ClassId = @ClassId
-                  AND cfs.SessionId = @SessionId
-                  AND cfs.IsActive = 1
-                  AND NOT EXISTS (
-                        SELECT 1 FROM StudentMonthlyFee smf
-                        WHERE smf.StudentId = s.StudentId
-                          AND smf.FeeHeadId = cfs.FeeHeadId
-                          AND smf.SessionId = @SessionId
-                          AND smf.FeeMonth = @FeeMonth
-                  )", con);
+        INSERT INTO StudentMonthlyFee
+        (StudentId, SessionId, ClassId, FeeHeadId, FeeMonth, DueAmount, PaidAmount)
+        SELECT 
+            s.StudentId,
+            @SessionId,
+            s.ClassId,
+            cfs.FeeHeadId,
+            @FeeMonth,
+            cfs.Amount,
+            0
+        FROM Students s
+        INNER JOIN ClassFeeStructure cfs 
+            ON s.ClassId = cfs.ClassId
+        WHERE s.ClassId = @ClassId
+          AND cfs.SessionId = @SessionId
+          AND cfs.IsActive = 1
+
+          -- 🔹 Month applicability check (CRITICAL)
+          AND (
+                cfs.ApplicableMonths IS NULL
+                OR cfs.ApplicableMonths = 'ALL'
+                OR CHARINDEX(@FeeMonth, cfs.ApplicableMonths) > 0
+          )
+
+          -- 🔹 Prevent duplicate monthly rows
+          AND NOT EXISTS (
+                SELECT 1
+                FROM StudentMonthlyFee smf
+                WHERE smf.StudentId = s.StudentId
+                  AND smf.FeeHeadId = cfs.FeeHeadId
+                  AND smf.SessionId = @SessionId
+                  AND smf.FeeMonth = @FeeMonth
+          )
+    ", con);
 
             cmd.Parameters.AddWithValue("@SessionId", sessionId);
             cmd.Parameters.AddWithValue("@ClassId", classId);
@@ -162,7 +177,6 @@ namespace SchoolProject.Services
 
             cmd.ExecuteNonQuery();
         }
-
 
 
         public void GenerateMonthlyTransportFee(int sessionId)
@@ -439,5 +453,129 @@ namespace SchoolProject.Services
 
             return list;
         }
+
+        public List<MonthlyFeeStatus> GetMonthlyFeeStatus(
+     int sessionId,
+     int? classId,
+     int? sectionId,
+     string admissionNumber,
+     string status
+ )
+        {
+            List<MonthlyFeeStatus> list = new();
+
+            using SqlConnection con = new SqlConnection(_cs);
+            using SqlCommand cmd = new SqlCommand(@"
+SELECT
+    s.StudentId,
+    s.AdmissionNumber,
+    u.Name AS StudentName,
+    c.ClassName,
+    sec.SectionName,
+    smf.FeeMonth,
+
+    -- TOTAL DUE
+    SUM(smf.DueAmount) AS TotalDue,
+
+    -- TOTAL PAID
+    SUM(smf.PaidAmount) AS TotalPaid,
+
+    -- BALANCE
+    SUM(smf.DueAmount - smf.PaidAmount) AS Balance,
+
+    CASE
+        WHEN SUM(smf.DueAmount - smf.PaidAmount) = 0
+        THEN 'Paid'
+        ELSE 'Pending'
+    END AS FeeStatus,
+
+    -- RECEIPT (latest, if any)
+    MAX(fr.ReceiptId) AS ReceiptId
+
+FROM StudentMonthlyFee smf
+INNER JOIN Students s ON smf.StudentId = s.StudentId
+INNER JOIN Users u ON s.UserId = u.UserId
+INNER JOIN Classes c ON smf.ClassId = c.ClassId
+INNER JOIN Sections sec ON s.SectionId = sec.SectionId
+
+-- 🔹 Receipt Details (NO StudentId here)
+LEFT JOIN FeeReceiptDetails frd
+    ON frd.FeeMonth = smf.FeeMonth
+
+-- 🔹 Receipt Master (StudentId EXISTS here)
+LEFT JOIN FeeReceipts fr
+    ON fr.ReceiptId = frd.ReceiptId
+   AND fr.StudentId = smf.StudentId
+   AND fr.SessionId = smf.SessionId
+
+WHERE smf.SessionId = @SessionId
+  AND (@ClassId IS NULL OR smf.ClassId = @ClassId)
+  AND (@SectionId IS NULL OR s.SectionId = @SectionId)
+  AND (@AdmissionNumber IS NULL OR s.AdmissionNumber = @AdmissionNumber)
+
+GROUP BY
+    s.StudentId,
+    s.AdmissionNumber,
+    u.Name,
+    c.ClassName,
+    sec.SectionName,
+    smf.FeeMonth
+
+ORDER BY
+    c.ClassName,
+    sec.SectionName,
+    s.AdmissionNumber,
+    CASE smf.FeeMonth
+        WHEN 'January' THEN 1
+        WHEN 'February' THEN 2
+        WHEN 'March' THEN 3
+        WHEN 'April' THEN 4
+        WHEN 'May' THEN 5
+        WHEN 'June' THEN 6
+        WHEN 'July' THEN 7
+        WHEN 'August' THEN 8
+        WHEN 'September' THEN 9
+        WHEN 'October' THEN 10
+        WHEN 'November' THEN 11
+        WHEN 'December' THEN 12
+    END;
+", con);
+
+            cmd.Parameters.AddWithValue("@SessionId", sessionId);
+            cmd.Parameters.AddWithValue("@ClassId", (object?)classId ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@SectionId", (object?)sectionId ?? DBNull.Value);
+            cmd.Parameters.AddWithValue(
+                "@AdmissionNumber",
+                string.IsNullOrWhiteSpace(admissionNumber) ? DBNull.Value : admissionNumber
+            );
+
+            con.Open();
+
+            using SqlDataReader dr = cmd.ExecuteReader();
+            while (dr.Read())
+            {
+                list.Add(new MonthlyFeeStatus
+                {
+                    StudentId = Convert.ToInt32(dr["StudentId"]),
+                    AdmissionNumber = dr["AdmissionNumber"].ToString(),
+                    StudentName = dr["StudentName"].ToString(),
+                    ClassName = dr["ClassName"].ToString(),
+                    SectionName = dr["SectionName"].ToString(),
+                    FeeMonth = dr["FeeMonth"].ToString(),
+                    TotalDue = Convert.ToDecimal(dr["TotalDue"]),
+                    TotalPaid = Convert.ToDecimal(dr["TotalPaid"]),
+                    Balance = Convert.ToDecimal(dr["Balance"]),
+                    FeeStatus = dr["FeeStatus"].ToString(),
+                    ReceiptId = dr["ReceiptId"] == DBNull.Value
+                        ? null
+                        : Convert.ToInt32(dr["ReceiptId"])
+                });
+            }
+
+            return list;
+        }
+
+
+
     }
 }

@@ -367,40 +367,24 @@
                 <li><a href="#"><i class="bi bi-calendar-week"></i> Schedule</a></li>
                 <li><a href="#"><i class="bi bi-people"></i> Students</a></li>
                 <li><a href="#"><i class="bi bi-journal-text"></i> Syllabus</a></li>
-                @* <li>
-                    <a href="#">
-                        <i class="bi bi-clipboard-data"><a asp-controller="Attendance" asp-action="AttendanceIndex">MarkAttendance</a></i>
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <i class="bi bi-clipboard-data"><a asp-controller="Attendance" asp-action="AttendanceList">AttendanceList</a></i>
-                    </a>
-                </li> *@
+                
                 <li>
                     <a asp-controller="Accountant" asp-action="CollectFee">
                         <i class="bi bi-graph-up"></i>CollectFee</a>
                 </li>
+                <li>
+                    <a asp-controller="Accountant" asp-action="MonthlyFeeReport">
+                        <i class="bi bi-graph-up"></i>
+                        Monthly Fee Report
+                    </a>
+                </li>
+
                 <li><a href="#"><i class="bi bi-file-text"></i> Assignments</a></li>
                 <li><a href="#"><i class="bi bi-chat-left-text"></i> Messages</a></li>
                 <li><a href="#"><i class="bi bi-gear"></i> Settings</a></li>
             </ul>
 
-            <div class="mt-4 p-3 bg-light rounded">
-                <h6 class="mb-3">Today's Classes</h6>
-                <div class="d-flex justify-content-between mb-2">
-                    <span>9:00 AM - Physics</span>
-                    <span class="badge bg-primary">V-B</span>
-                </div>
-                <div class="d-flex justify-content-between mb-2">
-                    <span>11:00 AM - Physics</span>
-                    <span class="badge bg-success">IV-A</span>
-                </div>
-                <div class="d-flex justify-content-between">
-                    <span>2:00 PM - Lab</span>
-                    <span class="badge bg-warning">VI-C</span>
-                </div>
-            </div>
+           
         </div>
     </div>
 

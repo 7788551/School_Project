@@ -1,263 +1,174 @@
 ﻿@{
-    ViewData["Title"] = "Dashboard"; Layout = "~/Views/Shared/AccountantLayout.cshtml";
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/AccountantLayout.cshtml";
 }
 
-
-
 <style>
-    .card {
+    /* 🔹 Cards */
+    .stat-card {
         border: none;
+        border-radius: 14px;
+        transition: all .2s ease;
+        height: 100%;
     }
 
-    .card-header {
-        font-size: 16px;
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,.08);
+        }
+
+        .stat-card .number {
+            font-size: clamp(22px, 4vw, 30px);
+            font-weight: 700;
+        }
+
+    /* 🔹 Action Buttons */
+    .action-btns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+        justify-content: center;
+    }
+
+        .action-btns .btn {
+            min-width: 160px;
+        }
+
+    @@media (max-width: 576px) {
+        .action-btns .btn
+
+    {
+        width: 100%;
+    }
+
+    }
+
+    /* 🔹 Charts */
+    canvas {
+        max-width: 100%;
     }
 </style>
 
-
 <main class="main-content">
-    <div id="mainContent">
+    <div class="container-fluid">
 
-        <!-- Page Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                @* <h3 class="mb-1">Accountant Dashboard</h3> *@
-                <nav aria-label="breadcrumb">
-                    @* <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
-                    </ol> *@
-                </nav>
-            </div>
-        </div>
-
-        <!-- Greeting Section -->
+        <!-- 👋 Greeting -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card-body">
-                    <h1 class="card-title">
-                        Welcome Back..!
-                        <span class="text-danger">
-                            @{
-                                var fullName = User.Identity?.Name;
-                                var firstName = fullName?.Split(' ')[0];
-                            }
-                            @firstName
-                        </span>
-                    </h1>
-                    <p class="card-text">Here is your financial overview for today.</p>
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body">
+                        <h2 class="mb-1 fs-3 fs-md-2">
+                            Welcome Back..!
+                            <span class="text-danger">
+                                @{
+                                    var fullName = User.Identity?.Name;
+                                    var firstName = fullName?.Split(' ')[0];
+                                }
+                                @firstName
+                            </span>
+                        </h2>
+                        <p class="text-muted mb-0">
+                            Here is your financial overview for today.
+                        </p>
+                    </div>
                 </div>
-
             </div>
         </div>
-    </div>
 
-        <!-- Summary Row -->
-        @* <div class="row mb-4">
-            <div class="col-md-4 col-sm-12 mb-3">
-                <div class="card stat-card">
-                    <div class="card-body text-center">
-                        <h6 class="text-success">All Income</h6>
-                        <div class="number text-success">₹ 0/-</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-12 mb-3">
-                <div class="card stat-card">
-                    <div class="card-body text-center">
-                        <h6 class="text-danger">All Expense</h6>
-                        <div class="number text-danger">₹ 0/-</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 col-sm-12 mb-3">
-                <div class="card stat-card">
-                    <div class="card-body text-center">
-                        <h6 class="text-primary">Financial Health</h6>
-                        <div class="number text-primary">₹ 0/- Break Even</div>
-                    </div>
-                </div>
-            </div>
-        </div> *@
-
-        <!-- Action Buttons -->
+        <!-- ⚡ Actions -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-body text-center">
-                        @* <button class="btn btn-sm btn-primary m-1"><i class="bi bi-wallet2"></i> Fees Setup</button> *@
-                        <button class="btn btn-sm btn-primary m-1"><i class="bi bi-cash"></i> Collect Fee</button>
-                        <button class="btn btn-sm btn-primary m-1"><i class="bi bi-list-check"></i> Dues List</button>
-                        <button class="btn btn-sm btn-primary m-1"><i class="bi bi-person"></i> Students with Overdue Fees</button>
-                        <button class="btn btn-sm btn-primary m-1"><i class="bi bi-collection"></i> All Collection</button>
-                        @* <button class="btn btn-sm btn-primary m-1"><i class="bi bi-file-earmark-text"></i> Fee Status / Report</button> *@
-                        
-                        <button class="btn btn-sm btn-primary m-1"><i class="bi bi-currency-rupee"></i> Generate Receipt</button>
-                        <button class="btn btn-sm btn-primary m-1"><i class="bi bi-wallet2"></i> Send Fee Reminders</button>
+                <div class="card shadow-sm rounded-4">
+                    <div class="card-body action-btns">
+
+                        <form asp-controller="Accountant" asp-action="CollectFee" method="get">
+                            <button class="btn btn-primary btn-sm">
+                                <i class="bi bi-cash"></i> Collect Fee
+                            </button>
+                        </form>
+
+                        <button class="btn btn-primary btn-sm">
+                            <i class="bi bi-list-check"></i> Dues List
+                        </button>
+
+                        <button class="btn btn-primary btn-sm">
+                            <i class="bi bi-person"></i> Overdue Students
+                        </button>
+
+                        <button class="btn btn-primary btn-sm">
+                            <i class="bi bi-collection"></i> All Collection
+                        </button>
+
+                        <button class="btn btn-primary btn-sm">
+                            <i class="bi bi-receipt"></i> Generate Receipt
+                        </button>
+
+                        <button class="btn btn-primary btn-sm">
+                            <i class="bi bi-wallet2"></i> Send Reminders
+                        </button>
+
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Stat Cards -->
-        <div class="row mb-4">
-            @* <div class="col-md-3 col-sm-6 mb-3">
-                <div class="card stat-card">
+        <!-- 📊 Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card stat-card text-center shadow-sm">
                     <div class="card-body">
-                        <i class="bi bi-envelope text-info mb-3" style="font-size: 2rem;"></i>
-                        <h6>Receive Message</h6>
-                        <div class="number text-info">0</div>
-                    </div>
-                </div>
-            </div> *@
-
-            <div class="col-md-3 col-sm-6 mb-3">
-                <div class="card stat-card">
-                    <div class="card-body">
-                        <i class="bi bi-people-fill text-warning mb-3" style="font-size: 2rem;"></i>
-                        <h6>All Students</h6>
+                        <i class="bi bi-people-fill text-warning fs-2"></i>
+                        <h6 class="mt-2">All Students</h6>
                         <div class="number text-warning">4</div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-3 col-sm-6 mb-3">
-                <div class="card stat-card">
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card stat-card text-center shadow-sm">
                     <div class="card-body">
-                        <i class="bi bi-person-badge text-success mb-3" style="font-size: 2rem;"></i>
-                        <h6>Receipts Generated Today</h6>
+                        <i class="bi bi-person-badge text-success fs-2"></i>
+                        <h6 class="mt-2">Receipts Today</h6>
                         <div class="number text-success">1</div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-md-3 col-sm-6 mb-3">
-                <div class="card stat-card">
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="card stat-card text-center shadow-sm">
                     <div class="card-body">
-                        <i class="bi bi-calendar-event text-danger mb-3" style="font-size: 2rem;"></i>
-                        <h6>View Daily Report</h6>
+                        <i class="bi bi-calendar-event text-danger fs-2"></i>
+                        <h6 class="mt-2">Daily Report</h6>
                         <div class="number text-danger">0</div>
                     </div>
                 </div>
-            </div> 
-
-            @* <div class="col-md-3 col-sm-6 mb-3">
-                <div class="card stat-card">
-                    <div class="card-body">
-                        <i class="bi bi-file-earmark text-primary mb-3" style="font-size: 2rem;"></i>
-                        <h6>Pending Student Leave</h6>
-                        <div class="number text-primary">0</div>
-                    </div>
-                </div>
-            </div> *@
-
-            @* <div class="col-md-3 col-sm-6 mb-3">
-                <div class="card stat-card">
-                    <div class="card-body">
-                        <i class="bi bi-person-x text-warning mb-3" style="font-size: 2rem;"></i>
-                        <h6>Pending Staff Leave</h6>
-                        <div class="number text-warning">1</div>
-                    </div>
-                </div>
-            </div> *@
-        </div>
-
-        <div class="container-fluid mt-4">
-            <div class="row g-4">
-
-                <!-- 📈 Collection Trend -->
-                <div class="col-md-8">
-                    <div class="card shadow-sm rounded-4">
-                        <div class="card-header bg-white fw-bold">
-                            📈 Collection Trend (Last 7 Days)
-                        </div>
-                        <div class="card-body">
-                            <canvas id="collectionTrendChart" height="100"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 🍩 Paid vs Pending Fees -->
-                <div class="col-md-4">
-                    <div class="card shadow-sm rounded-4">
-                        <div class="card-header bg-white fw-bold">
-                            🍩 Paid vs Pending Fees
-                        </div>
-                        <div class="card-body text-center">
-                            <canvas id="feeStatusChart" height="200"></canvas>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
 
+        <!-- 📈 Charts -->
+        <div class="row g-4">
+            <div class="col-12 col-lg-8">
+                <div class="card shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white fw-bold">
+                        📈 Collection Trend (Last 7 Days)
+                    </div>
+                    <div class="card-body">
+                        <canvas id="collectionTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-4">
+                <div class="card shadow-sm rounded-4 h-100">
+                    <div class="card-header bg-white fw-bold">
+                        🍩 Paid vs Pending Fees
+                    </div>
+                    <div class="card-body">
+                        <canvas id="feeStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
 </main>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-
-        // 📈 Collection Trend Data (Last 7 Days)
-        const collectionData = {
-            labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-            datasets: [{
-                label: "Amount Collected (₹)",
-                data: [8000, 12500, 6000, 18000, 9500, 15000, 20000],
-                fill: true,
-                borderColor: "#4e73df",
-                backgroundColor: "rgba(78,115,223,0.1)",
-                tension: 0.4,
-                pointRadius: 4
-            }]
-        };
-
-        const collectionConfig = {
-            type: 'line',
-            data: collectionData,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: true }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: value => "₹" + value
-                        }
-                    }
-                }
-            }
-        };
-
-        new Chart(document.getElementById('collectionTrendChart'), collectionConfig);
-
-
-        // 🍩 Paid vs Pending Fees Data
-        const feeStatusData = {
-            labels: ["Paid", "Pending"],
-            datasets: [{
-                data: [75000, 25000],
-                backgroundColor: ["#1cc88a", "#e74a3b"]
-            }]
-        };
-
-        const feeStatusConfig = {
-            type: 'doughnut',
-            data: feeStatusData,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                },
-                cutout: "70%"
-            }
-        };
-
-        new Chart(document.getElementById('feeStatusChart'), feeStatusConfig);
-
-    });
-</script>

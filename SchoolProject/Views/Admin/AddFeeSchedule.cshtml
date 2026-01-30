@@ -1,4 +1,4 @@
-﻿@{
+﻿@* @{
     ViewData["Title"] = "Add Fee Schedule";
     Layout = "~/Views/Shared/AdminLayout.cshtml";
 }
@@ -119,4 +119,149 @@
             monthDiv.style.display = "none";
         }
     }
+</script> *@
+
+
+@{
+    ViewData["Title"] = "Add Fee Schedule";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Add Fee Schedule (Current Session)</h5>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="AddFeeSchedule" asp-controller="Admin" method="post">
+
+                <!-- Class Dropdown -->
+                <div class="mb-3">
+                    <label class="form-label">Class</label>
+                    <select id="classDropdown" class="form-select" name="classId" required>
+                        <option value="">-- Select Class --</option>
+                    </select>
+                </div>
+
+                <!-- Fee Head Dropdown -->
+                <div class="mb-3">
+                    <label class="form-label">Fee Head</label>
+                    <select id="feeHeadDropdown" class="form-select" name="feeHeadId" required>
+                        <option value="">-- Select Fee Head --</option>
+                    </select>
+                </div>
+
+                <!-- Frequency -->
+                <div class="mb-3">
+                    <label class="form-label">Frequency</label>
+                    <select class="form-select" name="frequency" id="frequency" required onchange="toggleMonth()">
+                        <option value="">-- Select Frequency --</option>
+                        <option value="Monthly">Monthly</option>
+                        <option value="Yearly">Yearly</option>
+                        <option value="Custom">Custom</option>
+                    </select>
+                </div>
+
+                <!-- Month Selection (Only for Custom) -->
+                <div class="mb-3" id="monthDiv" style="display:none;">
+                    <label class="form-label">Select Months (Custom)</label>
+                    <select class="form-select" name="monthNumbers" multiple size="6">
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                    <small class="text-muted">
+                        Hold Ctrl (or Cmd on Mac) to select multiple months
+                    </small>
+                </div>
+
+                <!-- Buttons -->
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save me-1"></i> Save Schedule
+                    </button>
+
+                    <a asp-action="ClassFeeStructure" asp-controller="Admin" class="btn btn-secondary ms-2">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- =======================
+     🔥 JAVASCRIPT
+======================= -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        loadClasses();
+        loadFeeHeads();
+    });
+
+    // ===========================
+    // Load Classes (Current Session)
+    // ===========================
+    function loadClasses() {
+        fetch('/Admin/GetClassesBySession', {
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            const ddl = document.getElementById("classDropdown");
+            ddl.innerHTML = '<option value="">-- Select Class --</option>';
+
+            data.forEach(c => {
+                const opt = document.createElement("option");
+                opt.value = c.classId;
+                opt.text = c.className;
+                ddl.appendChild(opt);
+            });
+        })
+        .catch(() => alert("Unable to load classes"));
+    }
+
+    // ===========================
+    // Load Fee Heads
+    // ===========================
+    function loadFeeHeads() {
+        fetch('/Admin/FeeHeads', {
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            const ddl = document.getElementById("feeHeadDropdown");
+            ddl.innerHTML = '<option value="">-- Select Fee Head --</option>';
+
+            data.forEach(f => {
+                const opt = document.createElement("option");
+                opt.value = f.feeHeadId;
+                opt.text = f.feeHeadName;
+                ddl.appendChild(opt);
+            });
+        })
+        .catch(() => alert("Unable to load fee heads"));
+    }
+
+    // ===========================
+    // Toggle Month Selector
+    // ===========================
+    function toggleMonth() {
+        const freq = document.getElementById("frequency").value;
+        document.getElementById("monthDiv").style.display =
+            freq === "Custom" ? "block" : "none";
+    }
 </script>
+

@@ -421,5 +421,49 @@ namespace SchoolProject.Controllers
 
             return $"REC/{year}/{next:D6}";
         }
+       [HttpGet]
+public IActionResult MonthlyFeeReport(
+    int? classId,
+    int? sectionId,
+    string admissionNumber,
+    string status = "All"
+)
+{
+    // 🔹 Always resolve CURRENT session
+    var session = _feeService.GetCurrentSession();
+
+    // 🔥 FIX 1: Treat 0 as NULL (VERY IMPORTANT)
+    if (classId == 0) classId = null;
+    if (sectionId == 0) sectionId = null;
+
+    // 🔹 Normalize inputs
+    admissionNumber = string.IsNullOrWhiteSpace(admissionNumber)
+        ? null
+        : admissionNumber.Trim();
+
+    status = string.IsNullOrWhiteSpace(status) ? "All" : status;
+
+    // 🔹 Fetch report data
+    var data = _feeService.GetMonthlyFeeStatus(
+        session.SessionId,
+        classId,
+        sectionId,
+        admissionNumber,
+        status
+    );
+
+    // 🔹 Pass filter state back to view
+    ViewBag.SessionId = session.SessionId;
+    ViewBag.SessionName = session.SessionName;
+    ViewBag.SelectedClassId = classId;
+    ViewBag.SelectedSectionId = sectionId;
+    ViewBag.AdmissionNumber = admissionNumber;
+    ViewBag.SelectedStatus = status;
+
+    return View(data);
+}
+
+
+
     }
 }
