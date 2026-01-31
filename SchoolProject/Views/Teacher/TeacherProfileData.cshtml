@@ -1,0 +1,157 @@
+﻿
+<style>
+
+    /* Sidebar width = 260px (adjust if yours is different) */
+    .main-content {
+        margin-left: 260px !important;
+        padding: 20px 25px;
+        min-height: 100vh;
+        background-color: #f8f9fa;
+    }
+
+/* Mobile fix
+@@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+    }
+} */
+
+</style>
+
+@model TeacherProfile
+
+@{
+    ViewData["Title"] = "Teacher Profile";
+    Layout = "~/Views/Shared/TeacherLayout.cshtml";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<form asp-action="TeacherProfileData"
+      method="post"
+      enctype="multipart/form-data">
+
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="UserId" />
+    <input type="hidden" asp-for="TeacherId" />
+    <input type="hidden" asp-for="ExistingTeacherImage" />
+
+    <div class="row">
+        <!-- LEFT : PROFILE IMAGE -->
+        <div class="col-md-4 text-center">
+            <img src="~/images/Teacherprofileimage/@(Model.ExistingTeacherImage ?? "default.png")"
+                 class="img-thumbnail mb-3"
+                 style="width:200px;height:200px;object-fit:cover;" />
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Profile Image</label>
+                <input asp-for="TeacherImage" type="file" class="form-control" />
+            </div>
+        </div>
+
+        <!-- RIGHT : PROFILE DETAILS -->
+        <div class="col-md-8">
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Name</label>
+                    <input asp-for="Name" class="form-control" readonly />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control" readonly />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Phone Number</label>
+                    <input asp-for="PhoneNumber" class="form-control" readonly />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Gender</label>
+                    <select asp-for="Gender" class="form-select">
+                        <option value="">-- Select --</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Date of Birth</label>
+                    <input asp-for="DateOfBirth" type="date" class="form-control" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Joining Date</label>
+                    <input asp-for="JoiningDate" type="date" class="form-control" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Qualification</label>
+                    <input asp-for="Qualification" class="form-control" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Experience (Years)</label>
+                    <input asp-for="ExperienceYears" type="number" class="form-control" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Designation</label>
+                    <input asp-for="Designation" class="form-control" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Subject</label>
+                    <input asp-for="Subject" class="form-control" />
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label class="form-label">Address Line 1</label>
+                    <input asp-for="AddressLine1" class="form-control" />
+                </div>
+
+                <div class="col-md-12 mb-3">
+                    <label class="form-label">Address Line 2</label>
+                    <input asp-for="AddressLine2" class="form-control" />
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">City</label>
+                    <input asp-for="City" class="form-control" />
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">State</label>
+                    <input asp-for="State" class="form-control" />
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Pincode</label>
+                    <input asp-for="Pincode" class="form-control" />
+                </div>
+
+            </div>
+
+            <div class="mt-4 text-end">
+                <button type="submit" class="btn btn-primary px-4">
+                    Save Profile
+                </button>
+
+                <a asp-action="TeacherDashboard"
+                   class="btn btn-secondary ms-2">
+                    Cancel
+                </a>
+            </div>
+        </div>
+    </div>
+</form>

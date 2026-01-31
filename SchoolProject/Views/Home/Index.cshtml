@@ -40,6 +40,7 @@
             object-fit: cover; /* 🔥 KEY */
             object-position: center;
             display: block;
+            border-radius:7px;
             transition: transform 0.4s ease;
         }
 
@@ -50,7 +51,7 @@
 
     /* Content area */
     .program-item-content {
-        padding: 20px;
+        padding: 2px;
         flex-grow: 1;
         text-align: center;
     }
@@ -146,18 +147,30 @@
                                 <img src="~/images/School-images/Schoolimages (48).jpeg" alt="">
                             </figure>
 
-                            <div class="video-play-button">
+                            @* <div class="video-play-button">
                                 <a href="https://www.youtube.com/watch?v=hsDh5GbZFRI"
                                    class="popup-video" data-cursor-text="Play">
                                     <i class="fa-solid fa-play"></i>
                                 </a>
+                            </div> *@
+                            <div class="video-play-button">
+                                <a href="https://www.youtube.com/watch?v=hsDh5GbZFRI"
+                                   class="popup-video"
+                                   data-cursor-text="Play"
+                                   target="_blank"
+                                   rel="noopener noreferrer">
+                                    <i class="fa-solid fa-play"></i>
+                                </a>
                             </div>
+
                         </div>
 
                         <div class="about-us-info-video-content">
                             <h3>We Have 700+</h3>
                             <p>Students Studying</p>
                         </div>
+                       
+
 
                     </div>
                 </div>

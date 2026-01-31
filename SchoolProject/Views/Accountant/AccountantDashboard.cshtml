@@ -1,4 +1,4 @@
-﻿@{
+﻿@* @{
     ViewData["Title"] = "Dashboard";
     Layout = "~/Views/Shared/AccountantLayout.cshtml";
 }
@@ -171,4 +171,197 @@
         </div>
 
     </div>
-</main>
+</main> *@
+
+
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/AccountantLayout.cshtml";
+}
+
+<style>
+    /* ===== DASHBOARD GLOBAL ===== */
+    .dashboard-container {
+        max-width: 1400px;
+        margin: auto;
+    }
+
+    /* ===== GREETING CARD ===== */
+    .welcome-card {
+        border-radius: 18px;
+        background: #ffffff;
+    }
+
+    /* ===== ACTION BUTTONS ===== */
+    .action-btns {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+    }
+
+        .action-btns .btn {
+            padding: 10px 12px;
+            font-size: 14px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+
+    /* ===== STAT CARDS ===== */
+    .stat-card {
+        border-radius: 16px;
+        border: none;
+        transition: all 0.25s ease;
+        background: #fff;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0,0,0,.08);
+        }
+
+    .stat-icon {
+        font-size: 34px;
+        margin-bottom: 8px;
+    }
+
+    .stat-number {
+        font-size: clamp(24px, 4vw, 32px);
+        font-weight: 700;
+    }
+
+    /* ===== CHART CARDS ===== */
+    .chart-card {
+        border-radius: 18px;
+        background: #fff;
+        height: 100%;
+    }
+
+    canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    /* ===== MOBILE OPTIMIZATION ===== */
+    @@media (max-width: 576px) {
+        .stat-card {
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="container-fluid dashboard-container">
+
+    <!-- 👋 WELCOME -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card welcome-card shadow-sm">
+                <div class="card-body py-4">
+                    <h2 class="fw-semibold mb-1">
+                        Welcome Back..!
+                        <span class="text-danger">
+                            @{
+                                var fullName = User.Identity?.Name;
+                                var firstName = fullName?.Split(' ')[0];
+                            }
+                            @firstName
+                        </span>
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Here is your financial overview for today.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ⚡ QUICK ACTIONS -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm rounded-4">
+                <div class="card-body">
+                    <div class="action-btns">
+
+                        <a asp-controller="Accountant" asp-action="CollectFee" class="btn btn-primary">
+                            <i class="bi bi-cash"></i> Collect Fee
+                        </a>
+
+                        <button class="btn btn-primary">
+                            <i class="bi bi-list-check"></i> Dues List
+                        </button>
+
+                        <button class="btn btn-primary">
+                            <i class="bi bi-person"></i> Overdue Students
+                        </button>
+
+                        <button class="btn btn-primary">
+                            <i class="bi bi-collection"></i> All Collection
+                        </button>
+
+                        <button class="btn btn-primary">
+                            <i class="bi bi-receipt"></i> Generate Receipt
+                        </button>
+
+                        <button class="btn btn-primary">
+                            <i class="bi bi-wallet2"></i> Send Reminders
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📊 STATS -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card stat-card shadow-sm text-center p-3">
+                <i class="bi bi-people-fill stat-icon text-warning"></i>
+                <h6 class="text-muted">All Students</h6>
+                <div class="stat-number text-warning">4</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card stat-card shadow-sm text-center p-3">
+                <i class="bi bi-person-badge stat-icon text-success"></i>
+                <h6 class="text-muted">Receipts Today</h6>
+                <div class="stat-number text-success">1</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card stat-card shadow-sm text-center p-3">
+                <i class="bi bi-calendar-event stat-icon text-danger"></i>
+                <h6 class="text-muted">Daily Report</h6>
+                <div class="stat-number text-danger">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📈 CHARTS -->
+    <div class="row g-4">
+        <div class="col-12 col-lg-8">
+            <div class="card chart-card shadow-sm">
+                <div class="card-header bg-white fw-semibold">
+                    📈 Collection Trend (Last 7 Days)
+                </div>
+                <div class="card-body">
+                    <canvas id="collectionTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card chart-card shadow-sm">
+                <div class="card-header bg-white fw-semibold">
+                    🍩 Paid vs Pending Fees
+                </div>
+                <div class="card-body">
+                    <canvas id="feeStatusChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+

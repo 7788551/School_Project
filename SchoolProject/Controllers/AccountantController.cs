@@ -18,6 +18,192 @@ namespace SchoolProject.Controllers
             _feeService = feeService;
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Accountant")]
+        public IActionResult AccountantProfileData()
+        {
+            int userId = Convert.ToInt32(HttpContext.Session.GetInt32("UserId"));
+
+            AccountantProfile model = new();
+            string cs = _configuration.GetConnectionString("DefaultConnection");
+
+            using SqlConnection con = new(cs);
+            using SqlCommand cmd = new(@"
+        SELECT
+            u.UserId,
+            u.Name,
+            u.Email,
+            u.PhoneNumber,
+
+            a.AccountantId,
+            a.Gender,
+            a.DateOfBirth,
+            a.Qualification,
+            a.ExperienceYears,
+            a.Designation,
+            a.JoiningDate,
+            a.AddressLine1,
+            a.AddressLine2,
+            a.City,
+            a.State,
+            a.Pincode,
+            a.AccountantImage
+        FROM Users u
+        LEFT JOIN Accountants a ON a.UserId = u.UserId
+        WHERE u.UserId = @UserId
+    ", con);
+
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            con.Open();
+
+            using SqlDataReader dr = cmd.ExecuteReader();
+            if (dr.Read())
+            {
+                model.UserId = userId;
+                model.AccountantId = dr["AccountantId"] == DBNull.Value
+                    ? 0
+                    : Convert.ToInt32(dr["AccountantId"]);
+
+                model.Name = dr["Name"].ToString()!;
+                model.Email = dr["Email"]?.ToString();
+                model.PhoneNumber = dr["PhoneNumber"].ToString()!;
+
+                model.Gender = dr["Gender"]?.ToString();
+                model.DateOfBirth = dr["DateOfBirth"] as DateTime?;
+                model.Qualification = dr["Qualification"]?.ToString();
+                model.ExperienceYears = dr["ExperienceYears"] as int?;
+                model.Designation = dr["Designation"]?.ToString();
+                model.JoiningDate = dr["JoiningDate"] as DateTime?;
+
+                model.AddressLine1 = dr["AddressLine1"]?.ToString();
+                model.AddressLine2 = dr["AddressLine2"]?.ToString();
+                model.City = dr["City"]?.ToString();
+                model.State = dr["State"]?.ToString();
+                model.Pincode = dr["Pincode"]?.ToString();
+
+                model.ExistingAccountantImage = dr["AccountantImage"]?.ToString();
+            }
+
+            // 🔴 THIS IS THE IMPORTANT PART (IMAGE FIX)
+            if (!string.IsNullOrEmpty(model.ExistingAccountantImage))
+            {
+                HttpContext.Session.SetString(
+                    "AccountantImage",
+                    model.ExistingAccountantImage
+                );
+            }
+            else
+            {
+                HttpContext.Session.SetString(
+                    "AccountantImage",
+                    "default.png"
+                );
+            }
+
+            model.IsEditMode = false;
+            return View(model);
+        }
+
+
+        [HttpPost]
+        [Authorize(Roles = "Accountant")]
+        [ValidateAntiForgeryToken]
+        public IActionResult AccountantProfileData(AccountantProfile model)
+        {
+            int? sessionUserId = HttpContext.Session.GetInt32("UserId");
+            if (sessionUserId == null)
+                return RedirectToAction("Login", "Account");
+
+            int userId = sessionUserId.Value;
+            int sessionId = Convert.ToInt32(HttpContext.Session.GetInt32("SessionId"));
+
+            string fileName = model.ExistingAccountantImage;
+
+            // IMAGE UPLOAD
+            if (model.AccountantImage != null && model.AccountantImage.Length > 0)
+            {
+                fileName = Guid.NewGuid() + Path.GetExtension(model.AccountantImage.FileName);
+
+                string folderPath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot/images/Accountants"
+                );
+
+                if (!Directory.Exists(folderPath))
+                    Directory.CreateDirectory(folderPath);
+
+                string fullPath = Path.Combine(folderPath, fileName);
+                using FileStream fs = new(fullPath, FileMode.Create);
+                model.AccountantImage.CopyTo(fs);
+            }
+
+            using SqlConnection con = new(_configuration.GetConnectionString("DefaultConnection"));
+            using SqlCommand cmd = new(@"
+        IF EXISTS (SELECT 1 FROM Accountants WHERE UserId = @UserId)
+        BEGIN
+            UPDATE Accountants
+            SET
+                Gender = @Gender,
+                DateOfBirth = @DateOfBirth,
+                Qualification = @Qualification,
+                ExperienceYears = @ExperienceYears,
+                Designation = @Designation,
+                JoiningDate = @JoiningDate,
+                AddressLine1 = @AddressLine1,
+                AddressLine2 = @AddressLine2,
+                City = @City,
+                State = @State,
+                Pincode = @Pincode,
+                AccountantImage = @AccountantImage,
+                UpdatedDate = GETDATE()
+            WHERE UserId = @UserId
+        END
+        ELSE
+        BEGIN
+            INSERT INTO Accountants
+            (
+                UserId, SessionId,
+                Gender, DateOfBirth, Qualification,
+                ExperienceYears, Designation, JoiningDate,
+                AddressLine1, AddressLine2, City, State, Pincode,
+                AccountantImage, IsActive, CreatedDate
+            )
+            VALUES
+            (
+                @UserId, @SessionId,
+                @Gender, @DateOfBirth, @Qualification,
+                @ExperienceYears, @Designation, @JoiningDate,
+                @AddressLine1, @AddressLine2, @City, @State, @Pincode,
+                @AccountantImage, 1, GETDATE()
+            )
+        END
+    ", con);
+
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            cmd.Parameters.AddWithValue("@SessionId", sessionId);
+            cmd.Parameters.AddWithValue("@Gender", (object?)model.Gender ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@DateOfBirth", (object?)model.DateOfBirth ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@Qualification", (object?)model.Qualification ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@ExperienceYears", (object?)model.ExperienceYears ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@Designation", (object?)model.Designation ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@JoiningDate", (object?)model.JoiningDate ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@AddressLine1", (object?)model.AddressLine1 ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@AddressLine2", (object?)model.AddressLine2 ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@City", (object?)model.City ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@State", (object?)model.State ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@Pincode", (object?)model.Pincode ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@AccountantImage", (object?)fileName ?? DBNull.Value);
+
+            con.Open();
+            cmd.ExecuteNonQuery();
+
+            HttpContext.Session.SetString("AccountantImage", fileName ?? "");
+
+            TempData["Success"] = "Profile updated successfully";
+            return RedirectToAction("AccountantDashboard");
+        }
+
+
         // ======================================================
         // 📊 DASHBOARD
         // ======================================================

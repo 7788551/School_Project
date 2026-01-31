@@ -1,0 +1,133 @@
+﻿@model SchoolProject.Models.AccountantProfile
+
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = "~/Views/Shared/AccountantLayout.cshtml";
+}
+
+<form asp-action="AccountantProfileData"
+      method="post"
+      enctype="multipart/form-data">
+
+    @Html.AntiForgeryToken()
+
+    <!-- HIDDEN FIELDS -->
+    <input type="hidden" asp-for="UserId" />
+    <input type="hidden" asp-for="AccountantId" />
+    <input type="hidden" asp-for="ExistingAccountantImage" />
+
+    <!-- ================= BASIC DETAILS (USERS TABLE) ================= -->
+    <div class="mb-3">
+        <label>Name</label>
+        <input asp-for="Name" class="form-control" readonly />
+    </div>
+
+    <div class="mb-3">
+        <label>Email</label>
+        <input asp-for="Email" class="form-control" readonly />
+    </div>
+
+    <div class="mb-3">
+        <label>Phone</label>
+        <input asp-for="PhoneNumber" class="form-control" readonly />
+    </div>
+
+    <!-- ================= ACCOUNTANT DETAILS ================= -->
+    <div class="mb-3">
+        <label>Gender</label>
+        <select asp-for="Gender" class="form-control">
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label>Date of Birth</label>
+        <input asp-for="DateOfBirth"
+               type="date"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Joining Date</label>
+        <input asp-for="JoiningDate"
+               type="date"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Designation</label>
+        <input asp-for="Designation"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Qualification</label>
+        <input asp-for="Qualification"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Experience (Years)</label>
+        <input asp-for="ExperienceYears"
+               type="number"
+               class="form-control" />
+    </div>
+
+    <!-- ================= ADDRESS ================= -->
+    <div class="mb-3">
+        <label>Address Line 1</label>
+        <input asp-for="AddressLine1"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Address Line 2</label>
+        <input asp-for="AddressLine2"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>City</label>
+        <input asp-for="City"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>State</label>
+        <input asp-for="State"
+               class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Pincode</label>
+        <input asp-for="Pincode"
+               class="form-control" />
+    </div>
+
+    <!-- ================= IMAGE ================= -->
+    @if (!string.IsNullOrEmpty(Model.ExistingAccountantImage))
+    {
+        <div class="mb-3">
+            <label>Current Image</label><br />
+            <img src="~/images/Accountantimage/@Model.ExistingAccountantImage"
+                 alt="Accountant Image"
+                 style="max-height:120px;border:1px solid #ccc;padding:5px;" />
+        </div>
+    }
+
+    <div class="mb-3">
+        <label>Profile Image</label>
+        <input asp-for="AccountantImage"
+               type="file"
+               class="form-control"
+               accept="image/*" />
+    </div>
+
+    <!-- ================= SUBMIT ================= -->
+    <button type="submit" class="btn btn-success">
+        Save Changes
+    </button>
+
+</form>

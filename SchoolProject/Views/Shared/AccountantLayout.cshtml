@@ -4,49 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accountant Dashboard</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Custom CSS -->
     <style>
-        :root {
-            --primary-color: #4361ee;
-            --secondary-color: #3f37c9;
-            --success-color: #4cc9f0;
-            --warning-color: #f72585;
-            --light-bg: #f8f9fa;
-            --dark-bg: #212529;
-        }
-
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f7fb;
             padding-top: 60px;
+            overflow-x: hidden;
         }
 
-        .navbar-brand {
+        /* NAVBAR */
+        .navbar {
+            height: 60px;
+            z-index: 1100;
+        }
+
+        /* Navbar brand center fix */
+        .navbar-center-title {
+            position: absolute;
+            left: 45%;
+            transform: translateX(-50%);
             font-weight: 600;
-            color: var(--primary-color) !important;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
         }
 
+   
+
+
+        /* SIDEBAR */
         .sidebar {
             position: fixed;
-            top: 60px;
+            top: 60px; /* exactly navbar height */
             left: 0;
-            bottom: 0;
             width: 260px;
-            background: white;
-            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+            height: calc(100vh - 60px);
+            background: #fff;
+            box-shadow: 0 0 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
             overflow-y: auto;
-            z-index: 100;
-            transition: all 0.3s;
+            z-index: 1050;
         }
 
             .sidebar.collapsed {
-                margin-left: -260px;
+                transform: translateX(-260px);
             }
 
         .sidebar-menu {
@@ -54,157 +62,49 @@
             padding: 0;
         }
 
-            .sidebar-menu li {
-                margin-bottom: 5px;
-            }
-
-            .sidebar-menu a {
+            .sidebar-menu li a {
                 display: block;
                 padding: 12px 20px;
                 color: #333;
                 text-decoration: none;
-                border-left: 4px solid transparent;
-                transition: all 0.3s;
             }
 
-                .sidebar-menu a:hover {
-                    background-color: rgba(67, 97, 238, 0.1);
-                    border-left-color: var(--primary-color);
+                .sidebar-menu li a:hover {
+                    background: rgba(67, 97, 238, 0.1);
                 }
 
-                .sidebar-menu a.active {
-                    background-color: rgba(67, 97, 238, 0.1);
-                    border-left-color: var(--primary-color);
-                    color: var(--primary-color);
-                }
-
-            .sidebar-menu i {
-                width: 20px;
-                margin-right: 10px;
-            }
-
+        /* MAIN CONTENT */
         .main-content {
             margin-left: 260px;
             padding: 20px;
-            transition: all 0.3s;
+            transition: margin-left 0.3s ease;
         }
 
             .main-content.expanded {
                 margin-left: 0;
             }
 
-        .card {
-            border: none;
-            box-shadow: 0 0 15px rgba(0,0,0,0.05);
-            border-radius: 10px;
-            margin-bottom: 20px;
-            transition: transform 0.3s;
+        /* MOBILE OVERLAY */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 1040;
+            display: none;
         }
 
-            .card:hover {
-                transform: translateY(-5px);
+            .sidebar-overlay.show {
+                display: block;
             }
 
-        .card-header {
-            background: white;
-            border-bottom: 1px solid #eee;
-            font-weight: 600;
-        }
-
-        .greeting-card {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-        }
-
-        .profile-card {
-            background: linear-gradient(135deg, #2b2d42, #4a4e69);
-            color: white;
-        }
-
-        .progress {
-            height: 8px;
-            border-radius: 4px;
-        }
-
-        .avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .avatar-lg {
-            width: 80px;
-            height: 80px;
-        }
-
-        .badge-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            width: 18px;
-            height: 18px;
-            background-color: red;
-            color: white;
-            border-radius: 50%;
-            font-size: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .stat-card {
-            text-align: center;
-            padding: 20px;
-        }
-
-            .stat-card .number {
-                font-size: 2rem;
-                font-weight: 700;
-            }
-
-        .table th {
-            border-top: none;
-            font-weight: 600;
-            color: #666;
-        }
-
-        .event-item {
-            border-left: 4px solid;
-            padding-left: 15px;
-            margin-bottom: 15px;
-        }
-
-            .event-item.danger {
-                border-left-color: var(--warning-color);
-            }
-
-            .event-item.success {
-                border-left-color: #4ade80;
-            }
-
-            .event-item.info {
-                border-left-color: var(--success-color);
-            }
-
-            .event-item.warning {
-                border-left-color: #f59e0b;
-            }
-
-        @@media (max-width: 992px) {
+        /* MOBILE */
+        @@media (max-width: 991px) {
             .sidebar {
-                margin-left: -260px;
+                transform: translateX(-260px);
             }
 
                 .sidebar.show {
-                    margin-left: 0;
+                    transform: translateX(0);
                 }
 
             .main-content {
@@ -212,268 +112,145 @@
             }
         }
 
-        .attendance-chart {
-            height: 150px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-around;
-            padding: 20px 0;
-        }
-
-        .attendance-bar {
-            width: 30px;
-            background-color: var(--primary-color);
-            border-radius: 4px 4px 0 0;
-            position: relative;
-        }
-
-            .attendance-bar span {
-                position: absolute;
-                bottom: -25px;
-                left: 50%;
-                transform: translateX(-50%);
-                font-size: 12px;
+        /* Mobile adjustments */
+        @@media (max-width: 576px) {
+            .brand-text {
+                font-size: 14px;
+                max-width: 200px;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
-
-        .carousel-control-next, .carousel-control-prev {
-            width: 40px;
-            height: 40px;
-            background-color: var(--primary-color);
-            border-radius: 50%;
-            top: 50%;
-            transform: translateY(-50%);
-            opacity: 1;
-        }
-
-        .carousel-control-prev {
-            left: -20px;
-        }
-
-        .carousel-control-next {
-            right: -20px;
-        }
-
-        .modal-content {
-            border-radius: 10px;
-            border: none;
         }
     </style>
 </head>
+
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-light bg-white fixed-top shadow-sm">
         <div class="container-fluid">
-            <button class="btn btn-link me-2" id="sidebarToggle">
-                <i class="bi bi-list" style="font-size: 1.5rem;"></i>
+            <button class="btn btn-link" id="sidebarToggle">
+                <i class="bi bi-list fs-3"></i>
             </button>
-                
-            <a class="navbar-brand" href="#">
+
+            <div class="navbar-center-title">
                 <i class="bi bi-mortarboard-fill me-2"></i>
-               Gyan Sagar Public School
-            </a>
-
-            <div class="d-flex align-items-center ms-auto">
-                <!-- Search -->
-                <div class="input-group me-3 d-none d-md-flex" style="width: 300px;">
-                    <input type="text" class="form-control" placeholder="Search...">
-                    <button class="btn btn-outline-primary" type="button">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </div>
-
-                <!-- Notifications -->
-                @* <div class="dropdown me-3">
-                    <button class="btn btn-light position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown">
-                        <i class="bi bi-bell"></i>
-                        <span class="notification-badge">3</span>
-                    </button>
-                     <div class="dropdown-menu dropdown-menu-end p-3" style="width: 350px;">
-                        <h6 class="mb-3">Notifications (3)</h6>
-                        <div class="notification-item mb-3">
-                            <div class="d-flex">
-                                <div class="flex-shrink-0">
-                                    <img src="https://i.pravatar.cc/40?img=1" class="avatar rounded-circle" alt="...">
-                                </div>
-                                <div class="flex-grow-1 ms-3">
-                                    <p class="mb-1"><strong>Shawn</strong> needs help with Math.</p>
-                                    <small class="text-muted">Just now</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="notification-item mb-3">
-                            <div class="d-flex">
-                                <div class="flex-shrink-0">
-                                    <img src="https://i.pravatar.cc/40?img=2" class="avatar rounded-circle" alt="...">
-                                </div>
-                                <div class="flex-grow-1 ms-3">
-                                    <p class="mb-1"><strong>Sylvia</strong> added appointment.</p>
-                                    <small class="text-muted">10 mins ago</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-center pt-2">
-                            <a href="#" class="btn btn-sm btn-primary">View All</a>
-                        </div>
-                    </div> 
-                </div> *@
-
-                <!-- User Menu -->
-                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-outline-danger d-flex align-items-center logout-btn">
-                        <i class="bi bi-box-arrow-right me-2"></i>
-                        <span>Logout</span>
-                    </button>
-                </form>
-
-
-
-                @* <div class="dropdown">
-                    <button class="btn btn-light d-flex align-items-center" type="button" id="userDropdown" data-bs-toggle="dropdown">
-                        <img src="https://i.pravatar.cc/40?img=3" class="avatar rounded-circle me-2" alt="...">
-                        <span class="d-none d-md-inline">Ajay Kumar</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                    </ul>
-                </div> *@
+                <span class="brand-text">Gyan Sagar Public School</span>
             </div>
+
+
+            <form asp-controller="Account" asp-action="Logout" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-box-arrow-right me-1"></i> Logout
+                </button>
+            </form>
         </div>
     </nav>
 
-    <!-- Sidebar -->
+    <!-- OVERLAY (MOBILE) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
         <div class="p-3">
-            <div class="d-flex align-items-center mb-4 p-3 bg-light rounded shadow-sm">
-                <div class="me-3 text-primary fs-4">
-                    <i class="fa-solid fa-user"></i>
-                </div>
-                <div>
-                    <h6 class="mb-0 fw-semibold">
-                        @User.Identity?.Name
-                    </h6>
-                    <small class="text-muted">
-                        @User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
-                    </small>
-                </div>
-            </div>
 
+            <!-- PROFILE -->
+            <a asp-controller="Accountant"
+               asp-action="AccountantProfileData"
+               class="text-decoration-none text-dark">
 
+                <div class="d-flex align-items-center mb-4 p-3 bg-light rounded shadow-sm"
+                     style="cursor:pointer;">
+
+                    @{
+                        var accountantImage = Context.Session.GetString("AccountantImage");
+                        var imageName = string.IsNullOrEmpty(accountantImage)
+                        ? "default.png"
+                        : accountantImage;
+                    }
+
+                    <!-- PROFILE IMAGE -->
+                    <div class="me-3">
+                        <img src="~/images/Accountantimage/@imageName?v=@DateTime.Now.Ticks"
+                             alt="Profile Image"
+                             class="rounded-circle"
+                             style="width:48px;height:48px;object-fit:cover;border:1px solid #ddd;" />
+                    </div>
+
+                    <!-- NAME + ROLE -->
+                    <div>
+                        <h6 class="mb-0 fw-semibold">
+                            @User.Identity?.Name
+                        </h6>
+                        <small class="text-muted">
+                            @User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
+                        </small>
+                    </div>
+
+                </div>
+            </a>
+            <!-- MENU -->
             <ul class="sidebar-menu">
                 <li>
                     <a asp-controller="Accountant" asp-action="AccountantDashboard">
-                        <i class="bi bi-house-door"></i>Dashboard
+                        <i class="bi bi-house-door me-2"></i> Dashboard
                     </a>
                 </li>
-               
-                <li><a href="#"><i class="bi bi-calendar-week"></i> Schedule</a></li>
-                <li><a href="#"><i class="bi bi-people"></i> Students</a></li>
-                <li><a href="#"><i class="bi bi-journal-text"></i> Syllabus</a></li>
-                
+
                 <li>
                     <a asp-controller="Accountant" asp-action="CollectFee">
-                        <i class="bi bi-graph-up"></i>CollectFee</a>
-                </li>
-                <li>
-                    <a asp-controller="Accountant" asp-action="MonthlyFeeReport">
-                        <i class="bi bi-graph-up"></i>
-                        Monthly Fee Report
+                        <i class="bi bi-cash-stack me-2"></i> Collect Fee
                     </a>
                 </li>
 
-                <li><a href="#"><i class="bi bi-file-text"></i> Assignments</a></li>
-                <li><a href="#"><i class="bi bi-chat-left-text"></i> Messages</a></li>
-                <li><a href="#"><i class="bi bi-gear"></i> Settings</a></li>
+                <li>
+                    <a asp-controller="Accountant" asp-action="MonthlyFeeReport">
+                        <i class="bi bi-file-earmark-text me-2"></i> Monthly Fee Report
+                    </a>
+                </li>
             </ul>
 
-           
         </div>
     </div>
 
-
-
+    <!-- MAIN -->
     <main class="main-content" id="mainContent">
         @RenderBody()
     </main>
 
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Custom JavaScript -->
     <script>
-        // Set current date
-        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+        document.addEventListener("DOMContentLoaded", function () {
 
-        // Toggle sidebar
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('mainContent');
+            const sidebar = document.getElementById("sidebar");
+            const mainContent = document.getElementById("mainContent");
+            const toggleBtn = document.getElementById("sidebarToggle");
+            const overlay = document.getElementById("sidebarOverlay");
 
-            if (window.innerWidth < 992) {
-                // Mobile view
-                sidebar.classList.toggle('show');
-            } else {
-                // Desktop view
-                sidebar.classList.toggle('collapsed');
-                mainContent.classList.toggle('expanded');
-            }
-        });
-
-        // Save event
-        document.getElementById('saveEvent').addEventListener('click', function() {
-            const title = document.getElementById('eventTitle').value;
-            const date = document.getElementById('eventDate').value;
-
-            if (title && date) {
-                alert(`Event "${title}" scheduled for ${new Date(date).toLocaleDateString()} has been saved.`);
-                document.getElementById('eventForm').reset();
-                const modal = bootstrap.Modal.getInstance(document.getElementById('addEventModal'));
-                modal.hide();
-            } else {
-                alert('Please fill in all required fields.');
-            }
-        });
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById('sidebar');
-            const toggleBtn = document.getElementById('sidebarToggle');
-
-            if (window.innerWidth < 992 &&
-                !sidebar.contains(event.target) &&
-                !toggleBtn.contains(event.target) &&
-                sidebar.classList.contains('show')) {
-                sidebar.classList.remove('show');
-            }
-        });
-
-        // Make attendance bars interactive
-        document.querySelectorAll('.attendance-bar').forEach(bar => {
-            bar.addEventListener('mouseover', function() {
-                this.style.opacity = '0.8';
+            toggleBtn.addEventListener("click", function () {
+                if (window.innerWidth < 992) {
+                    sidebar.classList.toggle("show");
+                    overlay.classList.toggle("show");
+                    document.body.style.overflow =
+                        sidebar.classList.contains("show") ? "hidden" : "";
+                } else {
+                    sidebar.classList.toggle("collapsed");
+                    mainContent.classList.toggle("expanded");
+                }
             });
 
-            bar.addEventListener('mouseout', function() {
-                this.style.opacity = '1';
+            overlay.addEventListener("click", function () {
+                sidebar.classList.remove("show");
+                overlay.classList.remove("show");
+                document.body.style.overflow = "";
             });
-        });
-
-        // Initialize tooltips
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
     </script>
+
     @RenderSection("Scripts", required: false)
+
 </body>
 </html>

@@ -83,9 +83,10 @@
             }
 
         .main-content {
-            margin-left: 260px;
-            padding: 20px;
-            transition: all 0.3s;
+            margin-left: 115px;
+            padding: 20px 25px;
+            min-height: 100vh;
+            background-color: #f8f9fa;
         }
 
             .main-content.expanded {
@@ -317,7 +318,7 @@
             
             
             
-            <div class="d-flex align-items-center mb-4 p-3 bg-light rounded shadow-sm">
+            @* <div class="d-flex align-items-center mb-4 p-3 bg-light rounded shadow-sm">
                 <div class="me-3">
 
                     @if (!string.IsNullOrEmpty(ViewBag.TeacherImage))
@@ -346,8 +347,43 @@
                         @User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
                     </small>
                 </div>
-            </div>
+            </div> *@
 
+            <!-- TEACHER PROFILE -->
+            <a asp-controller="Teacher"
+               asp-action="TeacherProfileData"
+               class="text-decoration-none text-dark">
+
+                <div class="d-flex align-items-center mb-4 p-3 bg-light rounded shadow-sm"
+                     style="cursor:pointer;">
+
+                    @{
+                        var teacherImage = Context.Session.GetString("TeacherImage");
+                        var imageName = string.IsNullOrEmpty(teacherImage)
+                        ? "default.png"
+                        : teacherImage;
+                    }
+
+                    <!-- PROFILE IMAGE -->
+                    <div class="me-3">
+                        <img src="~/images/Teacherprofileimage/@imageName?v=@DateTime.Now.Ticks"
+                             alt="Teacher"
+                             class="rounded-circle"
+                             style="width:48px;height:48px;object-fit:cover;border:1px solid #ddd;" />
+                    </div>
+
+                    <!-- NAME + ROLE -->
+                    <div>
+                        <h6 class="mb-0 fw-semibold">
+                            @User.Identity?.Name
+                        </h6>
+                        <small class="text-muted">
+                            @User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
+                        </small>
+                    </div>
+
+                </div>
+            </a>
 
           
             <ul class="sidebar-menu">
@@ -397,7 +433,14 @@
 
   
 
-    <main role="main-content">
+    @* <main role="main-content">
+        @RenderBody()
+    </main> *@
+
+
+    @* @Html.Partial("_TeacherSidebar") *@
+
+    <main class="main-content">
         @RenderBody()
     </main>
 
@@ -407,6 +450,11 @@
 
     <!-- Custom JavaScript -->
     <script>
+
+
+       
+
+
         document.addEventListener("DOMContentLoaded", function () {
 
             const sidebar = document.getElementById('sidebar');

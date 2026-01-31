@@ -27,6 +27,8 @@ namespace SchoolProject.Controllers
             return View();
         }
 
+
+
         [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Login(string LoginId, string Password)
@@ -40,16 +42,17 @@ namespace SchoolProject.Controllers
             bool forceChangePassword;
             string roleName;
             int roleId;
-            string adminImage = "default.png"; // ✅ fallback
 
-            // 🔹 Detect Email or Phone
+            string adminImage = "default.png";       // Admin fallback
+            string accountantImage = "default.png";  // Accountant fallback
+
             bool isEmail = LoginId.Contains("@");
 
             using SqlConnection con = new SqlConnection(cs);
             con.Open();
 
             // ================================
-            // 1️⃣ LOGIN QUERY (EMAIL OR PHONE)
+            // 1️⃣ LOGIN QUERY
             // ================================
             using (SqlCommand cmd = new SqlCommand(@"
         SELECT  
@@ -97,9 +100,9 @@ namespace SchoolProject.Controllers
             }
 
             // ================================
-            // 3️⃣ FETCH ADMIN IMAGE (ONLY IF ADMIN)
+            // 3️⃣ FETCH ROLE IMAGE
             // ================================
-            if (roleId == 1) // Admin
+            if (roleId == 1) // ADMIN
             {
                 using SqlCommand imgCmd = new(@"
             SELECT AdminImage
@@ -108,11 +111,22 @@ namespace SchoolProject.Controllers
 
                 imgCmd.Parameters.AddWithValue("@UserId", userId);
 
-                object? imgResult = imgCmd.ExecuteScalar();
-                if (imgResult != null && imgResult != DBNull.Value)
-                {
-                    adminImage = imgResult.ToString()!;
-                }
+                object? img = imgCmd.ExecuteScalar();
+                if (img != null && img != DBNull.Value)
+                    adminImage = img.ToString()!;
+            }
+            else if (roleId == 4) // ACCOUNTANT
+            {
+                using SqlCommand imgCmd = new(@"
+            SELECT AccountantImage
+            FROM Accountants
+            WHERE UserId = @UserId", con);
+
+                imgCmd.Parameters.AddWithValue("@UserId", userId);
+
+                object? img = imgCmd.ExecuteScalar();
+                if (img != null && img != DBNull.Value)
+                    accountantImage = img.ToString()!;
             }
 
             // ================================
@@ -161,7 +175,7 @@ namespace SchoolProject.Controllers
                 new ClaimsPrincipal(identity));
 
             // ================================
-            // 6️⃣ SESSION (FINAL & CORRECT)
+            // 6️⃣ SESSION
             // ================================
             HttpContext.Session.SetInt32("UserId", userId);
             HttpContext.Session.SetString("UserName", userName);
@@ -169,7 +183,10 @@ namespace SchoolProject.Controllers
             HttpContext.Session.SetInt32("RoleId", roleId);
             HttpContext.Session.SetInt32("SessionId", sessionId);
             HttpContext.Session.SetString("SessionName", sessionName);
+
+            // 🔑 ROLE IMAGE SESSION
             HttpContext.Session.SetString("AdminImage", adminImage);
+            HttpContext.Session.SetString("AccountantImage", accountantImage);
 
             // ================================
             // 7️⃣ FORCE PASSWORD CHANGE
@@ -178,7 +195,7 @@ namespace SchoolProject.Controllers
                 return RedirectToAction("ChangePassword", "Account");
 
             // ================================
-            // 8️⃣ ROLE-BASED REDIRECT
+            // 8️⃣ ROLE REDIRECT
             // ================================
             return roleId switch
             {

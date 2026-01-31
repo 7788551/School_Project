@@ -196,6 +196,45 @@
     Layout = "~/Views/Shared/TeacherLayout.cshtml";
 }
 
+<!-- ===================== OPTIONAL CSS ===================== -->
+<style>
+    /* FORCE CHART TO SHOW ON MOBILE */
+    .attendance-chart {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 180px; /* 🔥 KEY FIX */
+        height: 180px;
+    }
+
+    .attendance-bar {
+        flex: 1;
+        background: linear-gradient(180deg, #4e73df, #224abe);
+        border-radius: 6px;
+        position: relative;
+        min-height: 20px; /* 🔥 prevents collapse */
+    }
+
+        .attendance-bar span {
+            position: absolute;
+            bottom: -22px;
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            color: #555;
+        }
+
+    /* MOBILE FIX */
+    @@media (max-width: 768px) {
+        .attendance-chart {
+            height: 160px;
+            min-height: 160px;
+        }
+    }
+</style>
+
+
 <main class="main-content">
     <div id="mainContent">
 
@@ -218,10 +257,13 @@
                         <p class="card-text">Have a great day at work.</p>
 
                         <div class="d-flex align-items-center">
+                            <!-- Academic Year (from JS) -->
                             <span class="badge bg-light text-dark me-3" id="academicYearBadge">
                                 Academic Year: Loading...
                             </span>
 
+
+                            <!-- Current Date -->
                             <span class="badge bg-light text-dark">
                                 Today: <span id="currentDate"></span>
                             </span>
@@ -302,76 +344,53 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
 
-        // Greeting
+        // ⏰ Time-based greeting
         const hour = new Date().getHours();
         let greeting = "Good Day";
 
-        if (hour >= 5 && hour < 12) greeting = "Good Morning";
-        else if (hour >= 12 && hour < 17) greeting = "Good Afternoon";
-        else if (hour >= 17 && hour < 21) greeting = "Good Evening";
-        else greeting = "Good Night";
+        if (hour >= 5 && hour < 12) {
+            greeting = "Good Morning";
+        }
+        else if (hour >= 12 && hour < 17) {
+            greeting = "Good Afternoon";
+        }
+        else if (hour >= 17 && hour < 21) {
+            greeting = "Good Evening";
+        }
+        else {
+            greeting = "Good Night";
+        }
 
         document.getElementById("greetingText").textContent = greeting;
 
-        // Current Date
+        // 📅 Current Date
         const today = new Date();
         const options = { day: '2-digit', month: 'short', year: 'numeric' };
         document.getElementById("currentDate").textContent =
             today.toLocaleDateString('en-GB', options);
+    });
 
-        // Academic Session
+      document.addEventListener("DOMContentLoaded", function () {
+
         fetch('/Admin/GetCurrentSession')
-            .then(r => r.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Unauthorized or server error");
+                }
+                return response.json();
+            })
             .then(data => {
                 document.getElementById("academicYearBadge").textContent =
-                    data?.sessionName
+                    data.sessionName
                         ? `Academic Year: ${data.sessionName}`
                         : "Academic Year: Not Set";
             })
-            .catch(() => {
+            .catch(error => {
+                console.error("Academic year load failed:", error);
                 document.getElementById("academicYearBadge").textContent =
-                    "Academic Year: Error";
+                    "Academic Year: N/A";
             });
     });
+
 </script>
 
-<!-- ===================== OPTIONAL CSS ===================== -->
-<style>
-    /* FORCE CHART TO SHOW ON MOBILE */
-    .attendance-chart {
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: 12px;
-        min-height: 180px; /* 🔥 KEY FIX */
-        height: 180px;
-    }
-
-    .attendance-bar {
-        flex: 1;
-        background: linear-gradient(180deg, #4e73df, #224abe);
-        border-radius: 6px;
-        position: relative;
-        min-height: 20px; /* 🔥 prevents collapse */
-    }
-
-        .attendance-bar span {
-            position: absolute;
-            bottom: -22px;
-            width: 100%;
-            text-align: center;
-            font-size: 12px;
-            color: #555;
-        }
-
-    /* MOBILE FIX */
-    @@media (max-width: 768px) {
-        .attendance-chart
-
-    {
-        height: 160px;
-        min-height: 160px;
-    }
-
-    }
-</style>
