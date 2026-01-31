@@ -454,13 +454,136 @@ namespace SchoolProject.Services
             return list;
         }
 
+//        public List<MonthlyFeeStatus> GetMonthlyFeeStatus(
+//     int sessionId,
+//     int? classId,
+//     int? sectionId,
+//     string admissionNumber,
+//     string status
+// )
+//        {
+//            List<MonthlyFeeStatus> list = new();
+
+//            using SqlConnection con = new SqlConnection(_cs);
+//            using SqlCommand cmd = new SqlCommand(@"
+//SELECT
+//    s.StudentId,
+//    s.AdmissionNumber,
+//    u.Name AS StudentName,
+//    c.ClassName,
+//    sec.SectionName,
+//    smf.FeeMonth,
+
+//    SUM(smf.DueAmount) AS TotalDue,
+//    SUM(smf.PaidAmount) AS TotalPaid,
+//    SUM(smf.DueAmount - smf.PaidAmount) AS Balance,
+
+//    CASE
+//        WHEN SUM(smf.DueAmount - smf.PaidAmount) = 0
+//            THEN 'Paid'
+//        ELSE 'Pending'
+//    END AS FeeStatus,
+
+//    MAX(fr.ReceiptId) AS ReceiptId
+
+//FROM StudentMonthlyFee smf
+//INNER JOIN Students s ON smf.StudentId = s.StudentId
+//INNER JOIN Users u ON s.UserId = u.UserId
+//INNER JOIN Classes c ON smf.ClassId = c.ClassId
+//INNER JOIN Sections sec ON s.SectionId = sec.SectionId
+
+//LEFT JOIN FeeReceiptDetails frd
+//    ON frd.FeeMonth = smf.FeeMonth
+
+//LEFT JOIN FeeReceipts fr
+//    ON fr.ReceiptId = frd.ReceiptId
+//   AND fr.StudentId = smf.StudentId
+//   AND fr.SessionId = smf.SessionId
+
+//WHERE smf.SessionId = @SessionId
+//  AND (@ClassId IS NULL OR smf.ClassId = @ClassId)
+//  AND (@SectionId IS NULL OR s.SectionId = @SectionId)
+//  AND (@AdmissionNumber IS NULL OR s.AdmissionNumber = @AdmissionNumber)
+
+//GROUP BY
+//    s.StudentId,
+//    s.AdmissionNumber,
+//    u.Name,
+//    c.ClassName,
+//    sec.SectionName,
+//    smf.FeeMonth
+
+//HAVING
+//    @Status = 'All'
+//    OR (
+//        @Status = 'Paid'
+//        AND SUM(smf.DueAmount - smf.PaidAmount) = 0
+//    )
+//    OR (
+//        @Status = 'Pending'
+//        AND SUM(smf.DueAmount - smf.PaidAmount) > 0
+//    )
+
+//ORDER BY
+//    c.ClassName,
+//    sec.SectionName,
+//    s.AdmissionNumber,
+//    CASE smf.FeeMonth
+//        WHEN 'January' THEN 1
+//        WHEN 'February' THEN 2
+//        WHEN 'March' THEN 3
+//        WHEN 'April' THEN 4
+//        WHEN 'May' THEN 5
+//        WHEN 'June' THEN 6
+//        WHEN 'July' THEN 7
+//        WHEN 'August' THEN 8
+//        WHEN 'September' THEN 9
+//        WHEN 'October' THEN 10
+//        WHEN 'November' THEN 11
+//        WHEN 'December' THEN 12
+//    END;
+//", con);
+
+//            cmd.Parameters.AddWithValue("@SessionId", sessionId);
+//            cmd.Parameters.AddWithValue("@ClassId", (object?)classId ?? DBNull.Value);
+//            cmd.Parameters.AddWithValue("@SectionId", (object?)sectionId ?? DBNull.Value);
+//            cmd.Parameters.AddWithValue("@AdmissionNumber",
+//                string.IsNullOrWhiteSpace(admissionNumber) ? DBNull.Value : admissionNumber);
+//            cmd.Parameters.AddWithValue("@Status", status);
+
+//            con.Open();
+
+//            using SqlDataReader dr = cmd.ExecuteReader();
+//            while (dr.Read())
+//            {
+//                list.Add(new MonthlyFeeStatus
+//                {
+//                    StudentId = Convert.ToInt32(dr["StudentId"]),
+//                    AdmissionNumber = dr["AdmissionNumber"].ToString(),
+//                    StudentName = dr["StudentName"].ToString(),
+//                    ClassName = dr["ClassName"].ToString(),
+//                    SectionName = dr["SectionName"].ToString(),
+//                    FeeMonth = dr["FeeMonth"].ToString(),
+//                    TotalDue = Convert.ToDecimal(dr["TotalDue"]),
+//                    TotalPaid = Convert.ToDecimal(dr["TotalPaid"]),
+//                    Balance = Convert.ToDecimal(dr["Balance"]),
+//                    FeeStatus = dr["FeeStatus"].ToString(),
+//                    ReceiptId = dr["ReceiptId"] == DBNull.Value
+//                        ? null
+//                        : Convert.ToInt32(dr["ReceiptId"])
+//                });
+//            }
+
+//            return list;
+//        }
+
         public List<MonthlyFeeStatus> GetMonthlyFeeStatus(
-     int sessionId,
-     int? classId,
-     int? sectionId,
-     string admissionNumber,
-     string status
- )
+            int sessionId,
+            int? classId,
+            int? sectionId,
+            string admissionNumber,
+            string status
+        )
         {
             List<MonthlyFeeStatus> list = new();
 
@@ -474,22 +597,16 @@ SELECT
     sec.SectionName,
     smf.FeeMonth,
 
-    -- TOTAL DUE
     SUM(smf.DueAmount) AS TotalDue,
-
-    -- TOTAL PAID
     SUM(smf.PaidAmount) AS TotalPaid,
-
-    -- BALANCE
     SUM(smf.DueAmount - smf.PaidAmount) AS Balance,
 
     CASE
         WHEN SUM(smf.DueAmount - smf.PaidAmount) = 0
-        THEN 'Paid'
+            THEN 'Paid'
         ELSE 'Pending'
     END AS FeeStatus,
 
-    -- RECEIPT (latest, if any)
     MAX(fr.ReceiptId) AS ReceiptId
 
 FROM StudentMonthlyFee smf
@@ -498,11 +615,9 @@ INNER JOIN Users u ON s.UserId = u.UserId
 INNER JOIN Classes c ON smf.ClassId = c.ClassId
 INNER JOIN Sections sec ON s.SectionId = sec.SectionId
 
--- 🔹 Receipt Details (NO StudentId here)
 LEFT JOIN FeeReceiptDetails frd
     ON frd.FeeMonth = smf.FeeMonth
 
--- 🔹 Receipt Master (StudentId EXISTS here)
 LEFT JOIN FeeReceipts fr
     ON fr.ReceiptId = frd.ReceiptId
    AND fr.StudentId = smf.StudentId
@@ -520,6 +635,17 @@ GROUP BY
     c.ClassName,
     sec.SectionName,
     smf.FeeMonth
+
+HAVING
+    @Status = 'All'
+    OR (
+        @Status = 'Paid'
+        AND SUM(smf.DueAmount - smf.PaidAmount) = 0
+    )
+    OR (
+        @Status = 'Pending'
+        AND SUM(smf.DueAmount - smf.PaidAmount) > 0
+    )
 
 ORDER BY
     c.ClassName,
@@ -544,10 +670,9 @@ ORDER BY
             cmd.Parameters.AddWithValue("@SessionId", sessionId);
             cmd.Parameters.AddWithValue("@ClassId", (object?)classId ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@SectionId", (object?)sectionId ?? DBNull.Value);
-            cmd.Parameters.AddWithValue(
-                "@AdmissionNumber",
-                string.IsNullOrWhiteSpace(admissionNumber) ? DBNull.Value : admissionNumber
-            );
+            cmd.Parameters.AddWithValue("@AdmissionNumber",
+                string.IsNullOrWhiteSpace(admissionNumber) ? DBNull.Value : admissionNumber);
+            cmd.Parameters.AddWithValue("@Status", status);
 
             con.Open();
 

@@ -8,7 +8,7 @@
 <h3 class="mb-3">👤 System Users</h3>
 
 <div class="table-responsive">
-    <table class="table table-bordered table-striped align-middle">
+    <table id="myTable" class="table table-bordered table-striped align-middle">
         <thead class="table-dark">
             <tr>
                 <th>User ID</th>
@@ -69,3 +69,9 @@
         </tbody>
     </table>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        new DataTable('#myTable');
+    });
+</script>

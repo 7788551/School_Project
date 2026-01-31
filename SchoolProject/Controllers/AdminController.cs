@@ -26,7 +26,7 @@ namespace SchoolProject.Controllers
         // ============================
 
         [HttpGet]
-        [Authorize]
+        [Authorize(Roles = "Admin,Accountant")]
         public IActionResult GetCurrentSession()
         {
             using SqlConnection con = new SqlConnection(
@@ -1790,8 +1790,8 @@ WHERE UserId = @UserId", con, tran);
 
 
 
+
         [HttpGet]
-        [AllowAnonymous]
         [Authorize(Roles = "Admin,Accountant")]
         public IActionResult GetClassesBySession(int sessionId)
         {
@@ -1836,10 +1836,113 @@ WHERE UserId = @UserId", con, tran);
             return Json(list);
         }
 
+        //[HttpGet]
+        //[Authorize(Roles = "Admin,Accountant")]
+        //public IActionResult GetClassesByCurrentSession()
+        //{
+        //    int sessionId;
+
+        //    try
+        //    {
+        //        sessionId = GetCurrentSessionId(); // IsCurrent = 1
+        //    }
+        //    catch
+        //    {
+        //        // 🚫 Do NOT throw to JS
+        //        return Json(new List<object>());
+        //    }
+
+        //    var list = new List<object>();
+        //    string cs = _configuration.GetConnectionString("DefaultConnection");
+
+        //    using SqlConnection con = new SqlConnection(cs);
+        //    using SqlCommand cmd = new SqlCommand(@"
+        //SELECT ClassId, ClassName
+        //FROM (
+        //    SELECT DISTINCT
+        //        c.ClassId,
+        //        c.ClassName,
+        //        CASE
+        //            WHEN c.ClassName = 'Nursery' THEN 1
+        //            WHEN c.ClassName = 'LKG' THEN 2
+        //            WHEN c.ClassName = 'UKG' THEN 3
+        //            WHEN ISNUMERIC(c.ClassName) = 1
+        //                THEN 100 + CAST(c.ClassName AS INT)
+        //            ELSE 1000
+        //        END AS SortOrder
+        //    FROM ClassSections cs
+        //    INNER JOIN Classes c ON cs.ClassId = c.ClassId
+        //    WHERE cs.SessionId = @SessionId
+        //) x
+        //ORDER BY x.SortOrder;", con);
+
+        //    cmd.Parameters.AddWithValue("@SessionId", sessionId);
+
+        //    con.Open();
+        //    using SqlDataReader dr = cmd.ExecuteReader();
+
+        //    while (dr.Read())
+        //    {
+        //        list.Add(new
+        //        {
+        //            classId = dr.GetInt32(0),
+        //            className = dr.GetString(1)
+        //        });
+        //    }
+
+        //    return Json(list);
+        //}
+        //[HttpGet]
+        //[Authorize(Roles = "Admin,Accountant")]
+        //public IActionResult GetClassesBySession(int sessionId)
+        //{
+        //    var list = new List<object>();
+        //    string cs = _configuration.GetConnectionString("DefaultConnection");
+
+        //    using SqlConnection con = new SqlConnection(cs);
+        //    using SqlCommand cmd = new SqlCommand(@"
+        //    SELECT ClassId, ClassName
+        //    FROM (
+        //        SELECT DISTINCT
+        //            c.ClassId,
+        //            c.ClassName,
+        //            CASE
+        //                WHEN c.ClassName = 'Nursery' THEN 1
+        //                WHEN c.ClassName = 'LKG' THEN 2
+        //                WHEN c.ClassName = 'UKG' THEN 3
+        //                WHEN ISNUMERIC(c.ClassName) = 1
+        //                    THEN 100 + CAST(c.ClassName AS INT)
+        //                ELSE 1000
+        //            END AS SortOrder
+        //        FROM ClassSections cs
+        //        INNER JOIN Classes c ON cs.ClassId = c.ClassId
+        //        WHERE cs.SessionId = @SessionId
+        //    ) x
+        //    ORDER BY x.SortOrder;
+        //", con);
+
+        //    cmd.Parameters.AddWithValue("@SessionId", sessionId);
+
+        //    con.Open();
+        //    using SqlDataReader dr = cmd.ExecuteReader();
+
+        //    while (dr.Read())
+        //    {
+        //        list.Add(new
+        //        {
+        //            classId = dr.GetInt32(0),
+        //            className = dr.GetString(1)
+        //        });
+        //    }
+
+        //    return Json(list);
+        //}
+
+
+
 
 
         [HttpGet]
-        [AllowAnonymous]
         [Authorize(Roles = "Admin,Accountant")]
         public IActionResult GetSectionsByClass(int sessionId, int classId)
         {
@@ -2363,58 +2466,157 @@ WHERE UserId = @UserId", con, tran);
 
 
 
-        [HttpPost]
-        public IActionResult AddFeeSchedule(
-      int classId,
-      int feeHeadId,
-      string frequency,
-      int[] monthNumbers)
-        {
-            // 1️⃣ Resolve CURRENT session (CRITICAL)
-            var (sessionId, _) = _feeService.GetCurrentSession();
+        //    [HttpPost]
+        //    public IActionResult AddFeeSchedule(
+        //  int classId,
+        //  int feeHeadId,
+        //  string frequency,
+        //  int[] monthNumbers)
+        //    {
+        //        // 1️⃣ Resolve CURRENT session (CRITICAL)
+        //        var (sessionId, _) = _feeService.GetCurrentSession();
 
-            // 2️⃣ Convert frequency + months → string
+        //        // 2️⃣ Convert frequency + months → string
+        //        string applicableMonths;
+
+        //        if (frequency == "Monthly")
+        //        {
+        //            applicableMonths = "ALL";
+        //        }
+        //        else if (frequency == "Yearly")
+        //        {
+        //            // Admin can later choose which month (default April)
+        //            applicableMonths = "April";
+        //        }
+        //        else // 🔁 Custom
+        //        {
+        //            applicableMonths = string.Join(",",
+        //                monthNumbers.Select(m =>
+        //                    new DateTime(2000, m, 1).ToString("MMMM")));
+        //        }
+
+        //        using SqlConnection con =
+        //            new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+        //        con.Open();
+
+        //        // 3️⃣ Update CURRENT SESSION ONLY
+        //        using SqlCommand cmd = new SqlCommand(@"
+        //    UPDATE ClassFeeStructure
+        //    SET ApplicableMonths = @Months
+        //    WHERE SessionId = @SessionId
+        //      AND ClassId = @ClassId
+        //      AND FeeHeadId = @FeeHeadId
+        //", con);
+
+        //        cmd.Parameters.AddWithValue("@Months", applicableMonths);
+        //        cmd.Parameters.AddWithValue("@SessionId", sessionId);
+        //        cmd.Parameters.AddWithValue("@ClassId", classId);
+        //        cmd.Parameters.AddWithValue("@FeeHeadId", feeHeadId);
+
+        //        cmd.ExecuteNonQuery();
+
+        //        TempData["Success"] = "Fee schedule saved for current session.";
+        //        return RedirectToAction("ClassFeeStructure");
+        //    }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddFeeSchedule(
+    int classId,
+    int feeHeadId,
+    string frequency,
+    int[] monthNumbers)
+        {
+            // ======================================================
+            // 1️⃣ RESOLVE CURRENT SESSION (SINGLE SOURCE OF TRUTH)
+            // ======================================================
+            var (sessionId, sessionName) = _feeService.GetCurrentSession();
+
+            // ======================================================
+            // 2️⃣ VALIDATION
+            // ======================================================
+            if (classId <= 0 || feeHeadId <= 0)
+            {
+                TempData["Error"] = "Invalid class or fee head.";
+                return RedirectToAction("ClassFeeStructure");
+            }
+
+            if (string.IsNullOrWhiteSpace(frequency))
+            {
+                TempData["Error"] = "Fee frequency is required.";
+                return RedirectToAction("ClassFeeStructure");
+            }
+
+            // ======================================================
+            // 3️⃣ CONVERT FREQUENCY → APPLICABLE MONTHS
+            // ======================================================
             string applicableMonths;
 
             if (frequency == "Monthly")
             {
+                // Means: apply for all academic months
                 applicableMonths = "ALL";
             }
             else if (frequency == "Yearly")
             {
-                // Admin can later choose which month (default April)
+                // Default academic billing month (you can change later)
                 applicableMonths = "April";
             }
             else // 🔁 Custom
             {
+                if (monthNumbers == null || monthNumbers.Length == 0)
+                {
+                    TempData["Error"] = "Please select at least one month.";
+                    return RedirectToAction("ClassFeeStructure");
+                }
+
                 applicableMonths = string.Join(",",
-                    monthNumbers.Select(m =>
-                        new DateTime(2000, m, 1).ToString("MMMM")));
+                    monthNumbers
+                        .Distinct()
+                        .OrderBy(m => m)
+                        .Select(m => new DateTime(2000, m, 1).ToString("MMMM"))
+                );
             }
 
+            // ======================================================
+            // 4️⃣ UPDATE CLASS FEE STRUCTURE (CURRENT SESSION ONLY)
+            // ======================================================
             using SqlConnection con =
                 new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             con.Open();
 
-            // 3️⃣ Update CURRENT SESSION ONLY
             using SqlCommand cmd = new SqlCommand(@"
         UPDATE ClassFeeStructure
-        SET ApplicableMonths = @Months
+        SET ApplicableMonths = @ApplicableMonths
         WHERE SessionId = @SessionId
           AND ClassId = @ClassId
           AND FeeHeadId = @FeeHeadId
     ", con);
 
-            cmd.Parameters.AddWithValue("@Months", applicableMonths);
+            cmd.Parameters.AddWithValue("@ApplicableMonths", applicableMonths);
             cmd.Parameters.AddWithValue("@SessionId", sessionId);
             cmd.Parameters.AddWithValue("@ClassId", classId);
             cmd.Parameters.AddWithValue("@FeeHeadId", feeHeadId);
 
-            cmd.ExecuteNonQuery();
+            int rows = cmd.ExecuteNonQuery();
 
-            TempData["Success"] = "Fee schedule saved for current session.";
+            // ======================================================
+            // 5️⃣ FEEDBACK
+            // ======================================================
+            if (rows == 0)
+            {
+                TempData["Error"] =
+                    $"No fee structure found for current session ({sessionName}).";
+            }
+            else
+            {
+                TempData["Success"] =
+                    $"Fee schedule saved for academic session {sessionName}.";
+            }
+
             return RedirectToAction("ClassFeeStructure");
         }
+
 
 
 

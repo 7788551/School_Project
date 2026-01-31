@@ -205,7 +205,7 @@
 <!-- =======================
      🔥 JAVASCRIPT
 ======================= -->
-<script>
+@* <script>
     document.addEventListener("DOMContentLoaded", function () {
         loadClasses();
         loadFeeHeads();
@@ -214,24 +214,58 @@
     // ===========================
     // Load Classes (Current Session)
     // ===========================
+          document.addEventListener("DOMContentLoaded", function () {
+        loadClasses();
+    });
+
     function loadClasses() {
-        fetch('/Admin/GetClassesBySession', {
+
+        const ddl = document.getElementById("classDropdown");
+        if (!ddl) {
+            console.error("Class dropdown not found.");
+            return;
+        }
+
+        // UX: disable while loading
+        ddl.disabled = true;
+        ddl.innerHTML = '<option value="">Loading classes...</option>';
+
+        fetch('/Admin/GetClassesByCurrentSession', {
             headers: { 'Accept': 'application/json' }
         })
-        .then(r => r.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Failed to load classes");
+            }
+            return response.json();
+        })
         .then(data => {
-            const ddl = document.getElementById("classDropdown");
+
             ddl.innerHTML = '<option value="">-- Select Class --</option>';
+
+            if (!Array.isArray(data) || data.length === 0) {
+                ddl.innerHTML +=
+                    '<option value="">No classes found for current session</option>';
+                return;
+            }
 
             data.forEach(c => {
                 const opt = document.createElement("option");
                 opt.value = c.classId;
-                opt.text = c.className;
+                opt.textContent = c.className;
                 ddl.appendChild(opt);
             });
+
+            ddl.disabled = false;
         })
-        .catch(() => alert("Unable to load classes"));
+        .catch(err => {
+            console.error(err);
+            ddl.innerHTML =
+                '<option value="">Failed to load classes</option>';
+            alert("Unable to load classes for current academic session.");
+        });
     }
+
 
     // ===========================
     // Load Fee Heads
@@ -263,5 +297,235 @@
         document.getElementById("monthDiv").style.display =
             freq === "Custom" ? "block" : "none";
     }
+</script> *@
+
+@* <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        loadClasses();
+        loadFeeHeads();
+    });
+
+
+     // ===========================
+    // Load Classes (Current Session)
+    // ===========================
+    function loadCurrentSession() {
+             fetch('/Admin/GetCurrentSession')
+                 .then(response => response.json())
+                 .then(data => {
+                     document.getElementById('sessionId').value = data.sessionId;
+                     document.getElementById('sessionName').value = data.sessionName;
+                     loadClasses(data.sessionId);
+                 });
+         }
+
+         function loadClasses(sessionId) {
+             fetch(`/Admin/GetClassesBySession?sessionId=${sessionId}`)
+                 .then(res => res.json())
+                 .then(data => {
+                     const ddl = document.getElementById('classId');
+                     ddl.innerHTML = '<option value="">Select Class</option>';
+                     ddl.disabled = false;
+
+                     data.forEach(c => {
+                         ddl.innerHTML +=
+                             `<option value="${c.classId}">${c.className}</option>`;
+                     });
+                 });
+         }
+
+    // ===========================
+    // Load Classes (Current Session)
+    // ===========================
+    // function loadClasses() {
+
+    //     const ddl = document.getElementById("classDropdown");
+    //     if (!ddl) {
+    //         console.error("Class dropdown not found.");
+    //         return;
+    //     }
+
+    //     UX: disable while loading
+    //     ddl.disabled = true;
+    //     ddl.innerHTML = '<option value="">Loading classes...</option>';
+
+    //     fetch('/Admin/GetClassesByCurrentSession', {
+    //         headers: { 'Accept': 'application/json' }
+    //     })
+    //     .then(response => {
+    //         if (!response.ok) {
+    //             throw new Error("Failed to load classes");
+    //         }
+    //         return response.json();
+    //     })
+    //     .then(data => {
+
+    //         ddl.innerHTML = '<option value="">-- Select Class --</option>';
+
+    //         if (!Array.isArray(data) || data.length === 0) {
+    //             ddl.innerHTML +=
+    //                 '<option value="">No classes found for current session</option>';
+    //             return;
+    //         }
+
+    //         data.forEach(c => {
+    //             const opt = document.createElement("option");
+    //             opt.value = c.classId;
+    //             opt.textContent = c.className;
+    //             ddl.appendChild(opt);
+    //         });
+
+    //         ddl.disabled = false;
+    //     })
+    //     .catch(err => {
+    //         console.error(err);
+    //         ddl.innerHTML =
+    //             '<option value="">Failed to load classes</option>';
+    //         alert("Unable to load classes for current academic session.");
+    //     });
+    // }
+
+  
+
+
+    // ===========================
+    // Load Fee Heads
+    // ===========================
+    function loadFeeHeads() {
+
+        fetch('/Admin/FeeHeads', {
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(r => r.json())
+        .then(data => {
+
+            const ddl = document.getElementById("feeHeadDropdown");
+            if (!ddl) {
+                console.error("Fee head dropdown not found.");
+                return;
+            }
+
+            ddl.innerHTML = '<option value="">-- Select Fee Head --</option>';
+
+            if (!Array.isArray(data) || data.length === 0) {
+                ddl.innerHTML += '<option value="">No fee heads found</option>';
+                return;
+            }
+
+            data.forEach(f => {
+                const opt = document.createElement("option");
+                opt.value = f.feeHeadId;
+                opt.textContent = f.feeHeadName;
+                ddl.appendChild(opt);
+            });
+        })
+        .catch(() => alert("Unable to load fee heads"));
+    }
+
+    // ===========================
+    // Toggle Month Selector
+    // ===========================
+    function toggleMonth() {
+        const freq = document.getElementById("frequency").value;
+        document.getElementById("monthDiv").style.display =
+            freq === "Custom" ? "block" : "none";
+    }
 </script>
 
+ *@
+
+
+                <script>
+
+                        document.addEventListener("DOMContentLoaded", function () {
+        loadCurrentSession();
+        loadFeeHeads();
+    });
+
+
+        function loadCurrentSession() {
+        fetch('/Admin/GetCurrentSession')
+            .then(res => res.json())
+            .then(data => {
+                if (!data || !data.sessionId) {
+                    console.error("Session not found");
+                    return;
+                }
+
+                document.getElementById('sessionId').value = data.sessionId;
+                document.getElementById('sessionName').value = data.sessionName;
+
+                // ✅ CALL YOUR API HERE
+                loadClassesBySession(data.sessionId);
+            })
+            .catch(() => alert("Unable to load session"));
+    }
+
+
+        function loadClassesBySession(sessionId) {
+
+        fetch(`/Admin/GetClassesBySession?sessionId=${sessionId}`)
+            .then(res => res.json())
+            .then(data => {
+
+                const ddl = document.getElementById('classId');
+                ddl.innerHTML = '<option value="">Select Class</option>';
+                ddl.disabled = false;
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    ddl.innerHTML += '<option value="">No classes found</option>';
+                    return;
+                }
+
+                data.forEach(c => {
+                    ddl.innerHTML +=
+                        `<option value="${c.classId}">${c.className}</option>`;
+                });
+            })
+            .catch(() => alert("Unable to load classes"));
+    }
+
+    
+    // ===========================
+    function loadFeeHeads() {
+
+        fetch('/Admin/FeeHeads', {
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(r => r.json())
+        .then(data => {
+
+            const ddl = document.getElementById("feeHeadDropdown");
+            if (!ddl) {
+                console.error("Fee head dropdown not found.");
+                return;
+            }
+
+            ddl.innerHTML = '<option value="">-- Select Fee Head --</option>';
+
+            if (!Array.isArray(data) || data.length === 0) {
+                ddl.innerHTML += '<option value="">No fee heads found</option>';
+                return;
+            }
+
+            data.forEach(f => {
+                const opt = document.createElement("option");
+                opt.value = f.feeHeadId;
+                opt.textContent = f.feeHeadName;
+                ddl.appendChild(opt);
+            });
+        })
+        .catch(() => alert("Unable to load fee heads"));
+    }
+
+    // ===========================
+    // Toggle Month Selector
+    // ===========================
+    function toggleMonth() {
+        const freq = document.getElementById("frequency").value;
+        document.getElementById("monthDiv").style.display =
+            freq === "Custom" ? "block" : "none";
+    }
+
+
+                </script>

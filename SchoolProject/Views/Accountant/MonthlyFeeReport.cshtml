@@ -125,7 +125,7 @@ else
 }
 
 <!-- ================= SCRIPTS ================= -->
-@section Scripts {
+@* @section Scripts {
     <script>
         const selectedClassId = '@ViewBag.SelectedClassId';
         const selectedSectionId = '@ViewBag.SelectedSectionId';
@@ -136,34 +136,122 @@ else
         // ============================
         // LOAD CURRENT SESSION FIRST
         // ============================
-        fetch('/Admin/GetCurrentSession')
-            .then(res => res.json())
-            .then(session => {
-                const sessionId = session.sessionId;
-                loadClasses(sessionId);
-            });
+        // fetch('/Admin/GetCurrentSession')
+        //     .then(res => res.json())
+        //     .then(session => {
+        //         const sessionId = session.sessionId;
+        //         loadClasses(sessionId);
+        //     });
+                document.addEventListener("DOMContentLoaded", function () {
+            loadClasses();
+            loadFeeHeads();
+        });
 
         // ============================
         // LOAD CLASSES
         // ============================
-        function loadClasses(sessionId) {
-            fetch(`/Admin/GetClassesBySession?sessionId=${sessionId}`)
-                .then(res => res.json())
-                .then(data => {
-                    classSelect.innerHTML = '<option value="">-- All Classes --</option>';
+        // function loadClasses(sessionId) {
+        //     fetch(`/Admin/GetClassesBySession?sessionId=${sessionId}`)
+        //         .then(res => res.json())
+        //         .then(data => {
+        //             classSelect.innerHTML = '<option value="">-- All Classes --</option>';
 
-                    data.forEach(c => {
-                        const opt = document.createElement('option');
-                        opt.value = c.classId;
-                        opt.textContent = c.className;
-                        if (c.classId == selectedClassId) opt.selected = true;
-                        classSelect.appendChild(opt);
-                    });
+        //             data.forEach(c => {
+        //                 const opt = document.createElement('option');
+        //                 opt.value = c.classId;
+        //                 opt.textContent = c.className;
+        //                 if (c.classId == selectedClassId) opt.selected = true;
+        //                 classSelect.appendChild(opt);
+        //             });
 
-                    if (selectedClassId) {
-                        loadSections(sessionId, selectedClassId);
-                    }
+        //             if (selectedClassId) {
+        //                 loadSections(sessionId, selectedClassId);
+        //             }
+        //         });
+        // }
+
+
+        //            function loadClasses() {
+
+        //     fetch('/Admin/GetClassesByCurrentSession', {
+        //         headers: { 'Accept': 'application/json' }
+        //     })
+        //     .then(res => {
+        //         if (!res.ok) {
+        //             throw new Error("Failed to load classes");
+        //         }
+        //         return res.json();
+        //     })
+        //     .then(data => {
+
+        //         const classSelect = document.getElementById("classDropdown");
+        //         classSelect.innerHTML = '<option value="">-- All Classes --</option>';
+
+        //         if (!Array.isArray(data) || data.length === 0) {
+        //             classSelect.innerHTML +=
+        //                 '<option value="">No classes found</option>';
+        //             return;
+        //         }
+
+        //         data.forEach(c => {
+        //             const opt = document.createElement('option');
+        //             opt.value = c.classId;
+        //             opt.textContent = c.className;
+
+        //             if (typeof selectedClassId !== "undefined"
+        //                 && c.classId == selectedClassId) {
+        //                 opt.selected = true;
+        //             }
+
+        //             classSelect.appendChild(opt);
+        //         });
+
+        //         auto-load sections if class preselected
+        //         if (typeof selectedClassId !== "undefined" && selectedClassId) {
+        //             loadSections(selectedClassId);
+        //         }
+        //     })
+        //     .catch(err => {
+        //         console.error(err);
+        //         alert("Unable to load classes for current academic session.");
+        //     });
+        // }
+                function loadClasses() {
+            const ddl = document.getElementById("classDropdown");
+            if (!ddl) return;
+
+            ddl.disabled = true;
+            ddl.innerHTML = '<option value="">Loading classes...</option>';
+
+            fetch('/Admin/GetClassesByCurrentSession', {
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(r => {
+                if (!r.ok) throw new Error("Failed to load classes");
+                return r.json();
+            })
+            .then(data => {
+                ddl.innerHTML = '<option value="">-- All Classes --</option>';
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    ddl.innerHTML += '<option value="">No classes found</option>';
+                    return;
+                }
+
+                data.forEach(c => {
+                    const opt = document.createElement("option");
+                    opt.value = c.classId;
+                    opt.textContent = c.className;
+                    ddl.appendChild(opt);
                 });
+
+                ddl.disabled = false;
+            })
+            .catch(err => {
+                console.error(err);
+                ddl.innerHTML = '<option value="">Failed to load classes</option>';
+                alert("Unable to load classes for current academic session.");
+            });
         }
 
         // ============================
@@ -201,4 +289,131 @@ else
                 });
         });
     </script>
+} *@
+
+@section Scripts {
+    <script>
+        const selectedClassId = '@ViewBag.SelectedClassId';
+        const selectedSectionId = '@ViewBag.SelectedSectionId';
+
+        const classSelect = document.getElementById('ClassId');
+
+        const sectionSelect = document.getElementById('SectionId');
+
+        let currentSessionId = 0;
+
+        // ============================
+        // INIT
+        // ============================
+        document.addEventListener("DOMContentLoaded", function () {
+            loadCurrentSession();
+        });
+
+        // ============================
+        // LOAD CURRENT SESSION ONCE
+        // ============================
+        function loadCurrentSession() {
+            fetch('/Admin/GetCurrentSession')
+                .then(res => res.json())
+                .then(session => {
+                    if (!session || session.sessionId === 0) {
+                        alert("Academic session not configured.");
+                        return;
+                    }
+
+                    currentSessionId = session.sessionId;
+                    loadClasses(); // classes use current session internally
+                })
+                .catch(() => {
+                    alert("Unable to resolve current academic session.");
+                });
+        }
+
+        // ============================
+        // LOAD CLASSES (CURRENT SESSION)
+        // ============================
+        function loadClasses() {
+            if (!classSelect) {
+                console.error("classDropdown not found");
+                return;
+            }
+
+            classSelect.disabled = true;
+            classSelect.innerHTML = '<option value="">Loading classes...</option>';
+
+            fetch('/Admin/GetClassesByCurrentSession')
+                .then(res => res.json())
+                .then(data => {
+                    classSelect.innerHTML = '<option value="">-- All Classes --</option>';
+
+                    if (!Array.isArray(data) || data.length === 0) {
+                        classSelect.innerHTML += '<option value="">No classes found</option>';
+                        return;
+                    }
+
+                    data.forEach(c => {
+                        const opt = document.createElement("option");
+                        opt.value = c.classId;
+                        opt.textContent = c.className;
+
+                        if (selectedClassId && c.classId == selectedClassId) {
+                            opt.selected = true;
+                        }
+
+                        classSelect.appendChild(opt);
+                    });
+
+                    classSelect.disabled = false;
+
+                    // auto-load sections if class preselected
+                    if (selectedClassId) {
+                        loadSections(selectedClassId);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert("Unable to load classes for current academic session.");
+                });
+        }
+
+        // ============================
+        // LOAD SECTIONS (CURRENT SESSION)
+        // ============================
+        function loadSections(classId) {
+            if (!currentSessionId) return;
+
+            sectionSelect.innerHTML = '<option value="">Loading sections...</option>';
+
+            fetch(`/Admin/GetSectionsByClass?sessionId=${currentSessionId}&classId=${classId}`)
+                .then(res => res.json())
+                .then(data => {
+                    sectionSelect.innerHTML = '<option value="">-- All Sections --</option>';
+
+                    data.forEach(s => {
+                        const opt = document.createElement('option');
+                        opt.value = s.sectionId;
+                        opt.textContent = s.sectionName;
+
+                        if (selectedSectionId && s.sectionId == selectedSectionId) {
+                            opt.selected = true;
+                        }
+
+                        sectionSelect.appendChild(opt);
+                    });
+                });
+        }
+
+        // ============================
+        // CLASS CHANGE HANDLER
+        // ============================
+        classSelect.addEventListener('change', function () {
+            if (!this.value) {
+                sectionSelect.innerHTML = '<option value="">-- All Sections --</option>';
+                return;
+            }
+
+            loadSections(this.value);
+        });
+    </script>
 }
+
