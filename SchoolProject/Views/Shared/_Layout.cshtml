@@ -74,6 +74,134 @@
             flex: 1;
         }
 
+
+        /* ================= POPUP OVERLAY ================= */
+        .popup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            padding: 20px;
+        }
+
+        /* ================= POPUP BOX ================= */
+        .popup-box {
+            position: relative;
+            width: 100%;
+            max-width: 750px;
+            background: #ffffff; /* White Border Effect */
+            padding: 12px; /* Border Thickness */
+            border-radius: 14px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+            animation: popupZoom 0.35s ease;
+        }
+
+        /* ================= POPUP IMAGE ================= */
+        .popup-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        /* ================= CLOSE BUTTON ================= */
+        .popup-close {
+            position: absolute;
+            top: -14px;
+            right: -14px;
+            background: #ffffff;
+            border: none;
+            width: 40px;
+            height: 40px;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+            /* Hover effect */
+            .popup-close:hover {
+                background: #f1f1f1;
+            }
+
+        /* ================= ANIMATION ================= */
+        @@keyframes popupZoom {
+            from {
+                transform: scale(0.85);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* ================= RESPONSIVE ================= */
+
+        /* Tablet */
+        @@media (max-width: 991px) {
+            .popup-box {
+                max-width: 600px;
+            }
+        }
+
+        /* Mobile */
+        /* @@media (max-width: 576px) {
+            .popup-box {
+                max-width: 95%;
+                padding: 8px;
+            }
+
+            .popup-close {
+                width: 32px;
+                height: 32px;
+                font-size: 18px;
+                top: -10px;
+                right: -10px;
+            }
+        } */
+
+
+        /* ================= MOBILE POPUP FIX ================= */
+        @@media (max-width: 576px) {
+
+            .popup-overlay {
+                padding: 15px;
+                align-items: center;
+            }
+
+            .popup-box {
+                width: 100%;
+                max-width: 100%;
+                padding: 6px; /* Thin white border */
+                border-radius: 12px;
+                margin: 0 auto;
+            }
+
+            .popup-image {
+                width: 100%;
+                height: auto;
+                max-height: 80vh; /* Prevent overflow */
+                object-fit: contain;
+                border-radius: 8px;
+            }
+
+            .popup-close {
+                width: 30px;
+                height: 30px;
+                font-size: 16px;
+                top: -8px;
+                right: -8px;
+                box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+            }
+        }
+
     </style>
 
     @RenderSection("Styles", false)
@@ -225,6 +353,27 @@
             </div>
         </div>
     </div>
+
+    <!-- ================= Admission Popup ================= -->
+    <div id="admissionPopup" class="popup-overlay">
+        <div class="popup-box">
+
+            <!-- Close Button -->
+            <button class="popup-close" id="closePopup">&times;</button>
+
+            <!-- Clickable Image -->
+            <a asp-controller="Admission" asp-action="AdmissionBrochure">
+                <img src="~/images/school-images/gsps.jpg"
+                     alt="Admission Open"
+                     class="popup-image" />
+            </a>
+
+        </div>
+    </div>
+
+
+
+
     <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@4.1.4/dist/locomotive-scroll.min.js"></script>
     <!-- JS Files -->
     <script src="~/js/jquery-3.7.1.min.js" asp-append-version="true"></script>
@@ -259,7 +408,7 @@
     
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    @* <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script> *@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
     <script>
         $(document).ready(function () {
@@ -284,6 +433,48 @@
             }
         });
     </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // Get current route from Razor
+            var currentController = '@ViewContext.RouteData.Values["controller"]';
+            var currentAction = '@ViewContext.RouteData.Values["action"]';
+
+            // Run only on Home/Index
+            if (currentController === "Home" && currentAction === "Index") {
+
+                const popup = document.getElementById("admissionPopup");
+                const closeBtn = document.getElementById("closePopup");
+
+                if (popup) {
+
+                    // Show popup only on Home page
+                    popup.style.display = "flex";
+                    document.body.style.overflow = "hidden";
+
+                    function closePopup() {
+                        popup.style.display = "none";
+                        document.body.style.overflow = "auto";
+                    }
+
+                    if (closeBtn) {
+                        closeBtn.addEventListener("click", closePopup);
+                    }
+
+                    popup.addEventListener("click", function (e) {
+                        if (e.target === popup) {
+                            closePopup();
+                        }
+                    });
+                }
+            }
+
+        });
+    </script>
+
     @RenderSection("Scripts", required: false)
+
+
 </body>
 </html>

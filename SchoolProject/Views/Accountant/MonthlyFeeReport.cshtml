@@ -76,6 +76,9 @@ else
             <tbody>
                 @foreach (var x in Model)
                 {
+                    bool isPaid = x.Balance <= 0;
+                    bool hasReceipt = x.ReceiptId.HasValue;
+
                     <tr>
                         <td>@x.AdmissionNumber</td>
                         <td>@x.StudentName</td>
@@ -85,34 +88,45 @@ else
                         <td class="text-end">@x.TotalDue.ToString("0.00")</td>
                         <td class="text-end">@x.TotalPaid.ToString("0.00")</td>
 
+                        <!-- Balance -->
                         <td class="text-end">
-                            <strong class="@(x.Balance > 0 ? "text-danger" : "text-success")">
+                            <strong class="@(isPaid ? "text-success" : "text-danger")">
                                 @x.Balance.ToString("0.00")
                             </strong>
                         </td>
 
+                        <!-- Status -->
                         <td>
-                            <span class="badge @(x.Balance == 0 ? "bg-success" : "bg-danger")">
-                                @(x.Balance == 0 ? "Paid" : "Pending")
+                            <span class="badge @(isPaid ? "bg-success" : "bg-danger")">
+                                @(isPaid ? "Paid" : "Pending")
                             </span>
                         </td>
 
+                        <!-- Action -->
                         <td>
-                            @if (x.ReceiptId != null)
+                            @if (isPaid)
                             {
-                                <a class="btn btn-sm btn-outline-primary"
-                                   href="@Url.Action("Receipt",
-                                                                                    "Accountant",
-                                                                                    new { id = x.ReceiptId })">
+                                if (hasReceipt)
+                                {
+                                    <a class="btn btn-sm btn-primary"
+                                       href="@Url.Action("Receipt",
+                                                                                "Accountant",
+                                                                                new { id = x.ReceiptId })">
                         View Receipt
                     </a>
                                         }
+                                else
+                                {
+                                    <!-- Safety: Paid but no receipt -->
+                                    <span class="badge bg-secondary">Paid</span>
+                                }
+                            }
                             else
                             {
-                                <a class="btn btn-sm btn-outline-warning"
+                                <a class="btn btn-sm btn-warning"
                                    href="@Url.Action("CollectFee",
-                                                                                    "Accountant",
-                                                                                    new { studentId = x.StudentId })">
+                                                                        "Accountant",
+                                                                        new { studentId = x.StudentId, month = x.FeeMonth })">
                         Collect
                     </a>
                                         }
@@ -120,6 +134,60 @@ else
                     </tr>
                 }
             </tbody>
+@*            <tbody>
+@foreach (var x in Model)
+{
+    // Declared as plain C# statements inside the existing foreach code block to avoid RZ1010.
+    bool isPaid = x.Balance <= 0;
+    bool hasReceipt = x.ReceiptId != null;
+
+    <tr>
+        <td>@x.AdmissionNumber</td>
+        <td>@x.StudentName</td>
+        <td>@x.ClassName - @x.SectionName</td>
+        <td>@x.FeeMonth</td>
+
+        <td class="text-end">@x.TotalDue.ToString("0.00")</td>
+        <td class="text-end">@x.TotalPaid.ToString("0.00")</td>
+
+        <!-- Balance -->
+        <td class="text-end">
+            <strong class="@(isPaid ? "text-success" : "text-danger")">
+                @x.Balance.ToString("0.00")
+            </strong>
+        </td>
+
+        <!-- Status -->
+        <td>
+            <span class="badge @(isPaid ? "bg-success" : "bg-danger")">
+                @(isPaid ? "Paid" : "Pending")
+            </span>
+        </td>
+
+        <!-- Action -->
+        <td>
+            @if (isPaid && hasReceipt)
+            {
+                <a class="btn btn-sm btn-outline-primary"
+                   href="@Url.Action("Receipt",
+                                     "Accountant",
+                                     new { id = x.ReceiptId })">
+                    View Receipt
+                </a>
+            }
+            else
+            {
+                <a class="btn btn-sm btn-outline-warning"
+                   href="@Url.Action("CollectFee",
+                                     "Accountant",
+                                     new { studentId = x.StudentId, month = x.FeeMonth })">
+                    Collect
+                </a>
+            }
+        </td>
+    </tr>
+}
+</tbody> *@
         </table>
     </div>
 }

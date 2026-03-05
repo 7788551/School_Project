@@ -602,26 +602,30 @@ SELECT
     SUM(smf.DueAmount - smf.PaidAmount) AS Balance,
 
     CASE
-        WHEN SUM(smf.DueAmount - smf.PaidAmount) = 0
-            THEN 'Paid'
+        WHEN SUM(smf.DueAmount - smf.PaidAmount) <= 0 THEN 'Paid'
         ELSE 'Pending'
     END AS FeeStatus,
 
-    MAX(fr.ReceiptId) AS ReceiptId
+    r.ReceiptId
 
 FROM StudentMonthlyFee smf
+
 INNER JOIN Students s ON smf.StudentId = s.StudentId
 INNER JOIN Users u ON s.UserId = u.UserId
 INNER JOIN Classes c ON smf.ClassId = c.ClassId
 INNER JOIN Sections sec ON s.SectionId = sec.SectionId
 
-LEFT JOIN FeeReceiptDetails frd
-    ON frd.FeeMonth = smf.FeeMonth
-
-LEFT JOIN FeeReceipts fr
-    ON fr.ReceiptId = frd.ReceiptId
-   AND fr.StudentId = smf.StudentId
-   AND fr.SessionId = smf.SessionId
+-- 🔥 CORRECT WAY: OUTER APPLY for receipt
+OUTER APPLY
+(
+    SELECT MAX(fr.ReceiptId) AS ReceiptId
+    FROM FeeReceiptDetails frd
+    INNER JOIN FeeReceipts fr
+        ON fr.ReceiptId = frd.ReceiptId
+    WHERE fr.StudentId = smf.StudentId
+      AND fr.SessionId = smf.SessionId
+      AND frd.FeeMonth = smf.FeeMonth
+) r
 
 WHERE smf.SessionId = @SessionId
   AND (@ClassId IS NULL OR smf.ClassId = @ClassId)
@@ -634,13 +638,14 @@ GROUP BY
     u.Name,
     c.ClassName,
     sec.SectionName,
-    smf.FeeMonth
+    smf.FeeMonth,
+    r.ReceiptId
 
 HAVING
     @Status = 'All'
     OR (
         @Status = 'Paid'
-        AND SUM(smf.DueAmount - smf.PaidAmount) = 0
+        AND SUM(smf.DueAmount - smf.PaidAmount) <= 0
     )
     OR (
         @Status = 'Pending'

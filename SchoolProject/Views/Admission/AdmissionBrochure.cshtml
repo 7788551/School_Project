@@ -1,0 +1,344 @@
+﻿@{
+    ViewData["Title"] = "Admission Brochure";
+    Layout = "~/Views/Shared/_Layout.cshtml";   // change if needed
+}
+
+<style>
+
+    .brochure-section {
+        /* max-width: 1100px; */
+        margin: 60px auto;
+        padding: 20px;
+        background: #fffef5;
+        border-radius: 8px;
+    }
+
+    .brochure-block {
+        margin-bottom: 35px;
+    }
+
+    .brochure-heading {
+        background: #1527B3;
+        padding: 8px 15px;
+        font-weight: bold;
+        color: #FFFF;
+        display: inline-block;
+    }
+
+    .brochure-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+        .brochure-table td {
+            border: 1px solid #999;
+            padding: 8px;
+        }
+
+    .uniform-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 25px;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+    }
+
+    .small-note {
+        font-size: 14px;
+        margin-top: 10px;
+    }
+
+    .signature-section {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 50px;
+        font-weight: bold;
+    }
+
+    /* RESPONSIVE */
+
+    @@media (max-width: 768px) {
+
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .signature-section {
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+        }
+    }
+
+    @@media (max-width: 576px) {
+
+        .brochure-heading {
+            font-size: 14px;
+        }
+
+        .brochure-section {
+            padding: 15px;
+        }
+    }
+
+</style>
+
+<div class="page-header bg-section dark-section parallaxie">
+    <div class="container">
+        <div class="row">+
+            <div class="col-lg-12">
+                <!-- Page Header Box Start -->
+                <div class="page-header-box">
+                    <h1 class="text-anime-style-3" data-cursor="-opaque">Admision Brochure</h1>
+                    <nav class="wow fadeInUp">
+                        <ol class="breadcrumb">
+                            <!-- <li class="breadcrumb-item"><a href="index-2.html">Home</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Contact us</li> -->
+                        </ol>
+                    </nav>
+                </div>
+                <!-- Page Header Box End -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    
+
+@*     <div class="brochure-wrapper">
+
+        <!-- LEFT SIDE IMAGE -->
+        <div class="left-section">
+           <img src="~/images/school-images/banner-img.jpg" alt="Students" />
+           
+            <div class="overlay-text">
+                Nurturing Holistic Development <br />
+                For All Round Excellence With <br />
+                Human Values
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE PANEL -->
+        <div class="right-section">
+
+            <div class="admission-title">
+                ADMISSIONS OPEN FOR SESSION <br />(2026-27)
+            </div>
+
+            <div class="yellow-btn">
+                For Amity International Schools
+            </div>
+
+            <a href="#" class="dark-btn">
+                Fill in online form
+            </a>
+
+            <div class="note">
+                Note :- Please keep your credit card ready for online payment
+            </div>
+
+            <p style="margin-top:15px;">
+                If you have already filled in the form and have the Registration Number and password,
+            </p>
+
+            <a href="#" class="link-style">
+                Click here to Login and Continue with the Form or to Check Status of the Form.
+            </a>
+
+            <div class="section-divider"></div>
+
+            
+
+    </div>
+</div>
+
+     *@
+
+<div class="brochure-section container-fluid">
+
+    <!-- LOCATION -->
+    <div class="brochure-block">
+        <h3 class="brochure-heading">LOCATION :</h3>
+        <p>
+            The <strong>GYAN SAGAR PUBLIC SCHOOL</strong> is located at Agarwa, Motihari,
+            East Champaran, Bihar. The school is housed in an excellent building
+            with huge campus, well ventilated spacious classrooms and other required amenities.
+        </p>
+    </div>
+
+    <!-- SCHEME OF STUDIES -->
+    <div class="brochure-block">
+        <h3 class="brochure-heading">SCHEME OF STUDIES :</h3>
+        <p>
+            The school runs classes from Pre-Nursery to Xth. The syllabus for all
+            classes is through Central Board of Secondary Education and the course
+            and books shall be those of N.C.E.R.T.
+        </p>
+    </div>
+
+    <!-- MORNING ASSEMBLY -->
+    <div class="brochure-block">
+        <h3 class="brochure-heading">THE MORNING ASSEMBLY :</h3>
+        <p>
+            Regular features include prayer, pledge, news reading, speech, thought for the day,
+            recitation and English spoken quiz etc. It helps pupils overcome stage fear
+            and develop confidence clearly and creatively.
+        </p>
+    </div>
+
+    <!-- REGISTRATION -->
+    <div class="brochure-block">
+        <h3 class="brochure-heading">REGISTRATION & ADMISSION :</h3>
+        <p>
+            Students are registered prior to admission. Registration form is available
+            in the prospectus. Students and guardians must appear at the admission test.
+            Admission of selected students begins after two days of the test.
+        </p>
+    </div>
+
+    <!-- FEE STRUCTURE -->
+    <div class="brochure-block">
+        <h3 class="brochure-heading">SCHOOL FEE STRUCTURE</h3>
+
+        <div class="table-responsive">
+            <table class="brochure-table">
+                <tr>
+                    <td>Registration Charge</td>
+                    <td>Rs. 1000.00</td>
+                </tr>
+                <tr>
+                    <td>Admission Charge</td>
+                    <td>Rs. 1500.00</td>
+                </tr>
+                <tr>
+                    <td>Annual Charge</td>
+                    <td>Rs. 1000.00</td>
+                </tr>
+                <tr>
+                    <td>Misc Charge (Tie, Belt, Diary)</td>
+                    <td>Rs. 300.00</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- MONTHLY FEE -->
+    <div class="brochure-block">
+        <h3 class="brochure-heading">MONTHLY TUITION FEE</h3>
+
+        <div class="table-responsive">
+            <table class="brochure-table">
+                <tr>
+                    <td>Nursery to UKG</td>
+                    <td>Rs. 800.00</td>
+                </tr>
+                <tr>
+                    <td>Std. I to IV</td>
+                    <td>Rs. 900.00</td>
+                </tr>
+                <tr>
+                    <td>Std. VI to Xth</td>
+                    <td>Rs. 1200.00</td>
+                </tr>
+            </table>
+        </div>
+
+        <p class="small-note">
+            Tuition fee is payable between 1st to 10th of every month.
+            Fine of Rs.50 will be charged after due date.
+        </p>
+    </div>
+
+    <!-- UNIFORM SECTION -->
+    <div class="brochure-block">
+        <h3 class="brochure-heading">SCHOOL UNIFORM</h3>
+
+        <div class="uniform-grid">
+
+            <div>
+                <h5>Boys (Play to V)</h5>
+                <ul>
+                    <li>White Shirt</li>
+                    <li>Blue Pant</li>
+                    <li>Blue Sweater</li>
+                    <li>Black Shoes</li>
+                    <li>Blue Socks</li>
+                </ul>
+            </div>
+
+            <div>
+                <h5>Boys (VI to X)</h5>
+                <ul>
+                    <li>Striped Brown Shirt</li>
+                    <li>Dark Brown Pant</li>
+                    <li>Dark Brown Sweater</li>
+                    <li>Brown Shoes</li>
+                    <li>Brown Socks</li>
+                </ul>
+            </div>
+
+            <div>
+                <h5>Girls (Play to V)</h5>
+                <ul>
+                    <li>White Shirt</li>
+                    <li>Blue Skirt</li>
+                    <li>Blue Sweater</li>
+                    <li>Black Shoes</li>
+                    <li>Blue Socks</li>
+                </ul>
+            </div>
+
+            <div>
+                <h5>Girls (VI to X)</h5>
+                <ul>
+                    <li>Striped Brown Kurti</li>
+                    <li>Dark Brown Salwar</li>
+                    <li>Dark Brown Sweater</li>
+                    <li>Brown Shoes</li>
+                    <li>Brown Socks</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- EXTRA FEATURES -->
+    <div class="brochure-block">
+        <h3 class="brochure-heading">EXTRA FEATURES</h3>
+
+        <div class="features-grid">
+            <ul>
+                <li>1st Term – April to September</li>
+                <li>First Periodic Test – May</li>
+                <li>Second Periodic Test – July</li>
+                <li>Half Yearly – September</li>
+            </ul>
+
+            <ul>
+                <li>2nd Term – October to February</li>
+                <li>IIIrd Periodic Test – November</li>
+                <li>IVth Periodic Test – January</li>
+                <li>Annual Exam – March</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- SIGNATURE -->
+    <div class="signature-section">
+        <div>
+            <strong>Director</strong><br />
+            Md. Anwar Hussain
+        </div>
+        <div>
+            <strong>Principal</strong><br />
+            Dr. Dharmendra Kr. Mishra
+        </div>
+    </div>
+
+</div>
